@@ -1,6 +1,6 @@
 package com.example.FoodDeliveryDemoApp.controller;
 
-import com.example.FoodDeliveryDemoApp.dto.WeatherDataDTO;
+import com.example.FoodDeliveryDemoApp.component.WeatherDataComponent;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import com.example.FoodDeliveryDemoApp.service.WeatherDataService;
 import jakarta.xml.bind.JAXBException;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/weather")
 public class WeatherDataController {
 
     private final WeatherDataService weatherDataService;
@@ -25,23 +26,14 @@ public class WeatherDataController {
         this.weatherDataComponent = weatherDataComponent;
     }
 
-    @GetMapping(path="/weather",
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<WeatherData>> getWeatherObservations() throws JAXBException {
         String response = weatherDataService.retrieveWeatherObservations();
         List<WeatherData> weatherData = weatherDataComponent.convertStationsToWeatherData(
                 weatherDataComponent.filterResponse(response));
         weatherDataComponent.saveWeatherData(weatherData);
-        List<WeatherData> lastData = weatherDataComponent.getLastData();
+        List<WeatherData> lastData = weatherDataComponent.getLastWeatherDataForAllCities();
 
         return new ResponseEntity<>(lastData, HttpStatus.OK);
     }
-
-/*    @PostMapping("/weather")
-    public ResponseEntity<List<WeatherData>> addWeatherData() throws JAXBException {
-        List<WeatherDataDTO.Station> asd = weatherDataComponent.filterResponse(weatherDataService.retrieveWeatherObservations());
-        System.out.println(asd);
-        return null;
-    } */
-
 }

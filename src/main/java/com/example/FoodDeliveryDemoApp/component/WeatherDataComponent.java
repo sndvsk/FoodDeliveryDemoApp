@@ -1,4 +1,4 @@
-package com.example.FoodDeliveryDemoApp.controller;
+package com.example.FoodDeliveryDemoApp.component;
 
 import com.example.FoodDeliveryDemoApp.dto.WeatherDataDTO;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
@@ -9,7 +9,6 @@ import jakarta.xml.bind.Unmarshaller;
 import org.springframework.stereotype.Component;
 
 import java.io.StringReader;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -69,9 +68,13 @@ public class WeatherDataComponent {
         return weatherDataList;
     }
 
-    public List<WeatherData> getLastData() {
+    public List<WeatherData> getLastWeatherDataForAllCities() {
         WeatherData lastEntry = weatherDataRepository.findTopByOrderByIdDesc();
         Instant timestamp = lastEntry.getTimestamp();
         return weatherDataRepository.findByTimestamp(timestamp);
+    }
+
+    public WeatherData getLastDataByCity(String city) {
+        return weatherDataRepository.findTopByStationName(city);
     }
 }

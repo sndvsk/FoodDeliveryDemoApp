@@ -2,6 +2,8 @@ package com.example.FoodDeliveryDemoApp.model;
 
 import jakarta.persistence.*;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "order_data")
 public class OrderData {
@@ -21,6 +23,9 @@ public class OrderData {
 
     @Column(name = "weather_id")
     private Long weatherId;
+
+    @Column(name = "timestamp")
+    private Instant timestamp;
 
     public Long getId() {
         return id;
@@ -60,5 +65,13 @@ public class OrderData {
 
     public void setWeatherId(Long weatherId) {
         this.weatherId = weatherId;
+    }
+
+    public Instant getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
     }
 }

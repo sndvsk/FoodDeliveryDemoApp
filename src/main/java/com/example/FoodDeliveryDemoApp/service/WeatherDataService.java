@@ -14,17 +14,13 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 @Service
 public class WeatherDataService {
 
-    @Value("${weather.data.baseurl}")
+    @Value("${weather.data.url}")
     private String weatherObservationsUrl;
-
-    @Value("${weather.data.uri}")
-    private String weatherObservationsUri;
 
     private final WebClient webClient;
 
     public WeatherDataService() {
         this.webClient = WebClient.builder()
-                //.baseUrl(weatherObservationsUrl)
                 .defaultHeader("Accept", MediaType.APPLICATION_XML_VALUE)
                 .build();
     }
@@ -34,19 +30,21 @@ public class WeatherDataService {
             String userAgent = "PostmanRuntime/7.31.1";
 
             return webClient.get()
-                    .uri(weatherObservationsUrl + weatherObservationsUri)
+                    .uri(weatherObservationsUrl)
                     .header("User-Agent", userAgent)
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
 
         } catch (WebClientResponseException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+            if (e.getStatusCode().is4xxClientError()) {
                 throw new NotFoundException("Data not found");
             } else if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 throw new UnauthorizedException("Unauthorized access");
-            } else {
+            } else if (e.getStatusCode().is5xxServerError()) {
                 throw new ExternalServiceException("Error in external service");
+            } else {
+                throw new RuntimeException("Unknown error occurred");
             }
         }
     }
