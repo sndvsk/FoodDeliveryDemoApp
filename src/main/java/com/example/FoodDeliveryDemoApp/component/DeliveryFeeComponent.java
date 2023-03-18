@@ -1,9 +1,11 @@
 package com.example.FoodDeliveryDemoApp.component;
 
 import com.example.FoodDeliveryDemoApp.exception.DeliveryFeeException;
+import com.example.FoodDeliveryDemoApp.exception.DeliveryFeeExceptionsList;
 import com.example.FoodDeliveryDemoApp.model.OrderData;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import com.example.FoodDeliveryDemoApp.repository.OrderDataRepository;
+import com.example.FoodDeliveryDemoApp.repository.WeatherDataRepository;
 import com.example.FoodDeliveryDemoApp.util.Utils;
 import org.springframework.stereotype.Component;
 
@@ -53,25 +55,6 @@ public class DeliveryFeeComponent {
         }
         return null;
     }
-
-/*    public double calculateWeatherConditionFee(String city, String vehicleType) {
-        WeatherData weatherData = getLastDataByCityFromWeatherComponent(city);
-
-        double airTemperatureFee = 0;
-        double windSpeedFee = 0;
-        double weatherPhenomenonFee = 0;
-        if (vehicleType.equals("bike") || vehicleType.equals("scooter")) {
-            airTemperatureFee += calculateAirTemperatureFee(weatherData.getAirTemperature());
-        }
-        if (vehicleType.equals("bike")) {
-            windSpeedFee += calculateWindSpeedFee(weatherData.getWindSpeed());
-        }
-        if (vehicleType.equals("bike") || vehicleType.equals("scooter")) {
-            weatherPhenomenonFee += calculateWeatherPhenomenonFee(weatherData.getWeatherPhenomenon());
-        }
-
-        return airTemperatureFee + windSpeedFee + weatherPhenomenonFee;
-    }*/
 
     public double calculateWeatherConditionFee(String city, String vehicleType) {
         WeatherData weatherData = getLastDataByCityFromWeatherComponent(city);
@@ -203,21 +186,50 @@ public class DeliveryFeeComponent {
         saveOrderData(orderData);
 
         // Create a new OrderData object without weatherId
-        return removeIdFromOrderData(orderData);
+        return orderData;
     }
 
-    public OrderData removeIdFromOrderData(OrderData orderData) {
-        OrderData responseOrderData = new OrderData();
-        responseOrderData.setCity(orderData.getCity());
-        responseOrderData.setVehicleType(orderData.getVehicleType());
-        responseOrderData.setDeliveryFee(orderData.getDeliveryFee());
-        responseOrderData.setTimestamp(orderData.getTimestamp());
-        return responseOrderData;
-    }
 
     public WeatherData getLastDataByCityFromWeatherComponent(String city) {
         return weatherDataComponent.getLastDataByCity(
                 Utils.capitalizeFirstLetter(city)
         );
+    }
+
+    public OrderData getDeliveryFee(String city, String vehicleType) throws DeliveryFeeExceptionsList {
+
+        String cityParam = city.toLowerCase(Locale.ROOT);
+        String vehicleTypeParam = vehicleType.toLowerCase(Locale.ROOT);
+
+        List<DeliveryFeeException> deliveryFeeExceptionsList = validateInputs(
+                cityParam,
+                vehicleTypeParam
+        );
+
+        switch (deliveryFeeExceptionsList.size()) {
+            case 0:
+                // No exceptions, do nothing
+                break;
+            case 1:
+                // Throw a single DeliveryFeeException
+                throw new DeliveryFeeException(deliveryFeeExceptionsList);
+            default:
+                // Throw a DeliveryFeeExceptionsList with all exceptions
+                throw new DeliveryFeeExceptionsList(deliveryFeeExceptionsList);
+        }
+
+        // Calculate the delivery fee based on the city and vehicle type
+        double deliveryFee = calculateDeliveryFee(
+                cityParam,
+                vehicleTypeParam
+        );
+
+        // Create OrderData object
+        OrderData responseOrderData = createNewOrderData(
+                cityParam,
+                vehicleTypeParam,
+                deliveryFee);
+
+        return responseOrderData;
     }
 }

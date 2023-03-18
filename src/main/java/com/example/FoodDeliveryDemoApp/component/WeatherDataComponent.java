@@ -3,6 +3,7 @@ package com.example.FoodDeliveryDemoApp.component;
 import com.example.FoodDeliveryDemoApp.dto.WeatherDataDTO;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import com.example.FoodDeliveryDemoApp.repository.WeatherDataRepository;
+import com.example.FoodDeliveryDemoApp.service.WeatherDataService;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
@@ -17,10 +18,13 @@ import java.util.stream.Collectors;
 public class WeatherDataComponent {
 
     private final WeatherDataRepository weatherDataRepository;
+    private final WeatherDataService weatherDataService;
+
     private final List<String> neededStations = Arrays.asList("26038", "26242", "41803");
 
-    public WeatherDataComponent(WeatherDataRepository weatherDataRepository) {
+    public WeatherDataComponent(WeatherDataRepository weatherDataRepository, WeatherDataService weatherDataService) {
         this.weatherDataRepository = weatherDataRepository;
+        this.weatherDataService = weatherDataService;
     }
 
     @SuppressWarnings("unused")
@@ -79,21 +83,27 @@ public class WeatherDataComponent {
         return weatherDataRepository.findFirstByStationNameOrderByTimestampDesc(city);
     }
 
-    public List<WeatherData> removeIdsFromLastDataForAllCities(List<WeatherData> lastData) {
+    public List<WeatherData> getWeatherDataFromRepository(String cities) {
+        List<WeatherData> lastWeatherData = getLastWeatherDataForAllCities();
 
-        List<WeatherData> weatherDataWithoutIds = new ArrayList<>();
-
-        for (WeatherData data: lastData) {
-            WeatherData newWeatherDataEntry = new WeatherData();
-            newWeatherDataEntry.setStationName(data.getStationName());
-            newWeatherDataEntry.setWmoCode(data.getWmoCode());
-            newWeatherDataEntry.setAirTemperature(data.getAirTemperature());
-            newWeatherDataEntry.setWindSpeed(data.getWindSpeed());
-            newWeatherDataEntry.setWeatherPhenomenon(data.getWeatherPhenomenon());
-            newWeatherDataEntry.setTimestamp(data.getTimestamp());
-            weatherDataWithoutIds.add(newWeatherDataEntry);
+        if (cities != null) {
+            lastWeatherData = lastWeatherData.stream()
+                    .filter(weatherData -> cities.contains(weatherData.getStationName()))
+                    .toList();
         }
 
-        return weatherDataWithoutIds;
+        return lastWeatherData;
+    }
+
+
+    public List<WeatherData> getWeatherDataFromService() throws JAXBException {
+        String response = weatherDataService.retrieveWeatherObservations();
+        return convertStationsToWeatherData(filterResponse(response));
+    }
+
+    public List<WeatherData> getWeatherDataFromServiceAndSave() throws JAXBException {
+        List<WeatherData> weatherData = getWeatherDataFromService();
+        saveWeatherData(weatherData);
+        return weatherData;
     }
 }

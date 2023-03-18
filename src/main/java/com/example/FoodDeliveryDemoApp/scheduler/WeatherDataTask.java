@@ -1,24 +1,32 @@
 package com.example.FoodDeliveryDemoApp.scheduler;
 
-import com.example.FoodDeliveryDemoApp.service.WeatherDataService;
+import com.example.FoodDeliveryDemoApp.component.WeatherDataComponent;
+import jakarta.annotation.PostConstruct;
+import jakarta.xml.bind.JAXBException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
 public class WeatherDataTask {
 
-    private final WeatherDataService weatherDataService;
+    private final WeatherDataComponent weatherDataComponent;
 
-    public WeatherDataTask(WeatherDataService weatherDataService) {
-        this.weatherDataService = weatherDataService;
+    public WeatherDataTask(WeatherDataComponent weatherDataComponent) {
+        this.weatherDataComponent = weatherDataComponent;
     }
 
-    // TODO
-    // FIXME
+    @PostConstruct
+    public void onStartup() throws JAXBException {
+        saveWeatherDataFromService();
+    }
 
-/*    @Scheduled(cron = "${weatherman.robot.cron_interval}")
-    public void doTheTask() {
-        weatherDataService.retrieveWeatherObservations();
-    }*/
+    @Scheduled(cron = "${weather.data.cron-interval}")
+    public void onSchedule() throws JAXBException {
+        saveWeatherDataFromService();
+    }
+
+    public void saveWeatherDataFromService() throws JAXBException {
+        weatherDataComponent.saveWeatherData(weatherDataComponent.getWeatherDataFromService());
+    }
 
 }

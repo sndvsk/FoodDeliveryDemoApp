@@ -1,5 +1,6 @@
 package com.example.FoodDeliveryDemoApp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -11,6 +12,7 @@ public class OrderData {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @JsonIgnore
     private Long id;
 
     @Column(name = "city")
@@ -22,6 +24,7 @@ public class OrderData {
     @Column(name = "delivery_fee")
     private double deliveryFee;
 
+    @JsonIgnore
     @Column(name = "weather_id")
     private Long weatherId;
 
