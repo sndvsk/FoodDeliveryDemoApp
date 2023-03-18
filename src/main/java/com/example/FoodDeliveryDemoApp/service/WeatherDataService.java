@@ -4,7 +4,6 @@ import com.example.FoodDeliveryDemoApp.exception.ExternalServiceException;
 import com.example.FoodDeliveryDemoApp.exception.UnauthorizedException;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;

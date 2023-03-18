@@ -7,6 +7,7 @@ import java.util.List;
 
 public class WeatherDataDTO {
 
+    @SuppressWarnings({"unused", "CommentedOutCode"})
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class Station {
         private String name;
@@ -78,6 +79,7 @@ public class WeatherDataDTO {
         }
     }
 
+    @SuppressWarnings("unused")
     @XmlRootElement(name = "observations")
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class Observations {

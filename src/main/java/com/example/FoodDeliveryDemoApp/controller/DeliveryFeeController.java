@@ -2,6 +2,7 @@ package com.example.FoodDeliveryDemoApp.controller;
 
 import com.example.FoodDeliveryDemoApp.component.DeliveryFeeComponent;
 import com.example.FoodDeliveryDemoApp.exception.DeliveryFeeException;
+import com.example.FoodDeliveryDemoApp.exception.DeliveryFeeExceptionsList;
 import com.example.FoodDeliveryDemoApp.model.OrderData;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class DeliveryFeeController {
     }
 
     @GetMapping() //localhost:8080/delivery-fee?city=__enter-city__&vehicleType=__enter-vehicle__
-    public ResponseEntity<?> getDeliveryFee(@RequestParam String city, @RequestParam String vehicleType) {
+    public ResponseEntity<?> getDeliveryFee(@RequestParam String city, @RequestParam String vehicleType) throws DeliveryFeeExceptionsList {
 
         String cityParam = city.toLowerCase(Locale.ROOT);
         String vehicleTypeParam = vehicleType.toLowerCase(Locale.ROOT);
@@ -34,8 +35,16 @@ public class DeliveryFeeController {
                 vehicleTypeParam
         );
 
-        if (!deliveryFeeExceptionsList.isEmpty()) {
-            throw new DeliveryFeeException(deliveryFeeExceptionsList);
+        switch (deliveryFeeExceptionsList.size()) {
+            case 0:
+                // No exceptions, do nothing
+                break;
+            case 1:
+                // Throw a single DeliveryFeeException
+                throw new DeliveryFeeException(deliveryFeeExceptionsList);
+            default:
+                // Throw a DeliveryFeeExceptionsList with all exceptions
+                throw new DeliveryFeeExceptionsList(deliveryFeeExceptionsList);
         }
 
         // Calculate the delivery fee based on the city and vehicle type
@@ -46,8 +55,8 @@ public class DeliveryFeeController {
 
         // Create OrderData object
         OrderData responseOrderData = deliveryFeeComponent.createNewOrderData(
-                city,
-                vehicleType,
+                cityParam,
+                vehicleTypeParam,
                 deliveryFee);
 
         return new ResponseEntity<>(responseOrderData, HttpStatus.OK);

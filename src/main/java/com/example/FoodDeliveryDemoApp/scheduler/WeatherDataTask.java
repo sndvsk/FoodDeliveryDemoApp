@@ -13,6 +13,9 @@ public class WeatherDataTask {
         this.weatherDataService = weatherDataService;
     }
 
+    // TODO
+    // FIXME
+
 /*    @Scheduled(cron = "${weatherman.robot.cron_interval}")
     public void doTheTask() {
         weatherDataService.retrieveWeatherObservations();

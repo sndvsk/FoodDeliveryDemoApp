@@ -4,7 +4,7 @@ import com.example.FoodDeliveryDemoApp.exception.DeliveryFeeException;
 import com.example.FoodDeliveryDemoApp.model.OrderData;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import com.example.FoodDeliveryDemoApp.repository.OrderDataRepository;
-import com.example.FoodDeliveryDemoApp.repository.WeatherDataRepository;
+import com.example.FoodDeliveryDemoApp.util.Utils;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -14,13 +14,11 @@ import java.util.function.Function;
 @Component
 public class DeliveryFeeComponent {
 
-    private final WeatherDataRepository weatherDataRepository;
     private final OrderDataRepository orderDataRepository;
 
     private final WeatherDataComponent weatherDataComponent;
 
-    public DeliveryFeeComponent(WeatherDataRepository weatherDataRepository, OrderDataRepository orderDataRepository, WeatherDataComponent weatherDataComponent) {
-        this.weatherDataRepository = weatherDataRepository;
+    public DeliveryFeeComponent(OrderDataRepository orderDataRepository, WeatherDataComponent weatherDataComponent) {
         this.orderDataRepository = orderDataRepository;
         this.weatherDataComponent = weatherDataComponent;
     }
@@ -57,8 +55,7 @@ public class DeliveryFeeComponent {
     }
 
 /*    public double calculateWeatherConditionFee(String city, String vehicleType) {
-
-        WeatherData weatherData = weatherDataRepository.findTopByStationName(city);
+        WeatherData weatherData = getLastDataByCityFromWeatherComponent(city);
 
         double airTemperatureFee = 0;
         double windSpeedFee = 0;
@@ -77,7 +74,7 @@ public class DeliveryFeeComponent {
     }*/
 
     public double calculateWeatherConditionFee(String city, String vehicleType) {
-        WeatherData weatherData = weatherDataRepository.findTopByStationName(city);
+        WeatherData weatherData = getLastDataByCityFromWeatherComponent(city);
 
         Map<String, Function<WeatherData, Double>> vehicleTypeToFeeFunction = Map.of(
                 "car", weatherData1 -> 0.0,
@@ -119,51 +116,35 @@ public class DeliveryFeeComponent {
     }
 
     // ´static final´ to avoid recreating every time the method ´calculateWeatherPhenomenonFee´ is called
-    private static final Set<String> snowOrSleetWeatherPhenomenon = new HashSet<>(Arrays.asList(
-            "Light sleet",
-            "Moderate sleet",
-            "Light snow shower",
-            "Moderate snow shower",
-            "Heavy snow shower",
-            "Light snowfall",
-            "Moderate snowfall",
-            "Heavy snowfall",
-            "Blowing snow",
-            "Drifting snow"
-    ));
-
-    // ´static final´ to avoid recreating every time the method ´calculateWeatherPhenomenonFee´ is called
-    private static final Set<String> rainWeatherPhenomenon = new HashSet<>(Arrays.asList(
-            "Light shower",
-            "Moderate shower",
-            "Heavy shower",
-            "Light rain",
-            "Moderate rain",
-            "Heavy rain"
-    ));
-
-    // ´static final´ to avoid recreating every time the method ´calculateWeatherPhenomenonFee´ is called
-    private static final Set<String> dangerousWeatherPhenomenon = new HashSet<>(Arrays.asList(
-            "Glaze",
-            "Hail",
-            "Thunder",
-            "Thunderstorm"
-    ));
+    private static final Map<String, Double> weatherPhenomenonFees = Map.ofEntries(
+            Map.entry("Light sleet", 1.0),
+            Map.entry("Moderate sleet", 1.0),
+            Map.entry("Light snow shower", 1.0),
+            Map.entry("Moderate snow shower", 1.0),
+            Map.entry("Heavy snow shower", 1.0),
+            Map.entry("Light snowfall", 1.0),
+            Map.entry("Moderate snowfall", 1.0),
+            Map.entry("Heavy snowfall", 1.0),
+            Map.entry("Blowing snow", 1.0),
+            Map.entry("Drifting snow", 1.0),
+            Map.entry("Light shower", 0.5),
+            Map.entry("Moderate shower", 0.5),
+            Map.entry("Heavy shower", 0.5),
+            Map.entry("Light rain", 0.5),
+            Map.entry("Moderate rain", 0.5),
+            Map.entry("Heavy rain", 0.5),
+            Map.entry("Glaze", -1.0),
+            Map.entry("Hail", -1.0),
+            Map.entry("Thunder", -1.0),
+            Map.entry("Thunderstorm", -1.0)
+    );
 
     private double calculateWeatherPhenomenonFee(String weatherPhenomenon) {
-
-        if (snowOrSleetWeatherPhenomenon.contains(weatherPhenomenon)) {
-            return 1;
-        }
-
-        if (rainWeatherPhenomenon.contains(weatherPhenomenon)) {
-            return 0.5;
-        }
-        if (dangerousWeatherPhenomenon.contains(weatherPhenomenon)) {
+        Double fee = weatherPhenomenonFees.getOrDefault(weatherPhenomenon, 0.0);
+        if (fee == -1.0) {
             throw new DeliveryFeeException("Usage of selected vehicle type is forbidden");
         }
-
-        return 0;
+        return fee;
     }
 
     public List<DeliveryFeeException> validateInputs(String city, String vehicleType) {
@@ -182,16 +163,24 @@ public class DeliveryFeeComponent {
 
         List<DeliveryFeeException> exceptionList = new ArrayList<>();
 
-        if (city == null || !validCityNames.contains(city.trim().toLowerCase())) {
+        if (city == null || city.trim().isEmpty()) {
             exceptionList.add(
                     createException(
-                            String.format("City: %s argument is not supported.", city)));
+                            String.format("City: ´%s´ is empty.", Utils.capitalizeFirstLetter(city))));
+        } else if (!validCityNames.contains(city.trim().toLowerCase())) {
+            exceptionList.add(
+                    createException(
+                            String.format("City: ´%s´ argument is invalid or not supported.", Utils.capitalizeFirstLetter(city))));
         }
 
-        if (vehicleType == null || !validVehicleTypes.contains(vehicleType.trim().toLowerCase())) {
+        if (vehicleType == null || vehicleType.trim().isEmpty()) {
             exceptionList.add(
                     createException(
-                            String.format("Vehicle type: %s is not supported.", vehicleType)));
+                            String.format("Vehicle type: ´%s´ is empty.", Utils.capitalizeFirstLetter(vehicleType))));
+        } else if (!validVehicleTypes.contains(vehicleType.trim().toLowerCase())) {
+            exceptionList.add(
+                    createException(
+                            String.format("Vehicle type: ´%s´ is invalid or not supported.", Utils.capitalizeFirstLetter(vehicleType))));
         }
 
         return exceptionList;
@@ -204,22 +193,31 @@ public class DeliveryFeeComponent {
     public OrderData createNewOrderData(String city, String vehicleType, double deliveryFee) {
 
         OrderData orderData = new OrderData();
-        orderData.setCity(city);
-        orderData.setVehicleType(vehicleType);
+        orderData.setCity(Utils.capitalizeFirstLetter(city));
+        orderData.setVehicleType(Utils.capitalizeFirstLetter(vehicleType));
         orderData.setDeliveryFee(deliveryFee);
-        WeatherData weatherData = weatherDataComponent.getLastDataByCity(city);
+        WeatherData weatherData = getLastDataByCityFromWeatherComponent(city);
         orderData.setWeatherId(weatherData.getId());
         orderData.setTimestamp(Instant.now());
 
         saveOrderData(orderData);
 
+        // Create a new OrderData object without weatherId
+        return removeIdFromOrderData(orderData);
+    }
+
+    public OrderData removeIdFromOrderData(OrderData orderData) {
         OrderData responseOrderData = new OrderData();
         responseOrderData.setCity(orderData.getCity());
         responseOrderData.setVehicleType(orderData.getVehicleType());
         responseOrderData.setDeliveryFee(orderData.getDeliveryFee());
         responseOrderData.setTimestamp(orderData.getTimestamp());
-
-        // Create a new OrderData object without weatherId
         return responseOrderData;
+    }
+
+    public WeatherData getLastDataByCityFromWeatherComponent(String city) {
+        return weatherDataComponent.getLastDataByCity(
+                Utils.capitalizeFirstLetter(city)
+        );
     }
 }

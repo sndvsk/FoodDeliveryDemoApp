@@ -6,11 +6,12 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 @Repository
 public interface OrderDataRepository extends JpaRepository<OrderData, Long> {
 
     List<OrderData> findByWeatherId(Long weatherId);
 
-    OrderData findAllByCity(String city);
+    List<OrderData> findAllByCity(String city);
 }
 

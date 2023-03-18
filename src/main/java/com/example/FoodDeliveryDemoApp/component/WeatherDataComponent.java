@@ -23,6 +23,7 @@ public class WeatherDataComponent {
         this.weatherDataRepository = weatherDataRepository;
     }
 
+    @SuppressWarnings("unused")
     public void deleteAllData() {
         weatherDataRepository.deleteAll();
     }
@@ -75,6 +76,24 @@ public class WeatherDataComponent {
     }
 
     public WeatherData getLastDataByCity(String city) {
-        return weatherDataRepository.findTopByStationName(city);
+        return weatherDataRepository.findFirstByStationNameOrderByTimestampDesc(city);
+    }
+
+    public List<WeatherData> removeIdsFromLastDataForAllCities(List<WeatherData> lastData) {
+
+        List<WeatherData> weatherDataWithoutIds = new ArrayList<>();
+
+        for (WeatherData data: lastData) {
+            WeatherData newWeatherDataEntry = new WeatherData();
+            newWeatherDataEntry.setStationName(data.getStationName());
+            newWeatherDataEntry.setWmoCode(data.getWmoCode());
+            newWeatherDataEntry.setAirTemperature(data.getAirTemperature());
+            newWeatherDataEntry.setWindSpeed(data.getWindSpeed());
+            newWeatherDataEntry.setWeatherPhenomenon(data.getWeatherPhenomenon());
+            newWeatherDataEntry.setTimestamp(data.getTimestamp());
+            weatherDataWithoutIds.add(newWeatherDataEntry);
+        }
+
+        return weatherDataWithoutIds;
     }
 }

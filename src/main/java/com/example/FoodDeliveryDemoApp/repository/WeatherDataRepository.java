@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface WeatherDataRepository extends JpaRepository<WeatherData, Long> {
 
-    WeatherData findTopByStationName(String stationName);
+    WeatherData findFirstByStationNameOrderByTimestampDesc(String stationName);
 
     List<WeatherData> findByTimestamp(Instant timestamp);
 

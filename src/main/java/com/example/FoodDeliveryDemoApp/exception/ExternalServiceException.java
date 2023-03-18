@@ -6,6 +6,7 @@ public class ExternalServiceException extends RuntimeException {
         super(message);
     }
 
+    @SuppressWarnings("unused")
     public ExternalServiceException(String message, Throwable cause) {
         super(message, cause);
     }

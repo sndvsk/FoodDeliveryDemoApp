@@ -6,6 +6,7 @@ public class UnauthorizedException extends RuntimeException {
         super(message);
     }
 
+    @SuppressWarnings("unused")
     public UnauthorizedException(String message, Throwable cause) {
         super(message, cause);
     }

@@ -32,8 +32,10 @@ public class WeatherDataController {
         List<WeatherData> weatherData = weatherDataComponent.convertStationsToWeatherData(
                 weatherDataComponent.filterResponse(response));
         weatherDataComponent.saveWeatherData(weatherData);
-        List<WeatherData> lastData = weatherDataComponent.getLastWeatherDataForAllCities();
+        List<WeatherData> lastWeatherDataForAllCities = weatherDataComponent.getLastWeatherDataForAllCities();
 
-        return new ResponseEntity<>(lastData, HttpStatus.OK);
+        List<WeatherData> lastWeatherDataForAllCitiesWithoutIds = weatherDataComponent.removeIdsFromLastDataForAllCities(lastWeatherDataForAllCities);
+
+        return new ResponseEntity<>(lastWeatherDataForAllCitiesWithoutIds, HttpStatus.OK);
     }
 }

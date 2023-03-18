@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+@SuppressWarnings("unused")
 @Entity
 @Table(name = "order_data")
 public class OrderData {
