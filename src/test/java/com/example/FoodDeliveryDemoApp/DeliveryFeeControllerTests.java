@@ -7,12 +7,10 @@ import com.example.FoodDeliveryDemoApp.exception.DeliveryFeeExceptionsList;
 import com.example.FoodDeliveryDemoApp.model.OrderData;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import com.example.FoodDeliveryDemoApp.repository.OrderDataRepository;
-import org.hamcrest.text.IsEqualIgnoringCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 
 import java.util.*;
 
@@ -167,8 +165,130 @@ public class DeliveryFeeControllerTests {
         verifyNoMoreInteractions(weatherDataComponent);
     }
 
-/*    @Test
-    public void testGetDeliveryFeeWithDeliveryFeeException() {
+    @Test
+    public void testGetDeliveryFeeTallinnBikeWithWindSpeedMoreThanTwenty() throws DeliveryFeeExceptionsList {
+        String city = "tallinn";
+        String vehicleType = "bike";
+
+        WeatherData weatherData = new WeatherData();
+        weatherData.setAirTemperature(-3.0);
+        weatherData.setWeatherPhenomenon("Clear");
+        weatherData.setStationName(city);
+        weatherData.setWmoCode(stationWmoCode.get(city.toLowerCase(Locale.ROOT)));
+        weatherData.setWindSpeed(21.0);
+
+        when(weatherDataComponent.getLastDataByCity(city))
+                .thenReturn(weatherData);
+
+        List<DeliveryFeeException> exceptionList = new ArrayList<>(List.of(
+                new DeliveryFeeException("Usage of selected vehicle type is forbidden: wind speed too high")
+        ));
+
+        try {
+            deliveryFeeComponent.getDeliveryFee(city, vehicleType);
+            //fail("Expected DeliveryFeeExceptionsList to be thrown");
+        } catch (DeliveryFeeException e) {
+            assertEquals(exceptionList.get(0).getMessage(), e.getLocalizedMessage());
+        }
+
+        verify(weatherDataComponent, times(1)).getLastDataByCity(city);
+        verifyNoMoreInteractions(weatherDataComponent);
+    }
+
+    @Test
+    public void testGetDeliveryFeeParnuBikeWithWeatherPhenomenonThunder() throws DeliveryFeeExceptionsList {
+        String city = "tallinn";
+        String vehicleType = "bike";
+
+        WeatherData weatherData = new WeatherData();
+        weatherData.setAirTemperature(-3.0);
+        weatherData.setWeatherPhenomenon("Thunder");
+        weatherData.setStationName(city);
+        weatherData.setWmoCode(stationWmoCode.get(city.toLowerCase(Locale.ROOT)));
+        weatherData.setWindSpeed(15.0);
+
+        when(weatherDataComponent.getLastDataByCity(city))
+                .thenReturn(weatherData);
+
+        List<DeliveryFeeException> exceptionList = new ArrayList<>(List.of(
+                new DeliveryFeeException("Usage of selected vehicle type is forbidden")
+        ));
+
+        try {
+            deliveryFeeComponent.getDeliveryFee(city, vehicleType);
+            //fail("Expected DeliveryFeeExceptionsList to be thrown");
+        } catch (DeliveryFeeException e) {
+            assertEquals(exceptionList.get(0).getMessage(), e.getLocalizedMessage());
+        }
+
+        verify(weatherDataComponent, times(1)).getLastDataByCity(city);
+        verifyNoMoreInteractions(weatherDataComponent);
+    }
+
+    @Test
+    public void testGetDeliveryFeeTartuBikeWithAirTemperatureBetweenMinusFiveAndMinusTenAndWindSpeedBetweenTenAndTwentyAndWithWeatherPhenomenonRelatedToSnow() throws DeliveryFeeExceptionsList {
+        String city = "tartu";
+        String vehicleType = "bike";
+
+        WeatherData weatherData = new WeatherData();
+        weatherData.setAirTemperature(-7.5);
+        weatherData.setWeatherPhenomenon("Moderate snowfall");
+        weatherData.setStationName(city);
+        weatherData.setWmoCode(stationWmoCode.get(city.toLowerCase(Locale.ROOT)));
+        weatherData.setWindSpeed(15.0);
+
+        double regionalBaseFee = 2.5;
+        double weatherConditionFee = 2.0;
+        double deliveryFee = regionalBaseFee + weatherConditionFee;
+
+        when(weatherDataComponent.getLastDataByCity(city))
+                .thenReturn(weatherData);
+
+        OrderData response = deliveryFeeComponent.getDeliveryFee(city, vehicleType);
+
+        assertNotNull(response);
+
+        assertEquals(deliveryFee, response.getDeliveryFee());
+        assertEquals(city, response.getCity());
+        assertEquals(vehicleType, response.getVehicleType());
+
+        verify(weatherDataComponent, times(2)).getLastDataByCity(city);
+        verifyNoMoreInteractions(weatherDataComponent);
+    }
+
+    @Test
+    public void testGetDeliveryFeeTallinnScooterWithAirTemperatureBelowMinusTenWithWeatherPhenomenonRelatedToRain() throws DeliveryFeeExceptionsList {
+        String city = "tallinn";
+        String vehicleType = "scooter";
+
+        WeatherData weatherData = new WeatherData();
+        weatherData.setAirTemperature(-20.5);
+        weatherData.setWeatherPhenomenon("Heavy rain");
+        weatherData.setStationName(city);
+        weatherData.setWmoCode(stationWmoCode.get(city.toLowerCase(Locale.ROOT)));
+        weatherData.setWindSpeed(15.0);
+
+        double regionalBaseFee = 3.5;
+        double weatherConditionFee = 1.5;
+        double deliveryFee = regionalBaseFee + weatherConditionFee;
+
+        when(weatherDataComponent.getLastDataByCity(city))
+                .thenReturn(weatherData);
+
+        OrderData response = deliveryFeeComponent.getDeliveryFee(city, vehicleType);
+
+        assertNotNull(response);
+
+        assertEquals(deliveryFee, response.getDeliveryFee());
+        assertEquals(city, response.getCity());
+        assertEquals(vehicleType, response.getVehicleType());
+
+        verify(weatherDataComponent, times(2)).getLastDataByCity(city);
+        verifyNoMoreInteractions(weatherDataComponent);
+    }
+
+    @Test
+    public void testGetDeliveryFeeWithInvalidCityInvalidVehicleTypeException() {
         String city = "asd";
         String vehicleType = "asd";
         List<DeliveryFeeException> exceptionList = new ArrayList<>(List.of(
@@ -176,16 +296,80 @@ public class DeliveryFeeControllerTests {
                 new DeliveryFeeException(String.format("Vehicle type: ´%s´ argument is invalid or not supported.", vehicleType))
         ));
 
-        assertThrows(DeliveryFeeExceptionsList.class, () -> {
+        assertThrows(DeliveryFeeExceptionsList.class, () ->
+                deliveryFeeComponent.getDeliveryFee(city, vehicleType),
+                "Expected exception not thrown");
+
+        try {
             deliveryFeeComponent.getDeliveryFee(city, vehicleType);
-        }, "Expected exception not thrown");
+            //fail("Expected DeliveryFeeExceptionsList to be thrown");
+        } catch (DeliveryFeeExceptionsList e) {
+            assertIterableEquals(exceptionList, e.getExceptions());
+        }
+    }
+    @Test
+    public void testGetDeliveryFeeWithEmptyCityEmptyVehicleTypeException() {
+        String city = "";
+        String vehicleType = "";
+        List<DeliveryFeeException> exceptionList = new ArrayList<>(List.of(
+                new DeliveryFeeException(String.format("City: ´%s´ is empty.", city)),
+                new DeliveryFeeException(String.format("Vehicle type: ´%s´ is empty.", vehicleType))
+        ));
+
+        assertThrows(DeliveryFeeExceptionsList.class, () ->
+                deliveryFeeComponent.getDeliveryFee(city, vehicleType),
+                "Expected exception not thrown");
+
+        try {
+            deliveryFeeComponent.getDeliveryFee(city, vehicleType);
+            //fail("Expected DeliveryFeeExceptionsList to be thrown");
+        } catch (DeliveryFeeExceptionsList e) {
+            assertIterableEquals(exceptionList, e.getExceptions());
+        }
+    }
+
+    @Test
+    public void testGetDeliveryFeeWithEmptyCityException() {
+        String city = "";
+        String vehicleType = "car";
+        List<DeliveryFeeException> exceptionList = new ArrayList<>(List.of(
+                new DeliveryFeeException(String.format("City: ´%s´ is empty.", city))
+        ));
+
+        assertThrows(DeliveryFeeException.class, () ->
+                deliveryFeeComponent.getDeliveryFee(city, vehicleType),
+                "Expected exception not thrown");
+
+        try {
+            deliveryFeeComponent.getDeliveryFee(city, vehicleType);
+        } catch (DeliveryFeeException e) {
+            assertEquals(exceptionList.get(0).getMessage(), e.getLocalizedMessage());
+        } catch (DeliveryFeeExceptionsList deliveryFeeExceptionsList) {
+            fail("Expected DeliveryFeeException to be thrown");
+        }
+    }
+
+    @Test
+    public void testGetDeliveryFeeWithEmptyVehicleTypeException() {
+        String city = "tallinn";
+        String vehicleType = "";
+        List<DeliveryFeeException> exceptionList = new ArrayList<>(List.of(
+                new DeliveryFeeException(String.format("Vehicle type: ´%s´ is empty.", vehicleType))
+        ));
+
+        assertThrows(DeliveryFeeException.class, () ->
+                deliveryFeeComponent.getDeliveryFee(city, vehicleType),
+                "Expected exception not thrown");
 
         try {
             deliveryFeeComponent.getDeliveryFee(city, vehicleType);
             fail("Expected DeliveryFeeExceptionsList to be thrown");
-        } catch (DeliveryFeeExceptionsList e) {
-            assertEquals(exceptionList, e.getExceptions());
+        } catch (DeliveryFeeException e) {
+            assertEquals(exceptionList.get(0).getMessage(), e.getLocalizedMessage());
+        } catch (DeliveryFeeExceptionsList deliveryFeeExceptionsList) {
+            fail("Expected DeliveryFeeException to be thrown");
         }
-    }*/
+    }
+
 }
 

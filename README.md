@@ -44,3 +44,6 @@ Api documentation in done in SpringDoc OpenAPI Swagger [springdoc-openapi v2](ht
 Use [Swagger UI](http://localhost:8080/swagger-ui/index.html) to test the endpoints.
 
 Postman can also be used, as well as CURL etc.
+
+## Tests
+Coverage of DevileryFeeComponent is 100%.

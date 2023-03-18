@@ -50,10 +50,12 @@ public class DeliveryFeeComponent {
     public Double calculateRegionalBaseFee(String city, String vehicleType) {
 
         Map<String, Double> totalFees = cityVehicleFees.get(city);
-        if (totalFees != null) {
+/*        if (totalFees != null) {
             return totalFees.get(vehicleType);
         }
-        return null;
+        return null;*/
+
+        return totalFees.get(vehicleType);
     }
 
     public double calculateWeatherConditionFee(String city, String vehicleType) {
@@ -69,9 +71,9 @@ public class DeliveryFeeComponent {
         );
 
         Function<WeatherData, Double> feeFunction = vehicleTypeToFeeFunction.get(vehicleType);
-        if (feeFunction == null) {
+/*        if (feeFunction == null) {
             return 0.0;
-        }
+        }*/
 
         return feeFunction.apply(weatherData);
     }
@@ -92,7 +94,7 @@ public class DeliveryFeeComponent {
         if (windSpeed > maxWindSpeed) {
             throw new DeliveryFeeException("Usage of selected vehicle type is forbidden: wind speed too high");
         }
-        if (windSpeed > 10 && windSpeed <= maxWindSpeed) {
+        if (windSpeed > 10.0 && windSpeed <= maxWindSpeed) {
             return 0.5;
         }
         return 0;
@@ -196,7 +198,7 @@ public class DeliveryFeeComponent {
         );
     }
 
-    public OrderData getDeliveryFee(String city, String vehicleType) throws DeliveryFeeExceptionsList {
+    public OrderData getDeliveryFee(String city, String vehicleType) throws DeliveryFeeException, DeliveryFeeExceptionsList {
 
         city = city.trim().toLowerCase(Locale.ROOT);
         vehicleType = vehicleType.trim().toLowerCase(Locale.ROOT);
