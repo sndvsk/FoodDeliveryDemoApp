@@ -24,4 +24,5 @@ public class DeliveryFeeExceptionsList extends Exception {
         sb.append("]");
         return sb.toString();
     }
+
 }

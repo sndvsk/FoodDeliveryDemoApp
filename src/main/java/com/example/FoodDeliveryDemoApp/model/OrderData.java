@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.util.Locale;
 
 @SuppressWarnings("unused")
 @Entity
@@ -44,7 +45,7 @@ public class OrderData {
     }
 
     public void setCity(String city) {
-        this.city = city;
+        this.city = city.toLowerCase(Locale.ROOT);
     }
 
     public String getVehicleType() {
@@ -52,7 +53,7 @@ public class OrderData {
     }
 
     public void setVehicleType(String vehicleType) {
-        this.vehicleType = vehicleType;
+        this.vehicleType = vehicleType.toLowerCase(Locale.ROOT);
     }
 
     public double getDeliveryFee() {

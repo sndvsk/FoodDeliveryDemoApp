@@ -146,24 +146,24 @@ public class DeliveryFeeComponent {
 
         List<DeliveryFeeException> exceptionList = new ArrayList<>();
 
-        if (city == null || city.trim().isEmpty()) {
+        if (city == null || city.isEmpty()) {
             exceptionList.add(
                     createException(
-                            String.format("City: ´%s´ is empty.", Utils.capitalizeFirstLetter(city))));
-        } else if (!validCityNames.contains(city.trim().toLowerCase())) {
+                            String.format("City: ´%s´ is empty.", city)));
+        } else if (!validCityNames.contains(city)) {
             exceptionList.add(
                     createException(
-                            String.format("City: ´%s´ argument is invalid or not supported.", Utils.capitalizeFirstLetter(city))));
+                            String.format("City: ´%s´ argument is invalid or not supported.", city)));
         }
 
-        if (vehicleType == null || vehicleType.trim().isEmpty()) {
+        if (vehicleType == null || vehicleType.isEmpty()) {
             exceptionList.add(
                     createException(
-                            String.format("Vehicle type: ´%s´ is empty.", Utils.capitalizeFirstLetter(vehicleType))));
-        } else if (!validVehicleTypes.contains(vehicleType.trim().toLowerCase())) {
+                            String.format("Vehicle type: ´%s´ is empty.", vehicleType)));
+        } else if (!validVehicleTypes.contains(vehicleType)) {
             exceptionList.add(
                     createException(
-                            String.format("Vehicle type: ´%s´ is invalid or not supported.", Utils.capitalizeFirstLetter(vehicleType))));
+                            String.format("Vehicle type: ´%s´ argument is invalid or not supported.", vehicleType)));
         }
 
         return exceptionList;
@@ -176,8 +176,8 @@ public class DeliveryFeeComponent {
     public OrderData createNewOrderData(String city, String vehicleType, double deliveryFee) {
 
         OrderData orderData = new OrderData();
-        orderData.setCity(Utils.capitalizeFirstLetter(city));
-        orderData.setVehicleType(Utils.capitalizeFirstLetter(vehicleType));
+        orderData.setCity(city);
+        orderData.setVehicleType(vehicleType);
         orderData.setDeliveryFee(deliveryFee);
         WeatherData weatherData = getLastDataByCityFromWeatherComponent(city);
         orderData.setWeatherId(weatherData.getId());
@@ -192,18 +192,18 @@ public class DeliveryFeeComponent {
 
     public WeatherData getLastDataByCityFromWeatherComponent(String city) {
         return weatherDataComponent.getLastDataByCity(
-                Utils.capitalizeFirstLetter(city)
+                city
         );
     }
 
     public OrderData getDeliveryFee(String city, String vehicleType) throws DeliveryFeeExceptionsList {
 
-        String cityParam = city.toLowerCase(Locale.ROOT);
-        String vehicleTypeParam = vehicleType.toLowerCase(Locale.ROOT);
+        city = city.trim().toLowerCase(Locale.ROOT);
+        vehicleType = vehicleType.trim().toLowerCase(Locale.ROOT);
 
         List<DeliveryFeeException> deliveryFeeExceptionsList = validateInputs(
-                cityParam,
-                vehicleTypeParam
+                city,
+                vehicleType
         );
 
         switch (deliveryFeeExceptionsList.size()) {
@@ -220,14 +220,14 @@ public class DeliveryFeeComponent {
 
         // Calculate the delivery fee based on the city and vehicle type
         double deliveryFee = calculateDeliveryFee(
-                cityParam,
-                vehicleTypeParam
+                city,
+                vehicleType
         );
 
         // Create OrderData object
         OrderData responseOrderData = createNewOrderData(
-                cityParam,
-                vehicleTypeParam,
+                city,
+                vehicleType,
                 deliveryFee);
 
         return responseOrderData;

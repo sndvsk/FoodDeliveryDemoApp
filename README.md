@@ -31,14 +31,16 @@ This project is a technical task.
    ```
 5. Now you can use the project.
 
+6. Use [Swagger UI](http://localhost:8080/swagger-ui/index.html) to test the endpoints.
+
 P.S. Scheduled task gets data right after start of the application and then every hour at 15 minutes.
 If you want to get latest data when you want use __/get-weather-from-eea__ endpoint.
 
 
 ## How to use
 
-Api documentation and endpoints are provided by [springdoc-openapi v2](https://springdoc.org/v2/)
+Api documentation in done in SpringDoc OpenAPI Swagger [springdoc-openapi v2](https://springdoc.org/v2/)
 
-[Swagger UI](http://localhost:8080/swagger-ui/index.html) of the project.
+Use [Swagger UI](http://localhost:8080/swagger-ui/index.html) to test the endpoints.
 
-Here you can use all endpoints for testing the application.
+Postman can also be used, as well as CURL etc.

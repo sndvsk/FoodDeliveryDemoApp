@@ -20,7 +20,7 @@ public class WeatherDataComponent {
     private final WeatherDataRepository weatherDataRepository;
     private final WeatherDataService weatherDataService;
 
-    private final List<String> neededStations = Arrays.asList("26038", "26242", "41803");
+    private final List<String> neededStations = Arrays.asList("26038", "26242", "41803"); // Tallinn, Tartu, Pärnu respectively
 
     public WeatherDataComponent(WeatherDataRepository weatherDataRepository, WeatherDataService weatherDataService) {
         this.weatherDataRepository = weatherDataRepository;
@@ -54,8 +54,9 @@ public class WeatherDataComponent {
 
     public List<WeatherData> convertStationsToWeatherData(List<WeatherDataDTO.Station> stations) {
         Map<String, String> nameMappings = new HashMap<>();
-        nameMappings.put("Tallinn-Harku", "Tallinn");
-        nameMappings.put("Tartu-Tõravere", "Tartu");
+        nameMappings.put("Tallinn-Harku", "tallinn");
+        nameMappings.put("Tartu-Tõravere", "tartu");
+        nameMappings.put("Pärnu", "pärnu");
 
         List<WeatherData> weatherDataList = new ArrayList<>();
         for (WeatherDataDTO.Station station : stations) {
@@ -80,7 +81,7 @@ public class WeatherDataComponent {
     }
 
     public WeatherData getLastDataByCity(String city) {
-        return weatherDataRepository.findFirstByStationNameOrderByTimestampDesc(city);
+        return weatherDataRepository.findFirstByStationNameOrderByTimestampDesc(city.toLowerCase(Locale.ROOT));
     }
 
     public List<WeatherData> getWeatherDataFromRepository(String cities) {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.util.Locale;
 
 @SuppressWarnings("unused")
 @Entity
@@ -49,7 +50,7 @@ public class WeatherData {
     }
 
     public void setStationName(String stationName) {
-        this.stationName = stationName;
+        this.stationName = stationName.toLowerCase(Locale.ROOT);
     }
 
     public String getWmoCode() {

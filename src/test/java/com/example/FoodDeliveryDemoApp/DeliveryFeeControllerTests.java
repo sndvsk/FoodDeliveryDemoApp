@@ -2,26 +2,21 @@ package com.example.FoodDeliveryDemoApp;
 
 import com.example.FoodDeliveryDemoApp.component.DeliveryFeeComponent;
 import com.example.FoodDeliveryDemoApp.component.WeatherDataComponent;
-import com.example.FoodDeliveryDemoApp.controller.DeliveryFeeController;
 import com.example.FoodDeliveryDemoApp.exception.DeliveryFeeException;
 import com.example.FoodDeliveryDemoApp.exception.DeliveryFeeExceptionsList;
 import com.example.FoodDeliveryDemoApp.model.OrderData;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import com.example.FoodDeliveryDemoApp.repository.OrderDataRepository;
-import com.example.FoodDeliveryDemoApp.repository.WeatherDataRepository;
+import org.hamcrest.text.IsEqualIgnoringCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class DeliveryFeeControllerTests {
@@ -34,6 +29,12 @@ public class DeliveryFeeControllerTests {
     @Mock
     private OrderDataRepository orderDataRepository;
 
+    private final Map<String, String> stationWmoCode = new HashMap<>() {{
+        put("tallinn", "26038");
+        put("tartu", "26242");
+        put("pärnu", "41803");
+    }};
+
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
@@ -41,37 +42,20 @@ public class DeliveryFeeControllerTests {
     }
 
     @Test
-    public void testGetDeliveryFeeSuccess() throws DeliveryFeeExceptionsList {
-        String city = "Tallinn";
-        String vehicleType = "Car";
+    public void testGetDeliveryFeeTallinnCarNoWeatherFeeSuccess() throws DeliveryFeeExceptionsList {
+        String city = "tallinn";
+        String vehicleType = "car";
 
         WeatherData weatherData = new WeatherData();
         weatherData.setAirTemperature(10.0);
         weatherData.setWeatherPhenomenon("Clear");
-        weatherData.setStationName("Tallinn");
-        weatherData.setWmoCode("26038");
+        weatherData.setStationName(city);
+        weatherData.setWmoCode(stationWmoCode.get(city.toLowerCase(Locale.ROOT)));
         weatherData.setWindSpeed(5.0);
 
         double regionalBaseFee = 4.0;
         double weatherConditionFee = 0.0;
         double deliveryFee = regionalBaseFee + weatherConditionFee;
-/*
-
-        when(deliveryFeeComponent.validateInputs(city.toLowerCase(), vehicleType.toLowerCase()))
-                .thenReturn(exceptionList);
-
-        when(deliveryFeeComponent.calculateRegionalBaseFee(city.toLowerCase(), vehicleType.toLowerCase()))
-                .thenReturn(4.0);
-
-        when(deliveryFeeComponent.calculateWeatherConditionFee(city.toLowerCase(), vehicleType.toLowerCase()))
-                .thenReturn(0.0);
-
-        when(deliveryFeeComponent.calculateDeliveryFee(city.toLowerCase(), vehicleType.toLowerCase()))
-                .thenReturn(regionalBaseFee + weatherConditionFee);
-
-        when(deliveryFeeComponent.createNewOrderData(city.toLowerCase(), vehicleType.toLowerCase(), deliveryFee))
-                .thenReturn(orderData);
-*/
 
         when(weatherDataComponent.getLastDataByCity(city))
                 .thenReturn(weatherData);
@@ -80,34 +64,128 @@ public class DeliveryFeeControllerTests {
 
         assertNotNull(response);
 
-        assertEquals(4.0, response.getDeliveryFee());
+        assertEquals(deliveryFee, response.getDeliveryFee());
         assertEquals(city, response.getCity());
         assertEquals(vehicleType, response.getVehicleType());
+
+        verify(weatherDataComponent, times(2)).getLastDataByCity(city);
+        verifyNoMoreInteractions(weatherDataComponent);
     }
 
     @Test
-    public void testGetDeliveryFeeWithDeliveryFeeException() throws DeliveryFeeExceptionsList {
-/*        String city = "Tallinn";
-        String vehicleType = "car";
-        List<DeliveryFeeException> exceptionList = List.of(
-                new DeliveryFeeException("Exception 1"),
-                new DeliveryFeeException("Exception 2")
-        );
+    public void testGetDeliveryFeeTartuScooterNoWeatherFeeSuccess() throws DeliveryFeeExceptionsList {
+        String city = "tartu";
+        String vehicleType = "scooter";
 
-        when(deliveryFeeComponent.validateInputs(city.toLowerCase(), vehicleType.toLowerCase()))
-                .thenReturn(exceptionList);
+        WeatherData weatherData = new WeatherData();
+        weatherData.setAirTemperature(10.0);
+        weatherData.setWeatherPhenomenon("Clear");
+        weatherData.setStationName(city);
+        weatherData.setWmoCode(stationWmoCode.get(city.toLowerCase(Locale.ROOT)));
+        weatherData.setWindSpeed(5.0);
+
+        double regionalBaseFee = 3.0;
+        double weatherConditionFee = 0.0;
+        double deliveryFee = regionalBaseFee + weatherConditionFee;
+
+        when(weatherDataComponent.getLastDataByCity(city))
+                .thenReturn(weatherData);
+
+        OrderData response = deliveryFeeComponent.getDeliveryFee(city, vehicleType);
+
+        assertNotNull(response);
+
+        assertEquals(deliveryFee, response.getDeliveryFee());
+        assertEquals(city, response.getCity());
+        assertEquals(vehicleType, response.getVehicleType());
+
+        verify(weatherDataComponent, times(2)).getLastDataByCity(city);
+        verifyNoMoreInteractions(weatherDataComponent);
+    }
+
+    @Test
+    public void testGetDeliveryFeeParnuBikeNoWeatherFeeSuccess() throws DeliveryFeeExceptionsList {
+        String city = "pärnu";
+        String vehicleType = "bike";
+
+        WeatherData weatherData = new WeatherData();
+        weatherData.setAirTemperature(10.0);
+        weatherData.setWeatherPhenomenon("Clear");
+        weatherData.setStationName(city);
+        weatherData.setWmoCode(stationWmoCode.get(city.toLowerCase(Locale.ROOT)));
+        weatherData.setWindSpeed(5.0);
+
+        double regionalBaseFee = 2.0;
+        double weatherConditionFee = 0.0;
+        double deliveryFee = regionalBaseFee + weatherConditionFee;
+
+        when(weatherDataComponent.getLastDataByCity(city))
+                .thenReturn(weatherData);
+
+        OrderData response = deliveryFeeComponent.getDeliveryFee(city, vehicleType);
+
+        assertNotNull(response);
+
+        assertEquals(deliveryFee, response.getDeliveryFee());
+        assertEquals(city, response.getCity());
+        assertEquals(vehicleType, response.getVehicleType());
+
+        verify(weatherDataComponent, times(2)).getLastDataByCity(city);
+        verifyNoMoreInteractions(weatherDataComponent);
+    }
+
+    @Test
+    public void testGetDeliveryFeeTallinnCarNoWeatherFeeMixedCaseSuccess() throws DeliveryFeeExceptionsList {
+        String city = "tAlLiNn";
+        String vehicleType = "cAR";
+
+        //city = city.toLowerCase(Locale.ROOT);
+
+        WeatherData weatherData = new WeatherData();
+        weatherData.setAirTemperature(10.0);
+        weatherData.setWeatherPhenomenon("Clear");
+        weatherData.setStationName(city);
+        weatherData.setWmoCode(stationWmoCode.get(city.toLowerCase(Locale.ROOT)));
+        weatherData.setWindSpeed(5.0);
+
+        double regionalBaseFee = 4.0;
+        double weatherConditionFee = 0.0;
+        double deliveryFee = regionalBaseFee + weatherConditionFee;
+
+        when(weatherDataComponent.getLastDataByCity(city.toLowerCase(Locale.ROOT)))
+                .thenReturn(weatherData);
+
+        OrderData response = deliveryFeeComponent.getDeliveryFee(city, vehicleType);
+
+        assertNotNull(response);
+
+        assertEquals(deliveryFee, response.getDeliveryFee());
+        assertTrue(city.equalsIgnoreCase(response.getCity()));
+        assertTrue(vehicleType.equalsIgnoreCase(response.getVehicleType()));
+
+        verify(weatherDataComponent, times(2)).getLastDataByCity(city.toLowerCase(Locale.ROOT));
+        verifyNoMoreInteractions(weatherDataComponent);
+    }
+
+/*    @Test
+    public void testGetDeliveryFeeWithDeliveryFeeException() {
+        String city = "asd";
+        String vehicleType = "asd";
+        List<DeliveryFeeException> exceptionList = new ArrayList<>(List.of(
+                new DeliveryFeeException(String.format("City: ´%s´ argument is invalid or not supported.", city)),
+                new DeliveryFeeException(String.format("Vehicle type: ´%s´ argument is invalid or not supported.", vehicleType))
+        ));
+
+        assertThrows(DeliveryFeeExceptionsList.class, () -> {
+            deliveryFeeComponent.getDeliveryFee(city, vehicleType);
+        }, "Expected exception not thrown");
 
         try {
-            deliveryFeeController.getDeliveryFee(city, vehicleType);
+            deliveryFeeComponent.getDeliveryFee(city, vehicleType);
+            fail("Expected DeliveryFeeExceptionsList to be thrown");
         } catch (DeliveryFeeExceptionsList e) {
             assertEquals(exceptionList, e.getExceptions());
-            verify(deliveryFeeComponent).validateInputs(city.toLowerCase(), vehicleType.toLowerCase());
-            verifyNoMoreInteractions(deliveryFeeComponent);
-            return;
         }
-
-        throw new AssertionError("Expected DeliveryFeeExceptionsList to be thrown.");
     }*/
-    }
 }
 
