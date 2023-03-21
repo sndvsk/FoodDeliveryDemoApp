@@ -1,8 +1,12 @@
-package com.example.FoodDeliveryDemoApp.exception;
+package com.example.FoodDeliveryDemoApp.exception.deliveryfee;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
 
-public class DeliveryFeeExceptionsList extends Exception {
+@ResponseStatus(value= HttpStatus.BAD_REQUEST)
+public class DeliveryFeeExceptionsList extends RuntimeException {
 
     private final List<DeliveryFeeException> exceptions;
 

@@ -24,6 +24,15 @@ public class WeatherDataServiceImpl implements WeatherDataService {
                 .build();
     }
 
+    /**
+     * Retrieves weather observations from an external service using WebClient.
+     *
+     * @return a string representation of the weather observations response.
+     * @throws NotFoundException if the requested data is not found.
+     * @throws UnauthorizedException if the request is unauthorized.
+     * @throws ExternalServiceException if there is an error in the external service.
+     * @throws RuntimeException if an unknown error occurs.
+     */
     @Override
     public String retrieveWeatherObservations() {
         try {

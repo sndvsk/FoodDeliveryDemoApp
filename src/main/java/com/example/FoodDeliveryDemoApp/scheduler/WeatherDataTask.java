@@ -16,17 +16,17 @@ public class WeatherDataTask {
     }
 
     @PostConstruct
-    public void onStartup() throws JAXBException {
+    private void onStartup() throws JAXBException {
         saveWeatherDataFromService();
     }
 
     @Scheduled(cron = "${weather.data.cron-interval}")
-    public void onSchedule() throws JAXBException {
+    private void onSchedule() throws JAXBException {
         saveWeatherDataFromService();
     }
 
-    public void saveWeatherDataFromService() throws JAXBException {
-        weatherDataComponent.saveWeatherData(weatherDataComponent.getWeatherDataFromService());
+    private void saveWeatherDataFromService() throws JAXBException {
+        weatherDataComponent.getAndSaveWeatherDataFromService();
     }
 
 }

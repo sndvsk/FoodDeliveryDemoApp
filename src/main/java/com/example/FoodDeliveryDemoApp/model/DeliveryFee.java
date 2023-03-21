@@ -8,12 +8,12 @@ import java.util.Locale;
 
 @SuppressWarnings("unused")
 @Entity
-@Table(name = "order_data")
-public class OrderData {
+@Table(name = "delivery_fee")
+public class DeliveryFee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    @JsonIgnore
+    //@JsonIgnore
     private Long id;
 
     @Column(name = "city")

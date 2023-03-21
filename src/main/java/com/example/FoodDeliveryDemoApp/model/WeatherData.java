@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
 @SuppressWarnings("unused")
@@ -33,9 +34,6 @@ public class WeatherData {
 
     @Column(name = "timestamp")
     private Instant timestamp;
-
-    // Constructor, getters, and setters
-
 
     public Long getId() {
         return id;
@@ -90,6 +88,6 @@ public class WeatherData {
     }
 
     public void setTimestamp(Instant timestamp) {
-        this.timestamp = timestamp;
+        this.timestamp = timestamp.truncatedTo(ChronoUnit.SECONDS);
     }
 }

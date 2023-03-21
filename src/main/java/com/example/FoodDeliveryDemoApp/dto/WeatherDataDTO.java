@@ -3,11 +3,12 @@ package com.example.FoodDeliveryDemoApp.dto;
 import jakarta.xml.bind.annotation.*;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public class WeatherDataDTO {
 
-    @SuppressWarnings({"unused", "CommentedOutCode"})
+    @SuppressWarnings({"unused"})
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class Station {
         private String name;
@@ -16,19 +17,6 @@ public class WeatherDataDTO {
         private Double windspeed;
         private String phenomenon;
         public Instant timestamp;
-
-/*        private Double longitude;
-        private Double latitude;
-        private Double visibility;
-        private Integer precipitations;
-        private Double airpressure;
-        private Integer relativehumidity;
-        private Integer winddirection;
-        private Double windspeedmax;
-        private Double waterlevel;
-        private Double waterlevel_eh2000;
-        private Double watertemperature;
-        private Double uvindex;*/
 
         public String getName() {
             return name;
@@ -71,7 +59,7 @@ public class WeatherDataDTO {
         }
 
         public void setTimestamp(Instant timestamp) {
-            this.timestamp = timestamp;
+            this.timestamp = timestamp.truncatedTo(ChronoUnit.SECONDS);
         }
 
         public Instant getTimestamp() {

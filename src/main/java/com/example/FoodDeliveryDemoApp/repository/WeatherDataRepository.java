@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface WeatherDataRepository extends JpaRepository<WeatherData, Long> {
@@ -15,4 +16,9 @@ public interface WeatherDataRepository extends JpaRepository<WeatherData, Long> 
     List<WeatherData> findByTimestamp(Instant timestamp);
 
     WeatherData findTopByOrderByIdDesc();
+
+    Optional<WeatherData> findByStationNameAndTimestamp(String stationName, Instant timestamp);
+
+    Optional<WeatherData> findById(Long id);
+
 }
