@@ -12,13 +12,13 @@ public class RegionalBaseFeeRule implements FeeRule {
     private Long id;
 
     @Column(name = "city")
-    private String city;
+    public String city;
 
     @Column(name = "vehicle_type")
-    private String vehicleType;
+    public String vehicleType;
 
     @Column(name = "regional_base_fee")
-    private Double fee;
+    public Double fee;
 
     public RegionalBaseFeeRule(String city, String vehicleType, Double fee) {
         this.city = city;

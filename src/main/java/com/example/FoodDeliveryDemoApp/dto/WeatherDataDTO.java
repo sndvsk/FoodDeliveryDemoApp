@@ -3,8 +3,6 @@ package com.example.FoodDeliveryDemoApp.dto;
 import jakarta.xml.bind.annotation.*;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.List;
 
 public class WeatherDataDTO {
@@ -15,7 +13,7 @@ public class WeatherDataDTO {
 
         private String name;
 
-        private String wmocode;
+        private Long wmocode;
 
         private Double airtemperature;
 
@@ -33,11 +31,11 @@ public class WeatherDataDTO {
             this.name = name;
         }
 
-        public String getWmocode() {
+        public Long getWmocode() {
             return wmocode;
         }
 
-        public void setWmocode(String wmocode) {
+        public void setWmocode(Long wmocode) {
             this.wmocode = wmocode;
         }
 

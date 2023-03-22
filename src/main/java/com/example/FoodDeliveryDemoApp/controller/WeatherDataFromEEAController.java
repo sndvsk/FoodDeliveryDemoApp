@@ -1,7 +1,7 @@
 package com.example.FoodDeliveryDemoApp.controller;
 
-import com.example.FoodDeliveryDemoApp.service.ExternalWeatherData.ExternalWeatherDataService;
-import com.example.FoodDeliveryDemoApp.service.WeatherData.WeatherDataServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.externalWeatherData.ExternalWeatherDataService;
+import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataServiceImpl;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/get-weather-from-eea")
-@Tag(name = "Weather Data from Estonian Environment Agency API", description = "Endpoint for getting weather data from Estonian Environment Agency.")
+@Tag(name = "Weather Data from Estonian Environment Agency API", description = "Endpoint for getting weather data from Estonian Environment Agency")
 public class WeatherDataFromEEAController {
 
     private final WeatherDataServiceImpl weatherDataService;
@@ -39,7 +39,7 @@ public class WeatherDataFromEEAController {
      * @throws JAXBException if there is an error while parsing the weather data from the service
      */
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Save latest weather data from Estonian Environment Agency for Tallinn, Tartu and Pärnu to database.")
+    @Operation(summary = "Save latest weather data from Estonian Environment Agency for Tallinn, Tartu and Pärnu to database")
     public ResponseEntity<List<WeatherData>> getAndSaveWeatherObservations() throws JAXBException {
 
         List<WeatherData> lastWeatherData = weatherDataService.getAndSaveWeatherDataFromService();
@@ -48,7 +48,7 @@ public class WeatherDataFromEEAController {
     }
 
     @GetMapping(path = "/xml", produces = MediaType.APPLICATION_XML_VALUE)
-    @Operation(summary = "Get latest weather data from Estonian Environment Agency.")
+    @Operation(summary = "Get latest weather data from Estonian Environment Agency")
     public ResponseEntity<String> getWeatherDataFromServiceXML() {
 
         String response = externalWeatherDataService.retrieveWeatherObservations();

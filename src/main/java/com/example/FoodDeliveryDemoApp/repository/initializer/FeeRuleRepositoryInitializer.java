@@ -1,10 +1,10 @@
 package com.example.FoodDeliveryDemoApp.repository.initializer;
 
-import com.example.FoodDeliveryDemoApp.model.rules.ExtraFee.ExtraFeeAirTemperatureRule;
-import com.example.FoodDeliveryDemoApp.model.rules.ExtraFee.ExtraFeeWeatherPhenomenonRule;
-import com.example.FoodDeliveryDemoApp.model.rules.ExtraFee.ExtraFeeWindSpeedRule;
+import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeAirTemperatureRule;
+import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWeatherPhenomenonRule;
+import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWindSpeedRule;
 import com.example.FoodDeliveryDemoApp.model.rules.RegionalBaseFeeRule;
-import com.example.FoodDeliveryDemoApp.repository.rules.BaseFeeRuleRepository;
+import com.example.FoodDeliveryDemoApp.repository.rules.RegionalBaseFeeRuleRepository;
 import com.example.FoodDeliveryDemoApp.repository.rules.ExtraFeeAirTemperatureRuleRepository;
 import com.example.FoodDeliveryDemoApp.repository.rules.ExtraFeeWeatherPhenomenonRuleRepository;
 import com.example.FoodDeliveryDemoApp.repository.rules.ExtraFeeWindSpeedRuleRepository;
@@ -17,12 +17,12 @@ import java.util.List;
 @Component
 public class FeeRuleRepositoryInitializer implements CommandLineRunner {
 
-    private final BaseFeeRuleRepository baseFeeRuleRepository;
+    private final RegionalBaseFeeRuleRepository baseFeeRuleRepository;
     private final ExtraFeeAirTemperatureRuleRepository airTemperatureRepository;
     private final ExtraFeeWindSpeedRuleRepository windSpeedRepository;
     private final ExtraFeeWeatherPhenomenonRuleRepository weatherPhenomenonRepository;
 
-    public FeeRuleRepositoryInitializer(BaseFeeRuleRepository baseFeeRuleRepository, ExtraFeeAirTemperatureRuleRepository airTemperatureRepository, ExtraFeeWindSpeedRuleRepository windSpeedRepository, ExtraFeeWeatherPhenomenonRuleRepository weatherPhenomenonRepository) {
+    public FeeRuleRepositoryInitializer(RegionalBaseFeeRuleRepository baseFeeRuleRepository, ExtraFeeAirTemperatureRuleRepository airTemperatureRepository, ExtraFeeWindSpeedRuleRepository windSpeedRepository, ExtraFeeWeatherPhenomenonRuleRepository weatherPhenomenonRepository) {
         this.baseFeeRuleRepository = baseFeeRuleRepository;
         this.airTemperatureRepository = airTemperatureRepository;
         this.windSpeedRepository = windSpeedRepository;

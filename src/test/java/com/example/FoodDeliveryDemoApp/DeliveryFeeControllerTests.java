@@ -1,9 +1,14 @@
 package com.example.FoodDeliveryDemoApp;
 
-import com.example.FoodDeliveryDemoApp.service.DeliveryFee.DeliveryFeeServiceImpl;
-import com.example.FoodDeliveryDemoApp.service.WeatherData.WeatherDataServiceImpl;
-import com.example.FoodDeliveryDemoApp.exception.deliveryfee.DeliveryFeeException;
-import com.example.FoodDeliveryDemoApp.exception.deliveryfee.DeliveryFeeExceptionsList;
+import com.example.FoodDeliveryDemoApp.service.deliveryFee.DeliveryFeeService;
+import com.example.FoodDeliveryDemoApp.service.deliveryFee.DeliveryFeeServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.airTemperatureRule.ExtraFeeAirTemperatureRuleServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.weatherPhenomenonRule.ExtraFeeWeatherPhenomenonRuleServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.windSpeedRule.ExtraFeeWindSpeedRuleServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.feeRule.regionalBaseFee.RegionalBaseFeeRuleServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataServiceImpl;
+import com.example.FoodDeliveryDemoApp.exception.deliveryFee.DeliveryFeeBadRequestException;
+import com.example.FoodDeliveryDemoApp.exception.deliveryFee.DeliveryFeeExceptionsList;
 import com.example.FoodDeliveryDemoApp.model.DeliveryFee;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import com.example.FoodDeliveryDemoApp.repository.DeliveryFeeRepository;
@@ -22,24 +27,45 @@ import static org.mockito.Mockito.*;
 
 public class DeliveryFeeControllerTests {
 
-    private DeliveryFeeServiceImpl deliveryFeeService;
+    private DeliveryFeeService deliveryFeeService;
 
     @Mock
     private WeatherDataServiceImpl weatherDataService;
 
     @Mock
+    private ExtraFeeAirTemperatureRuleServiceImpl airTemperatureRuleService;
+
+    @Mock
+    private ExtraFeeWindSpeedRuleServiceImpl windSpeedRuleService;
+
+    @Mock
+    private ExtraFeeWeatherPhenomenonRuleServiceImpl weatherPhenomenonRuleService;
+
+    @Mock
+    private RegionalBaseFeeRuleServiceImpl baseFeeRuleService;
+
+    @Mock
     private DeliveryFeeRepository deliveryFeeRepository;
 
-    private final Map<String, String> stationWmoCode = new HashMap<>() {{
-        put("tallinn", "26038");
-        put("tartu", "26242");
-        put("pärnu", "41803");
+    private final Map<String, Long> stationWmoCode = new HashMap<>() {{
+        put("tallinn", 26038L);
+        put("tartu", 26242L);
+        put("pärnu", 41803L);
     }};
+
+    public DeliveryFeeControllerTests() {
+    }
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
-        deliveryFeeService = new DeliveryFeeServiceImpl(deliveryFeeRepository, weatherDataService);
+        deliveryFeeService = new DeliveryFeeServiceImpl(
+                deliveryFeeRepository,
+                weatherDataService,
+                airTemperatureRuleService,
+                windSpeedRuleService,
+                weatherPhenomenonRuleService,
+                baseFeeRuleService);
     }
 
     @Test
@@ -50,7 +76,7 @@ public class DeliveryFeeControllerTests {
       weather = normal
       result = success
      */
-    public void testCalculateAndSaveDeliveryFee_01_success() throws DeliveryFeeException, DeliveryFeeExceptionsList {
+    public void testCalculateAndSaveDeliveryFee_01_success() throws DeliveryFeeBadRequestException, DeliveryFeeExceptionsList {
         String city = "tallinn";
         String vehicleType = "car";
 
@@ -69,10 +95,10 @@ public class DeliveryFeeControllerTests {
         double weatherConditionFee = 0.0;
         double deliveryFee = regionalBaseFee + weatherConditionFee;
 
-        when(weatherDataService.getLastDataByCity(city))
+        when(weatherDataService.getLastDataByCity(city, null))
                 .thenReturn(weatherData);
 
-        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
+        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
 
         assertNotNull(response);
 
@@ -80,7 +106,7 @@ public class DeliveryFeeControllerTests {
         assertEquals(city, response.getCity());
         assertEquals(vehicleType, response.getVehicleType());
 
-        verify(weatherDataService, times(2)).getLastDataByCity(city);
+        verify(weatherDataService, times(2)).getLastDataByCity(city, null);
         verifyNoMoreInteractions(weatherDataService);
     }
 
@@ -92,7 +118,7 @@ public class DeliveryFeeControllerTests {
       weather = normal
       result = success
      */
-    public void testCalculateAndSaveDeliveryFee_02_success() throws DeliveryFeeException, DeliveryFeeExceptionsList {
+    public void testCalculateAndSaveDeliveryFee_02_success() throws DeliveryFeeBadRequestException, DeliveryFeeExceptionsList {
         String city = "tartu";
         String vehicleType = "scooter";
 
@@ -130,7 +156,7 @@ public class DeliveryFeeControllerTests {
       weather = normal
       result = success
      */
-    public void testCalculateAndSaveDeliveryFee_03_success() throws DeliveryFeeException, DeliveryFeeExceptionsList {
+    public void testCalculateAndSaveDeliveryFee_03_success() throws DeliveryFeeBadRequestException, DeliveryFeeExceptionsList {
         String city = "pärnu";
         String vehicleType = "bike";
 
@@ -168,7 +194,7 @@ public class DeliveryFeeControllerTests {
       weather = normal
       result = success
      */
-    public void testCalculateAndSaveDeliveryFee_04_mixedCase_success() throws DeliveryFeeException, DeliveryFeeExceptionsList {
+    public void testCalculateAndSaveDeliveryFee_04_mixedCase_success() throws DeliveryFeeBadRequestException, DeliveryFeeExceptionsList {
         String city = "tAlLiNn";
         String vehicleType = "cAR";
 
@@ -208,7 +234,7 @@ public class DeliveryFeeControllerTests {
       weather = windSpeed > 20.0
       result = exception
      */
-    public void testCalculateAndSaveDeliveryFee_05_bigWind_exception() throws DeliveryFeeException, DeliveryFeeExceptionsList {
+    public void testCalculateAndSaveDeliveryFee_05_bigWind_exception() throws DeliveryFeeBadRequestException, DeliveryFeeExceptionsList {
         String city = "tallinn";
         String vehicleType = "bike";
 
@@ -222,14 +248,14 @@ public class DeliveryFeeControllerTests {
         when(weatherDataService.getLastDataByCity(city))
                 .thenReturn(weatherData);
 
-        List<DeliveryFeeException> exceptionList = new ArrayList<>(List.of(
-                new DeliveryFeeException("Usage of selected vehicle type is forbidden: wind speed too high")
+        List<DeliveryFeeBadRequestException> exceptionList = new ArrayList<>(List.of(
+                new DeliveryFeeBadRequestException("Usage of selected vehicle type is forbidden: wind speed too high")
         ));
 
         try {
             deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
             //fail("Expected DeliveryFeeExceptionsList to be thrown");
-        } catch (DeliveryFeeException e) {
+        } catch (DeliveryFeeBadRequestException e) {
             assertEquals(exceptionList.get(0).getMessage(), e.getLocalizedMessage());
         }
 
@@ -245,7 +271,7 @@ public class DeliveryFeeControllerTests {
       weather = weatherPhenomenon - thunder
       result = exception
      */
-    public void testCalculateAndSaveDeliveryFee_06_thunder_exception() throws DeliveryFeeException, DeliveryFeeExceptionsList {
+    public void testCalculateAndSaveDeliveryFee_06_thunder_exception() throws DeliveryFeeBadRequestException, DeliveryFeeExceptionsList {
         String city = "tallinn";
         String vehicleType = "bike";
 
@@ -259,14 +285,14 @@ public class DeliveryFeeControllerTests {
         when(weatherDataService.getLastDataByCity(city))
                 .thenReturn(weatherData);
 
-        List<DeliveryFeeException> exceptionList = new ArrayList<>(List.of(
-                new DeliveryFeeException("Usage of selected vehicle type is forbidden")
+        List<DeliveryFeeBadRequestException> exceptionList = new ArrayList<>(List.of(
+                new DeliveryFeeBadRequestException("Usage of selected vehicle type is forbidden")
         ));
 
         try {
             deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
             //fail("Expected DeliveryFeeExceptionsList to be thrown");
-        } catch (DeliveryFeeException e) {
+        } catch (DeliveryFeeBadRequestException e) {
             assertEquals(exceptionList.get(0).getMessage(), e.getLocalizedMessage());
         }
 
@@ -284,7 +310,7 @@ public class DeliveryFeeControllerTests {
                 weatherPhenomenon - snow related
       result = success
      */
-    public void testCalculateAndSaveDeliveryFee_07_variousWeatherConditions_success() throws DeliveryFeeException, DeliveryFeeExceptionsList {
+    public void testCalculateAndSaveDeliveryFee_07_variousWeatherConditions_success() throws DeliveryFeeBadRequestException, DeliveryFeeExceptionsList {
         String city = "tartu";
         String vehicleType = "bike";
 
@@ -323,7 +349,7 @@ public class DeliveryFeeControllerTests {
                 weatherPhenomenon - rain related
       result = success
      */
-    public void testCalculateAndSaveDeliveryFee_08_withConditions_success() throws DeliveryFeeException, DeliveryFeeExceptionsList {
+    public void testCalculateAndSaveDeliveryFee_08_withConditions_success() throws DeliveryFeeBadRequestException, DeliveryFeeExceptionsList {
         String city = "tallinn";
         String vehicleType = "scooter";
 
@@ -361,13 +387,13 @@ public class DeliveryFeeControllerTests {
       weather = normal
       result = exception
      */
-    public void testCalculateAndSaveDeliveryFee_09_exception() throws DeliveryFeeException, DeliveryFeeExceptionsList {
+    public void testCalculateAndSaveDeliveryFee_09_exception() throws DeliveryFeeBadRequestException, DeliveryFeeExceptionsList {
         String city = "asd";
         String vehicleType = "asd";
 
-        List<DeliveryFeeException> exceptionList = new ArrayList<>(List.of(
-                new DeliveryFeeException(String.format("City: ´%s´ argument is invalid or not supported.", city)),
-                new DeliveryFeeException(String.format("Vehicle type: ´%s´ argument is invalid or not supported.", vehicleType))
+        List<DeliveryFeeBadRequestException> exceptionList = new ArrayList<>(List.of(
+                new DeliveryFeeBadRequestException(String.format("City: ´%s´ argument is invalid or not supported.", city)),
+                new DeliveryFeeBadRequestException(String.format("Vehicle type: ´%s´ argument is invalid or not supported.", vehicleType))
         ));
 
         assertThrows(DeliveryFeeExceptionsList.class, () ->
@@ -389,13 +415,13 @@ public class DeliveryFeeControllerTests {
       weather = normal
       result = exception
      */
-    public void testCalculateAndSaveDeliveryFee_10_exception() throws DeliveryFeeException, DeliveryFeeExceptionsList {
+    public void testCalculateAndSaveDeliveryFee_10_exception() throws DeliveryFeeBadRequestException, DeliveryFeeExceptionsList {
         String city = "";
         String vehicleType = "";
 
-        List<DeliveryFeeException> exceptionList = new ArrayList<>(List.of(
-                new DeliveryFeeException("Parameter city is empty."),
-                new DeliveryFeeException("Parameter vehicle type is empty.")
+        List<DeliveryFeeBadRequestException> exceptionList = new ArrayList<>(List.of(
+                new DeliveryFeeBadRequestException("Parameter city is empty."),
+                new DeliveryFeeBadRequestException("Parameter vehicle type is empty.")
         ));
 
         assertThrows(DeliveryFeeExceptionsList.class, () ->
@@ -418,22 +444,22 @@ public class DeliveryFeeControllerTests {
       weather = normal
       result = exception
      */
-    public void testCalculateAndSaveDeliveryFee_11_exception() throws DeliveryFeeException, DeliveryFeeExceptionsList {
+    public void testCalculateAndSaveDeliveryFee_11_exception() throws DeliveryFeeBadRequestException, DeliveryFeeExceptionsList {
         String city = "";
         String vehicleType = "car";
 
-        List<DeliveryFeeException> exceptionList = new ArrayList<>(List.of(
-                new DeliveryFeeException("Parameter city is empty.")
+        List<DeliveryFeeBadRequestException> exceptionList = new ArrayList<>(List.of(
+                new DeliveryFeeBadRequestException("Parameter city is empty.")
         ));
 
-        assertThrows(DeliveryFeeException.class, () ->
+        assertThrows(DeliveryFeeBadRequestException.class, () ->
                 deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType),
                 "Expected exception not thrown");
 
         try {
             deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
             fail("Expected DeliveryFeeException to be thrown");
-        } catch (DeliveryFeeException e) {
+        } catch (DeliveryFeeBadRequestException e) {
             assertEquals(exceptionList.get(0).getMessage(), e.getLocalizedMessage());
         } catch (DeliveryFeeExceptionsList deliveryFeeExceptionsList) {
             fail("Expected DeliveryFeeException to be thrown");
@@ -448,22 +474,22 @@ public class DeliveryFeeControllerTests {
       weather = normal
       result = exception
      */
-    public void testCalculateAndSaveDeliveryFee_12_exception() throws DeliveryFeeException, DeliveryFeeExceptionsList {
+    public void testCalculateAndSaveDeliveryFee_12_exception() throws DeliveryFeeBadRequestException, DeliveryFeeExceptionsList {
         String city = "tallinn";
         String vehicleType = "";
 
-        List<DeliveryFeeException> exceptionList = new ArrayList<>(List.of(
-                new DeliveryFeeException("Parameter vehicle type is empty.")
+        List<DeliveryFeeBadRequestException> exceptionList = new ArrayList<>(List.of(
+                new DeliveryFeeBadRequestException("Parameter vehicle type is empty.")
         ));
 
-        assertThrows(DeliveryFeeException.class, () ->
+        assertThrows(DeliveryFeeBadRequestException.class, () ->
                 deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType),
                 "Expected exception not thrown");
 
         try {
             deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
             fail("Expected DeliveryFeeException to be thrown");
-        } catch (DeliveryFeeException e) {
+        } catch (DeliveryFeeBadRequestException e) {
             assertEquals(exceptionList.get(0).getMessage(), e.getLocalizedMessage());
         } catch (DeliveryFeeExceptionsList deliveryFeeExceptionsList) {
             fail("Expected DeliveryFeeException to be thrown");

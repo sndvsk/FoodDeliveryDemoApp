@@ -1,7 +1,7 @@
 package com.example.FoodDeliveryDemoApp.controller;
 
-import com.example.FoodDeliveryDemoApp.exception.weatherdata.WeatherDataNotFoundException;
-import com.example.FoodDeliveryDemoApp.service.WeatherData.WeatherDataService;
+import com.example.FoodDeliveryDemoApp.exception.weatherData.WeatherDataNotFoundException;
+import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataService;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,11 +14,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/weather")
-@Tag(name = "Weather Data API", description = "Endpoint for getting weather data from database.")
+@Tag(name = "Weather Data API", description = "Endpoint for getting weather data from database")
 public class WeatherDataController {
 
     private final WeatherDataService weatherDataService;
@@ -27,6 +28,8 @@ public class WeatherDataController {
     public WeatherDataController(WeatherDataService weatherDataService) {
         this.weatherDataService = weatherDataService;
     }
+
+    // TODO add and update rest interface documentation
 
     /**
      * Retrieves the latest weather data for Tallinn, Tartu and Pärnu from external weather API.
@@ -61,8 +64,38 @@ public class WeatherDataController {
         return new ResponseEntity<>(lastWeatherData, HttpStatus.OK);
     }
 
+    @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all weather data")
+    public ResponseEntity<List<WeatherData>> getAllWeatherData() throws WeatherDataNotFoundException {
+
+        List<WeatherData> weatherData = weatherDataService.getAllWeatherData();
+
+        return new ResponseEntity<>(weatherData, HttpStatus.OK);
+    }
+
+    @PostMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Add weather data")
+    public ResponseEntity<WeatherData> addWeatherDataById(
+            @Parameter(name = "stationName", description = "Station name", example = "tallinn")
+            @RequestParam String stationName,
+            @Parameter(name = "wmoCode", description = "Station wmo code", example = "26038")
+            @RequestParam(required = false) Long wmoCode,
+            @Parameter(name = "airTemperature", description = "Air temperature", example = "10.0")
+            @RequestParam Double airTemperature,
+            @Parameter(name = "windSpeed", description = "Wind speed", example = "5.0")
+            @RequestParam Double windSpeed,
+            @Parameter(name = "weatherPhenomenon", description = "Weather phenomenon", example = "Clear")
+            @RequestParam String weatherPhenomenon,
+            @Parameter(name = "timestamp", description = "Time for weather data", example = "2023-03-22T12:15:00+02:00")
+            @RequestParam(required = false) OffsetDateTime dateTime) throws WeatherDataNotFoundException {
+
+        WeatherData weatherData = weatherDataService.addWeatherData(stationName, wmoCode, airTemperature, windSpeed, weatherPhenomenon, dateTime);
+
+        return new ResponseEntity<>(weatherData, HttpStatus.OK);
+    }
+
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get weather data by id.")
+    @Operation(summary = "Get weather data by id")
     public ResponseEntity<WeatherData> getWeatherDataById(
             @Parameter(name = "id", description = "Id of weather data", in = ParameterIn.PATH, example = "1" )
             @PathVariable(value = "id") Long weatherId) throws WeatherDataNotFoundException {
@@ -71,15 +104,15 @@ public class WeatherDataController {
 
         return new ResponseEntity<>(weatherData, HttpStatus.OK);
     }
-
+    
     @PatchMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get weather data by id.")
+    @Operation(summary = "Get weather data by id")
     public ResponseEntity<WeatherData> patchWeatherDataById(
             @Parameter(name = "airTemperature", description = "Air temperature", example = "10.0" )
             @RequestParam(required = false) Double airTemperature,
             @Parameter(name = "windSpeed", description = "Wind speed", example = "5.0" )
             @RequestParam(required = false) Double windSpeed,
-            @Parameter(name = "weatherPhenomenon", description = "Weather phenomenon ", example = "Clear" )
+            @Parameter(name = "weatherPhenomenon", description = "Weather phenomenon", example = "Clear" )
             @RequestParam(required = false) String weatherPhenomenon,
             @Parameter(name = "id", description = "Id of weather data", in = ParameterIn.PATH, example = "1" )
             @PathVariable(value = "id") Long weatherId) throws WeatherDataNotFoundException {
@@ -90,7 +123,7 @@ public class WeatherDataController {
     }
 
     @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get weather data by id.")
+    @Operation(summary = "Get weather data by id")
     public ResponseEntity<String> deleteWeatherDataById(
             @Parameter(name = "id", description = "Id of weather data", in = ParameterIn.PATH, example = "1" )
             @PathVariable(value = "id") Long weatherId) throws WeatherDataNotFoundException {

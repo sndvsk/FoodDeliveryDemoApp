@@ -17,14 +17,14 @@ public class WeatherData {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    @JsonIgnore
+    //@JsonIgnore
     private Long id;
 
     @Column(name = "station_name")
     private String stationName;
 
     @Column(name = "wmo_code")
-    private String wmoCode;
+    private Long wmoCode;
 
     @Column(name = "air_temperature")
     public Double airTemperature;
@@ -58,11 +58,11 @@ public class WeatherData {
         this.stationName = stationName.toLowerCase(Locale.ROOT);
     }
 
-    public String getWmoCode() {
+    public Long getWmoCode() {
         return wmoCode;
     }
 
-    public void setWmoCode(String wmoCode) {
+    public void setWmoCode(Long wmoCode) {
         this.wmoCode = wmoCode;
     }
 

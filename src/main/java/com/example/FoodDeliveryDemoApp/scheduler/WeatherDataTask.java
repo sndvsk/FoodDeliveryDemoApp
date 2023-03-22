@@ -1,6 +1,6 @@
 package com.example.FoodDeliveryDemoApp.scheduler;
 
-import com.example.FoodDeliveryDemoApp.service.WeatherData.WeatherDataService;
+import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataService;
 import jakarta.annotation.PostConstruct;
 import jakarta.xml.bind.JAXBException;
 import org.springframework.scheduling.annotation.Scheduled;
