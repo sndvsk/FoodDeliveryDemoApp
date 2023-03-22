@@ -1,11 +1,11 @@
 package com.example.FoodDeliveryDemoApp;
 
-import com.example.FoodDeliveryDemoApp.component.DeliveryFeeComponent;
-import com.example.FoodDeliveryDemoApp.component.WeatherDataComponent;
+import com.example.FoodDeliveryDemoApp.service.DeliveryFee.DeliveryFeeServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.WeatherData.WeatherDataServiceImpl;
 import com.example.FoodDeliveryDemoApp.controller.DeliveryFeeController;
 import com.example.FoodDeliveryDemoApp.controller.WeatherDataController;
 import com.example.FoodDeliveryDemoApp.controller.WeatherDataFromEEAController;
-import com.example.FoodDeliveryDemoApp.service.WeatherDataServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.ExternalWeatherData.ExternalWeatherDataServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,22 +25,22 @@ class FoodDeliveryDemoAppApplicationTests {
 	private WeatherDataFromEEAController weatherDataFromEEAController;
 
 	@Autowired
-	private DeliveryFeeComponent deliveryFeeComponent;
-
-	@Autowired
-	private WeatherDataComponent weatherDataComponent;
+	private DeliveryFeeServiceImpl deliveryFeeService;
 
 	@Autowired
 	private WeatherDataServiceImpl weatherDataService;
+
+	@Autowired
+	private ExternalWeatherDataServiceImpl externalWeatherDataService;
 
 	@Test
 	void contextLoads() {
 		assertThat(deliveryFeeController).isNotNull();
 		assertThat(weatherDataController).isNotNull();
 		assertThat(weatherDataFromEEAController).isNotNull();
-		assertThat(deliveryFeeComponent).isNotNull();
-		assertThat(weatherDataComponent).isNotNull();
+		assertThat(deliveryFeeService).isNotNull();
 		assertThat(weatherDataService).isNotNull();
+		assertThat(externalWeatherDataService).isNotNull();
 
 	}
 

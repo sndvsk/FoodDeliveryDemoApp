@@ -1,6 +1,6 @@
 package com.example.FoodDeliveryDemoApp.scheduler;
 
-import com.example.FoodDeliveryDemoApp.component.WeatherDataComponent;
+import com.example.FoodDeliveryDemoApp.service.WeatherData.WeatherDataServiceImpl;
 import jakarta.annotation.PostConstruct;
 import jakarta.xml.bind.JAXBException;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class WeatherDataTask {
 
-    private final WeatherDataComponent weatherDataComponent;
+    private final WeatherDataServiceImpl weatherDataService;
 
-    public WeatherDataTask(WeatherDataComponent weatherDataComponent) {
-        this.weatherDataComponent = weatherDataComponent;
+    public WeatherDataTask(WeatherDataServiceImpl weatherDataService) {
+        this.weatherDataService = weatherDataService;
     }
 
     @PostConstruct
@@ -26,7 +26,7 @@ public class WeatherDataTask {
     }
 
     private void saveWeatherDataFromService() throws JAXBException {
-        weatherDataComponent.getAndSaveWeatherDataFromService();
+        weatherDataService.getAndSaveWeatherDataFromService();
     }
 
 }

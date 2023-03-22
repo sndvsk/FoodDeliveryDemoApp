@@ -1,11 +1,13 @@
-package com.example.FoodDeliveryDemoApp.component;
+package com.example.FoodDeliveryDemoApp.service.WeatherData;
 
 import com.example.FoodDeliveryDemoApp.dto.WeatherDataDTO;
 import com.example.FoodDeliveryDemoApp.exception.weatherdata.WeatherDataBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.weatherdata.WeatherDataNotFoundException;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
+import com.example.FoodDeliveryDemoApp.model.rules.ExtraFee.ExtraFeeWeatherPhenomenonRule;
 import com.example.FoodDeliveryDemoApp.repository.WeatherDataRepository;
-import com.example.FoodDeliveryDemoApp.service.WeatherDataService;
+import com.example.FoodDeliveryDemoApp.service.ExternalWeatherData.ExternalWeatherDataService;
+import com.example.FoodDeliveryDemoApp.service.FeeRule.FeeRuleService;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
@@ -13,24 +15,29 @@ import org.springframework.stereotype.Component;
 
 import java.io.StringReader;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class WeatherDataComponent {
+public class WeatherDataServiceImpl implements WeatherDataService {
 
-    private final WeatherDataRepository weatherDataRepository;
-    private final WeatherDataService weatherDataService;
+    private WeatherDataRepository weatherDataRepository;
+    private ExternalWeatherDataService externalWeatherDataService;
+    private FeeRuleService feeRuleService;
+
 
     private final List<String> neededStationsNames = Arrays.asList("tallinn", "tartu", "pärnu");
     private final List<String> neededStationsWmo = Arrays.asList("26038", "26242", "41803");
 
-    public WeatherDataComponent(WeatherDataRepository weatherDataRepository, WeatherDataService weatherDataService) {
+    public WeatherDataServiceImpl(WeatherDataRepository weatherDataRepository, ExternalWeatherDataService externalWeatherDataService, FeeRuleService feeRuleService) {
         this.weatherDataRepository = weatherDataRepository;
-        this.weatherDataService = weatherDataService;
+        this.externalWeatherDataService = externalWeatherDataService;
+        this.feeRuleService = feeRuleService;
+    }
+
+    public WeatherDataServiceImpl() {
     }
 
     /**
@@ -40,7 +47,7 @@ public class WeatherDataComponent {
      * @return a list of DTO Station objects containing the weather data for the needed cities
      * @throws JAXBException if there is an error unmarshalling the XML response
      */
-    private List<WeatherDataDTO.Station> filterResponse(String response) throws JAXBException {
+    public List<WeatherDataDTO.Station> filterResponse(String response) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(WeatherDataDTO.Observations.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         StringReader reader = new StringReader(response);
@@ -61,7 +68,7 @@ public class WeatherDataComponent {
      * @param stations a list of DTO Station objects containing weather data
      * @return a list of WeatherData objects created from the Station objects
      */
-    private List<WeatherData> convertStationsToWeatherData(List<WeatherDataDTO.Station> stations) {
+    public List<WeatherData> convertStationsToWeatherData(List<WeatherDataDTO.Station> stations) {
         Map<String, String> nameMappings = new HashMap<>();
         nameMappings.put("Tallinn-Harku", "tallinn");
         nameMappings.put("Tartu-Tõravere", "tartu");
@@ -77,7 +84,8 @@ public class WeatherDataComponent {
                     weatherData.setAirTemperature(station.getAirtemperature());
                     weatherData.setWindSpeed(station.getWindspeed());
                     weatherData.setWeatherPhenomenon(station.getPhenomenon());
-                    weatherData.setTimestamp(station.getTimestamp());
+                    weatherData.setTimestamp(station.getTimestamp()
+                    );
 
                     return weatherData;
                 })
@@ -89,20 +97,9 @@ public class WeatherDataComponent {
      *
      * @return a list of WeatherData objects representing the last data entry for all cities
      */
-    private List<WeatherData> getLastWeatherDataForAllCities() {
+    public List<WeatherData> getLastWeatherDataForAllCities() {
         Instant lastEntryTimestamp = weatherDataRepository.findTopByOrderByIdDesc().getTimestamp();
         return weatherDataRepository.findByTimestamp(lastEntryTimestamp);
-    }
-
-    /**
-     * Retrieves weather data from the external weather API and returns it as a list of WeatherData objects.
-     *
-     * @return a list of WeatherData objects containing the weather data for the needed cities
-     * @throws JAXBException if there is an error unmarshalling the XML response from the weather API
-     */
-    private List<WeatherData> getWeatherDataFromService() throws JAXBException {
-        String response = weatherDataService.retrieveWeatherObservations();
-        return convertStationsToWeatherData(filterResponse(response));
     }
 
     /**
@@ -110,7 +107,7 @@ public class WeatherDataComponent {
      *
      * @param weatherDataList the list of weather data to be saved
      */
-    private void saveWeatherData(List<WeatherData> weatherDataList) {
+    public void saveWeatherData(List<WeatherData> weatherDataList) {
         for (WeatherData weatherData: weatherDataList) {
             weatherDataRepository.save(weatherData);
         }
@@ -122,17 +119,48 @@ public class WeatherDataComponent {
      * @param cities a string containing comma-separated city names
      * @throws WeatherDataBadRequestException if any of the city names are invalid
      */
-    private void validateCities(String cities) throws WeatherDataBadRequestException {
+    public void validateCities(String cities) throws WeatherDataBadRequestException {
         String[] cityArray = cities.split(",");
         for (String city : cityArray) {
             if (!neededStationsNames.contains(city.trim().toLowerCase())) {
-                throw new WeatherDataBadRequestException("Invalid city name: " + city.trim());
+                throw new WeatherDataBadRequestException(String.format("Invalid city name: ´%s´", city.trim()));
             }
         }
     }
 
+    public WeatherData validateWeatherDataInputs(WeatherData weatherData, Double airTemperature, Double windSpeed, String weatherPhenomenon) {
+        if (airTemperature != null) {
+            if (airTemperature < -273.15) {
+                throw new WeatherDataBadRequestException(String.format("Provided air temperature: ´%s´ is lower than absolute zero.", airTemperature));
+            }
+            weatherData.airTemperature = airTemperature;
+        }
+        if (windSpeed != null) {
+            if (windSpeed < 0.0) {
+                throw new WeatherDataBadRequestException(String.format("Provided wind speed: ´%s´ is lower than zero.", windSpeed));
+            }
+            weatherData.windSpeed = windSpeed;
+        }
+        if (weatherPhenomenon != null) {
+            ExtraFeeWeatherPhenomenonRule weatherPhenomenonFromRepository = feeRuleService.findByWeatherPhenomenonName(weatherPhenomenon);
+            weatherData.weatherPhenomenon = weatherPhenomenonFromRepository.getWeatherPhenomenonName();
+        }
+        return weatherData;
+    }
+
     /**
-     * Overload of the {@link #getLastDataByCity(String, LocalDateTime)} method with a default {@code dateTime}.
+     * Retrieves weather data from the external weather API and returns it as a list of WeatherData objects.
+     *
+     * @return a list of WeatherData objects containing the weather data for the needed cities
+     * @throws JAXBException if there is an error unmarshalling the XML response from the weather API
+     */
+    public List<WeatherData> getWeatherDataFromService() throws JAXBException {
+        String response = externalWeatherDataService.retrieveWeatherObservations();
+        return convertStationsToWeatherData(filterResponse(response));
+    }
+
+    /**
+     * Overload of the {@link #getLastDataByCity(String, OffsetDateTime)} method with a default {@code dateTime}.
      */
     public WeatherData getLastDataByCity(String city) {
         return getLastDataByCity(city, null);
@@ -147,20 +175,17 @@ public class WeatherDataComponent {
      * @return the last weather data for the given city and date-time
      * @throws WeatherDataNotFoundException if no weather data is found for the given city and datetime
      */
-    public WeatherData getLastDataByCity(String city, LocalDateTime dateTime) throws WeatherDataNotFoundException {
+    public WeatherData getLastDataByCity(String city, OffsetDateTime dateTime) throws WeatherDataNotFoundException {
         if (dateTime == null) {
             return weatherDataRepository.findFirstByStationNameOrderByTimestampDesc(city.toLowerCase(Locale.ROOT));
         } else {
-            Instant dt = dateTime.toInstant(
-                    ZoneOffset.UTC
-            ).truncatedTo(ChronoUnit.SECONDS);
+            // todo
+            // find entry in database that is +- 1 hour of the datetime
+            Instant dt = dateTime.truncatedTo(ChronoUnit.SECONDS).toInstant();
             Optional<WeatherData> weatherData = weatherDataRepository.findByStationNameAndTimestamp(city.toLowerCase(Locale.ROOT), dt);
 
-            if (weatherData.isPresent()) {
-                return weatherData.get();
-            } else {
-                throw new WeatherDataNotFoundException("Weather data for this datetime does not exist");
-            }
+            return weatherData.
+                    orElseThrow(() -> new WeatherDataNotFoundException(String.format("Weather data for this datetime: ´%s´ does not exist", dateTime)));
         }
     }
 
@@ -196,6 +221,32 @@ public class WeatherDataComponent {
         List<WeatherData> weatherData = getWeatherDataFromService();
         saveWeatherData(weatherData);
         return weatherData;
+    }
+
+    public WeatherData getWeatherDataById(Long weatherId) throws WeatherDataNotFoundException {
+        Optional<WeatherData> weatherData = weatherDataRepository.findById(weatherId);
+
+        return weatherData.
+                orElseThrow(() -> new WeatherDataNotFoundException(String.format("Weather data for this id: ´%s´ does not exist", weatherId)));
+
+    }
+
+    public String deleteWeatherDataById(Long weatherId) {
+        if (weatherDataRepository.existsById(weatherId)) {
+            weatherDataRepository.deleteById(weatherId);
+            return String.format("Weather data with id: ´%s´ was deleted", weatherId);
+        } else
+            throw new WeatherDataNotFoundException(String.format("Weather data for this id: ´%s´ does not exist", weatherId));
+    }
+
+    public WeatherData patchWeatherDataById(Long weatherId, Double airTemperature, Double windSpeed, String weatherPhenomenon) {
+        Optional<WeatherData> weatherData = weatherDataRepository.findById(weatherId);
+
+        WeatherData patchedWeatherData = weatherData
+                .orElseThrow(() -> new WeatherDataNotFoundException(String.format("Weather data for this id: ´%s´ does not exist", weatherId)));
+
+        patchedWeatherData = validateWeatherDataInputs(patchedWeatherData, airTemperature, windSpeed, weatherPhenomenon);
+        return weatherDataRepository.save(patchedWeatherData);
     }
 
 }

@@ -18,5 +18,10 @@ public interface DeliveryFeeRepository extends JpaRepository<DeliveryFee, Long> 
     Optional<DeliveryFee> findById(Long id);
 
     List<DeliveryFee> findAll();
+
+    void deleteById(Long id);
+
+    boolean existsById(Long id);
+
 }
 

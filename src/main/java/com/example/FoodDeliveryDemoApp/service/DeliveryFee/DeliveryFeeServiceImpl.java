@@ -1,4 +1,4 @@
-package com.example.FoodDeliveryDemoApp.component;
+package com.example.FoodDeliveryDemoApp.service.DeliveryFee;
 
 import com.example.FoodDeliveryDemoApp.exception.deliveryfee.DeliveryFeeException;
 import com.example.FoodDeliveryDemoApp.exception.deliveryfee.DeliveryFeeExceptionsList;
@@ -6,26 +6,26 @@ import com.example.FoodDeliveryDemoApp.exception.deliveryfee.DeliveryFeeNotFound
 import com.example.FoodDeliveryDemoApp.model.DeliveryFee;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import com.example.FoodDeliveryDemoApp.repository.DeliveryFeeRepository;
+import com.example.FoodDeliveryDemoApp.service.WeatherData.WeatherDataServiceImpl;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 
 
 @Component
-public class DeliveryFeeComponent {
+public class DeliveryFeeServiceImpl implements DeliveryFeeService {
 
     private final DeliveryFeeRepository deliveryFeeRepository;
 
-    private final WeatherDataComponent weatherDataComponent;
+    private final WeatherDataServiceImpl weatherDataService;
 
-    public DeliveryFeeComponent(DeliveryFeeRepository deliveryFeeRepository, WeatherDataComponent weatherDataComponent) {
+    public DeliveryFeeServiceImpl(DeliveryFeeRepository deliveryFeeRepository, WeatherDataServiceImpl weatherDataService) {
         this.deliveryFeeRepository = deliveryFeeRepository;
-        this.weatherDataComponent = weatherDataComponent;
+        this.weatherDataService = weatherDataService;
     }
 
     // ´static final´ to avoid recreating every time the method ´calculateRegionalBaseFee´ is called
@@ -67,15 +67,8 @@ public class DeliveryFeeComponent {
      *
      * @param deliveryFee the delivery fee object to be saved
      */
-    private void saveDeliveryFee(DeliveryFee deliveryFee) {
+    public void saveDeliveryFee(DeliveryFee deliveryFee) {
         deliveryFeeRepository.save(deliveryFee);
-    }
-
-    /**
-     * Overload of the {@link #calculateDeliveryFee(String, String, LocalDateTime)} method with a default {@code dateTime}.
-     */
-    private Double calculateDeliveryFee(String city, String vehicleType) {
-        return calculateDeliveryFee(city, vehicleType, null);
     }
 
     /**
@@ -87,16 +80,10 @@ public class DeliveryFeeComponent {
      * @param dateTime the date and time for which to calculate the delivery fee. If null, the current date and time will be used (optional)
      * @return the delivery fee for the given city, vehicle type, and datetime if provided
      */
-    private Double calculateDeliveryFee(String city, String vehicleType, LocalDateTime dateTime) {
+    public Double calculateDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime) {
 
         double regionalFee = calculateRegionalBaseFee(city, vehicleType);
-
-        double weatherConditionFee;
-        if (dateTime == null) {
-            weatherConditionFee = calculateWeatherConditionFee(city, vehicleType);
-        } else {
-            weatherConditionFee = calculateWeatherConditionFee(city, vehicleType, dateTime);
-        }
+        double weatherConditionFee = calculateWeatherConditionFee(city, vehicleType, dateTime);
 
         return regionalFee + weatherConditionFee;
     }
@@ -108,16 +95,9 @@ public class DeliveryFeeComponent {
      * @param vehicleType the type of vehicle used for delivery
      * @return the weather condition fee for the city and vehicle type
      */
-    private Double calculateRegionalBaseFee(String city, String vehicleType) {
+    public Double calculateRegionalBaseFee(String city, String vehicleType) {
         Map<String, Double> totalFees = cityVehicleFees.get(city);
         return totalFees.get(vehicleType);
-    }
-
-    /**
-     * Overload of the {@link #calculateWeatherConditionFee(String, String, LocalDateTime)} method with a default {@code dateTime}.
-     */
-    private Double calculateWeatherConditionFee(String city, String vehicleType) {
-        return calculateWeatherConditionFee(city, vehicleType, null);
     }
 
     /**
@@ -128,14 +108,9 @@ public class DeliveryFeeComponent {
      * @param dateTime the date and time for which to calculate the delivery fee. If null, the current date and time will be used (optional)
      * @return the weather condition fee for the specified city, vehicle type, and datetime
      */
-    private Double calculateWeatherConditionFee(String city, String vehicleType, LocalDateTime dateTime) {
+    public Double calculateWeatherConditionFee(String city, String vehicleType, OffsetDateTime dateTime) {
 
-        WeatherData weatherData;
-        if (dateTime == null) {
-            weatherData = getLastWeatherDataByCityFromWeatherComponent(city);
-        } else {
-            weatherData = getLastWeatherDataByCityFromWeatherComponent(city, dateTime);
-        }
+        WeatherData weatherData = weatherDataService.getLastDataByCity(city, dateTime);
 
         // A map that maps each vehicle type to its corresponding fee calculation function
         Map<String, Function<WeatherData, Double>> vehicleTypeToFeeFunction = Map.of(
@@ -158,7 +133,7 @@ public class DeliveryFeeComponent {
      * @param airTemperature the air temperature
      * @return the fee based on the air temperature
      */
-    private double calculateAirTemperatureFee(double airTemperature) {
+    public double calculateAirTemperatureFee(double airTemperature) {
         if (airTemperature < -10.0) {
             return 1;
         } else if (airTemperature < 0.0) {
@@ -174,7 +149,7 @@ public class DeliveryFeeComponent {
      * @return the fee based on the wind speed
      * @throws DeliveryFeeException if the wind speed is greater than 20.0
      */
-    private double calculateWindSpeedFee(Double windSpeed) {
+    public double calculateWindSpeedFee(Double windSpeed) {
         if (windSpeed > 20.0) {
             throw new DeliveryFeeException("Usage of selected vehicle type is forbidden: wind speed too high");
         } else if (windSpeed > 10.0) {
@@ -190,7 +165,7 @@ public class DeliveryFeeComponent {
      * @return the fee based on the weather phenomenon
      * @throws DeliveryFeeException if usage of selected vehicle type is forbidden in those weather conditions
      */
-    private Double calculateWeatherPhenomenonFee(String weatherPhenomenon) {
+    public Double calculateWeatherPhenomenonFee(String weatherPhenomenon) {
         Double fee = weatherPhenomenonFees.getOrDefault(weatherPhenomenon, 0.0);
         if (fee == -1.0) {
             throw new DeliveryFeeException("Usage of selected vehicle type is forbidden");
@@ -206,7 +181,7 @@ public class DeliveryFeeComponent {
      * @throws DeliveryFeeException if there is an exception validating the inputs provided. Will contain a single DeliveryFeeException object.
      * @throws DeliveryFeeExceptionsList if there are multiple exceptions validating the inputs provided. Will contain a list of DeliveryFeeException objects.
      */
-    private void validateInputs(String city, String vehicleType) throws DeliveryFeeException, DeliveryFeeExceptionsList {
+    public void validateInputs(String city, String vehicleType) throws DeliveryFeeException, DeliveryFeeExceptionsList {
         Set<String> validCityNames = new HashSet<>(
                 Arrays.asList(
                         "tallinn",
@@ -249,15 +224,8 @@ public class DeliveryFeeComponent {
      * @param message the error message to include in the exception
      * @return the newly created DeliveryFeeException
      */
-    private DeliveryFeeException createException(String message) {
+    public DeliveryFeeException createException(String message) {
         return new DeliveryFeeException(message);
-    }
-
-    /**
-     * Overload of the {@link #createNewDeliveryFee(String, String, double, LocalDateTime)}method with a default {@code dateTime}.
-     */
-    private DeliveryFee createNewDeliveryFee(String city, String vehicleType, double deliveryFee) {
-        return createNewDeliveryFee(city, vehicleType, deliveryFee, null);
     }
 
     /**
@@ -269,20 +237,19 @@ public class DeliveryFeeComponent {
      * @param dateTime the date and time for which to calculate the delivery fee. If null, the current date and time will be used (optional)
      * @return a new DeliveryFee object with the specified parameters
      */
-    private DeliveryFee createNewDeliveryFee(String city, String vehicleType, double deliveryFeePrice, LocalDateTime dateTime) {
+    public DeliveryFee createNewDeliveryFee(String city, String vehicleType, double deliveryFeePrice, OffsetDateTime dateTime) {
 
         DeliveryFee deliveryFee = new DeliveryFee();
         deliveryFee.setCity(city);
         deliveryFee.setVehicleType(vehicleType);
         deliveryFee.setDeliveryFee(deliveryFeePrice);
 
-        WeatherData weatherData;
+        WeatherData weatherData = weatherDataService.getLastDataByCity(city, dateTime);
+
         if (dateTime == null) {
-            weatherData = getLastWeatherDataByCityFromWeatherComponent(city, null);
             deliveryFee.setTimestamp(Instant.now().truncatedTo(ChronoUnit.SECONDS));
         } else {
-            weatherData = getLastWeatherDataByCityFromWeatherComponent(city, dateTime);
-            deliveryFee.setTimestamp(dateTime.toInstant(ZoneOffset.UTC));
+            deliveryFee.setTimestamp(dateTime.truncatedTo(ChronoUnit.SECONDS).toInstant());
         }
 
         deliveryFee.setWeatherId(weatherData.getId());
@@ -291,29 +258,7 @@ public class DeliveryFeeComponent {
     }
 
     /**
-     * Overload of the {@link #getLastWeatherDataByCityFromWeatherComponent(String, LocalDateTime)} method with a default {@code dateTime}.
-     */
-    private WeatherData getLastWeatherDataByCityFromWeatherComponent(String city) {
-        return getLastWeatherDataByCityFromWeatherComponent(city, null);
-    }
-
-    /**
-     * Retrieves the last weather data from the external API for a given city.
-     * @param city the city for which the weather data is retrieved
-     * @param dateTime the date and time for which to calculate the delivery fee. If null, the current date and time will be used (optional)
-     * @return the last weather data object for the city
-     */
-
-    private WeatherData getLastWeatherDataByCityFromWeatherComponent(String city, LocalDateTime dateTime) {
-        if (dateTime == null) {
-            return weatherDataComponent.getLastDataByCity(city);
-        } else {
-            return weatherDataComponent.getLastDataByCity(city, dateTime);
-        }
-    }
-
-    /**
-     * Overload of the {@link #calculateAndSaveDeliveryFee(String, String, LocalDateTime)}method with a default {@code dateTime}.
+     * Overload of the {@link #calculateAndSaveDeliveryFee(String, String, OffsetDateTime)}method with a default {@code dateTime}.
      */
     public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType) throws DeliveryFeeException, DeliveryFeeExceptionsList {
         return calculateAndSaveDeliveryFee(city, vehicleType, null);
@@ -330,20 +275,15 @@ public class DeliveryFeeComponent {
      * @throws DeliveryFeeException if there is an error in the input validation or the fee calculation
      * @throws DeliveryFeeExceptionsList if there are multiple errors in the input validation
      */
-    public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType, LocalDateTime dateTime) throws DeliveryFeeException, DeliveryFeeExceptionsList {
+    public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime) throws DeliveryFeeException, DeliveryFeeExceptionsList {
 
         city = city.trim().toLowerCase(Locale.ROOT);
         vehicleType = vehicleType.trim().toLowerCase(Locale.ROOT);
 
         validateInputs(city, vehicleType);
 
-        double deliveryFee = dateTime == null
-                ? calculateDeliveryFee(city, vehicleType)
-                : calculateDeliveryFee(city, vehicleType, dateTime);
-
-        DeliveryFee returnDeliveryFee = dateTime == null
-                ? createNewDeliveryFee(city, vehicleType, deliveryFee)
-                : createNewDeliveryFee(city, vehicleType, deliveryFee, dateTime);
+        double deliveryFee = calculateDeliveryFee(city, vehicleType, dateTime);
+        DeliveryFee returnDeliveryFee = createNewDeliveryFee(city, vehicleType, deliveryFee, dateTime);
 
         saveDeliveryFee(returnDeliveryFee);
 
@@ -361,11 +301,8 @@ public class DeliveryFeeComponent {
     public DeliveryFee getDeliveryFeeById(Long id) throws DeliveryFeeException {
         Optional<DeliveryFee> deliveryFee = deliveryFeeRepository.findById(id);
 
-        if (deliveryFee.isPresent()) {
-            return deliveryFee.get();
-        } else {
-            throw new DeliveryFeeNotFoundException("This delivery fee calculation does not exist");
-        }
+        return deliveryFee.
+                orElseThrow(() -> new DeliveryFeeNotFoundException("This delivery fee calculation does not exist"));
 
     }
 

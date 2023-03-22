@@ -1,7 +1,7 @@
 package com.example.FoodDeliveryDemoApp;
 
-import com.example.FoodDeliveryDemoApp.component.DeliveryFeeComponent;
-import com.example.FoodDeliveryDemoApp.component.WeatherDataComponent;
+import com.example.FoodDeliveryDemoApp.service.DeliveryFee.DeliveryFeeServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.WeatherData.WeatherDataServiceImpl;
 import com.example.FoodDeliveryDemoApp.exception.deliveryfee.DeliveryFeeException;
 import com.example.FoodDeliveryDemoApp.exception.deliveryfee.DeliveryFeeExceptionsList;
 import com.example.FoodDeliveryDemoApp.model.DeliveryFee;
@@ -22,10 +22,10 @@ import static org.mockito.Mockito.*;
 
 public class DeliveryFeeControllerTests {
 
-    private DeliveryFeeComponent deliveryFeeComponent;
+    private DeliveryFeeServiceImpl deliveryFeeService;
 
     @Mock
-    private WeatherDataComponent weatherDataComponent;
+    private WeatherDataServiceImpl weatherDataService;
 
     @Mock
     private DeliveryFeeRepository deliveryFeeRepository;
@@ -39,7 +39,7 @@ public class DeliveryFeeControllerTests {
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
-        deliveryFeeComponent = new DeliveryFeeComponent(deliveryFeeRepository, weatherDataComponent);
+        deliveryFeeService = new DeliveryFeeServiceImpl(deliveryFeeRepository, weatherDataService);
     }
 
     @Test
@@ -69,10 +69,10 @@ public class DeliveryFeeControllerTests {
         double weatherConditionFee = 0.0;
         double deliveryFee = regionalBaseFee + weatherConditionFee;
 
-        when(weatherDataComponent.getLastDataByCity(city))
+        when(weatherDataService.getLastDataByCity(city))
                 .thenReturn(weatherData);
 
-        DeliveryFee response = deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType);
+        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
 
         assertNotNull(response);
 
@@ -80,8 +80,8 @@ public class DeliveryFeeControllerTests {
         assertEquals(city, response.getCity());
         assertEquals(vehicleType, response.getVehicleType());
 
-        verify(weatherDataComponent, times(2)).getLastDataByCity(city);
-        verifyNoMoreInteractions(weatherDataComponent);
+        verify(weatherDataService, times(2)).getLastDataByCity(city);
+        verifyNoMoreInteractions(weatherDataService);
     }
 
     @Test
@@ -107,10 +107,10 @@ public class DeliveryFeeControllerTests {
         double weatherConditionFee = 0.0;
         double deliveryFee = regionalBaseFee + weatherConditionFee;
 
-        when(weatherDataComponent.getLastDataByCity(city))
+        when(weatherDataService.getLastDataByCity(city))
                 .thenReturn(weatherData);
 
-        DeliveryFee response = deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType);
+        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
 
         assertNotNull(response);
 
@@ -118,8 +118,8 @@ public class DeliveryFeeControllerTests {
         assertEquals(city, response.getCity());
         assertEquals(vehicleType, response.getVehicleType());
 
-        verify(weatherDataComponent, times(2)).getLastDataByCity(city);
-        verifyNoMoreInteractions(weatherDataComponent);
+        verify(weatherDataService, times(2)).getLastDataByCity(city);
+        verifyNoMoreInteractions(weatherDataService);
     }
 
     @Test
@@ -145,10 +145,10 @@ public class DeliveryFeeControllerTests {
         double weatherConditionFee = 0.0;
         double deliveryFee = regionalBaseFee + weatherConditionFee;
 
-        when(weatherDataComponent.getLastDataByCity(city))
+        when(weatherDataService.getLastDataByCity(city))
                 .thenReturn(weatherData);
 
-        DeliveryFee response = deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType);
+        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
 
         assertNotNull(response);
 
@@ -156,8 +156,8 @@ public class DeliveryFeeControllerTests {
         assertEquals(city, response.getCity());
         assertEquals(vehicleType, response.getVehicleType());
 
-        verify(weatherDataComponent, times(2)).getLastDataByCity(city);
-        verifyNoMoreInteractions(weatherDataComponent);
+        verify(weatherDataService, times(2)).getLastDataByCity(city);
+        verifyNoMoreInteractions(weatherDataService);
     }
 
     @Test
@@ -185,10 +185,10 @@ public class DeliveryFeeControllerTests {
         double weatherConditionFee = 0.0;
         double deliveryFee = regionalBaseFee + weatherConditionFee;
 
-        when(weatherDataComponent.getLastDataByCity(city.toLowerCase(Locale.ROOT)))
+        when(weatherDataService.getLastDataByCity(city.toLowerCase(Locale.ROOT)))
                 .thenReturn(weatherData);
 
-        DeliveryFee response = deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType);
+        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
 
         assertNotNull(response);
 
@@ -196,8 +196,8 @@ public class DeliveryFeeControllerTests {
         assertTrue(city.equalsIgnoreCase(response.getCity()));
         assertTrue(vehicleType.equalsIgnoreCase(response.getVehicleType()));
 
-        verify(weatherDataComponent, times(2)).getLastDataByCity(city.toLowerCase(Locale.ROOT));
-        verifyNoMoreInteractions(weatherDataComponent);
+        verify(weatherDataService, times(2)).getLastDataByCity(city.toLowerCase(Locale.ROOT));
+        verifyNoMoreInteractions(weatherDataService);
     }
 
     @Test
@@ -219,7 +219,7 @@ public class DeliveryFeeControllerTests {
         weatherData.setWmoCode(stationWmoCode.get(city.toLowerCase(Locale.ROOT)));
         weatherData.setWindSpeed(21.0);
 
-        when(weatherDataComponent.getLastDataByCity(city))
+        when(weatherDataService.getLastDataByCity(city))
                 .thenReturn(weatherData);
 
         List<DeliveryFeeException> exceptionList = new ArrayList<>(List.of(
@@ -227,14 +227,14 @@ public class DeliveryFeeControllerTests {
         ));
 
         try {
-            deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType);
+            deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
             //fail("Expected DeliveryFeeExceptionsList to be thrown");
         } catch (DeliveryFeeException e) {
             assertEquals(exceptionList.get(0).getMessage(), e.getLocalizedMessage());
         }
 
-        verify(weatherDataComponent, times(1)).getLastDataByCity(city);
-        verifyNoMoreInteractions(weatherDataComponent);
+        verify(weatherDataService, times(1)).getLastDataByCity(city);
+        verifyNoMoreInteractions(weatherDataService);
     }
 
     @Test
@@ -256,7 +256,7 @@ public class DeliveryFeeControllerTests {
         weatherData.setWmoCode(stationWmoCode.get(city.toLowerCase(Locale.ROOT)));
         weatherData.setWindSpeed(15.0);
 
-        when(weatherDataComponent.getLastDataByCity(city))
+        when(weatherDataService.getLastDataByCity(city))
                 .thenReturn(weatherData);
 
         List<DeliveryFeeException> exceptionList = new ArrayList<>(List.of(
@@ -264,14 +264,14 @@ public class DeliveryFeeControllerTests {
         ));
 
         try {
-            deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType);
+            deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
             //fail("Expected DeliveryFeeExceptionsList to be thrown");
         } catch (DeliveryFeeException e) {
             assertEquals(exceptionList.get(0).getMessage(), e.getLocalizedMessage());
         }
 
-        verify(weatherDataComponent, times(1)).getLastDataByCity(city);
-        verifyNoMoreInteractions(weatherDataComponent);
+        verify(weatherDataService, times(1)).getLastDataByCity(city);
+        verifyNoMoreInteractions(weatherDataService);
     }
 
     @Test
@@ -299,10 +299,10 @@ public class DeliveryFeeControllerTests {
         double weatherConditionFee = 2.0;
         double deliveryFee = regionalBaseFee + weatherConditionFee;
 
-        when(weatherDataComponent.getLastDataByCity(city))
+        when(weatherDataService.getLastDataByCity(city))
                 .thenReturn(weatherData);
 
-        DeliveryFee response = deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType);
+        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
 
         assertNotNull(response);
 
@@ -310,8 +310,8 @@ public class DeliveryFeeControllerTests {
         assertEquals(city, response.getCity());
         assertEquals(vehicleType, response.getVehicleType());
 
-        verify(weatherDataComponent, times(2)).getLastDataByCity(city);
-        verifyNoMoreInteractions(weatherDataComponent);
+        verify(weatherDataService, times(2)).getLastDataByCity(city);
+        verifyNoMoreInteractions(weatherDataService);
     }
 
     @Test
@@ -338,10 +338,10 @@ public class DeliveryFeeControllerTests {
         double weatherConditionFee = 1.5;
         double deliveryFee = regionalBaseFee + weatherConditionFee;
 
-        when(weatherDataComponent.getLastDataByCity(city))
+        when(weatherDataService.getLastDataByCity(city))
                 .thenReturn(weatherData);
 
-        DeliveryFee response = deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType);
+        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
 
         assertNotNull(response);
 
@@ -349,8 +349,8 @@ public class DeliveryFeeControllerTests {
         assertEquals(city, response.getCity());
         assertEquals(vehicleType, response.getVehicleType());
 
-        verify(weatherDataComponent, times(2)).getLastDataByCity(city);
-        verifyNoMoreInteractions(weatherDataComponent);
+        verify(weatherDataService, times(2)).getLastDataByCity(city);
+        verifyNoMoreInteractions(weatherDataService);
     }
 
     @Test
@@ -371,11 +371,11 @@ public class DeliveryFeeControllerTests {
         ));
 
         assertThrows(DeliveryFeeExceptionsList.class, () ->
-                deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType),
+                deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType),
                 "Expected exception not thrown");
 
         try {
-            deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType);
+            deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
             fail("Expected DeliveryFeeExceptionsList to be thrown");
         } catch (DeliveryFeeExceptionsList e) {
             assertIterableEquals(exceptionList, e.getExceptions());
@@ -399,11 +399,11 @@ public class DeliveryFeeControllerTests {
         ));
 
         assertThrows(DeliveryFeeExceptionsList.class, () ->
-                deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType),
+                deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType),
                 "Expected exception not thrown");
 
         try {
-            deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType);
+            deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
             fail("Expected DeliveryFeeExceptionsList to be thrown");
         } catch (DeliveryFeeExceptionsList e) {
             assertIterableEquals(exceptionList, e.getExceptions());
@@ -427,11 +427,11 @@ public class DeliveryFeeControllerTests {
         ));
 
         assertThrows(DeliveryFeeException.class, () ->
-                deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType),
+                deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType),
                 "Expected exception not thrown");
 
         try {
-            deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType);
+            deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
             fail("Expected DeliveryFeeException to be thrown");
         } catch (DeliveryFeeException e) {
             assertEquals(exceptionList.get(0).getMessage(), e.getLocalizedMessage());
@@ -457,11 +457,11 @@ public class DeliveryFeeControllerTests {
         ));
 
         assertThrows(DeliveryFeeException.class, () ->
-                deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType),
+                deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType),
                 "Expected exception not thrown");
 
         try {
-            deliveryFeeComponent.calculateAndSaveDeliveryFee(city, vehicleType);
+            deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
             fail("Expected DeliveryFeeException to be thrown");
         } catch (DeliveryFeeException e) {
             assertEquals(exceptionList.get(0).getMessage(), e.getLocalizedMessage());

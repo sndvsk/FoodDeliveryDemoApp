@@ -1,4 +1,4 @@
-package com.example.FoodDeliveryDemoApp.service;
+package com.example.FoodDeliveryDemoApp.service.ExternalWeatherData;
 
 import com.example.FoodDeliveryDemoApp.exception.ExternalServiceException;
 import com.example.FoodDeliveryDemoApp.exception.UnauthorizedException;
@@ -6,19 +6,20 @@ import jakarta.ws.rs.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-@Service
-public class WeatherDataServiceImpl implements WeatherDataService {
+@Component
+public class ExternalWeatherDataServiceImpl implements ExternalWeatherDataService {
 
     @Value("${weather.data.url}")
     private String weatherObservationsUrl;
 
     private final WebClient webClient;
 
-    public WeatherDataServiceImpl() {
+    public ExternalWeatherDataServiceImpl() {
         this.webClient = WebClient.builder()
                 .defaultHeader("Accept", MediaType.APPLICATION_XML_VALUE)
                 .build();

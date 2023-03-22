@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 				description = """
 				<font size='5'>This app has a sub-functionality of the food delivery application, which calculates the delivery fee for food couriers based on regional base fee, vehicle type, and weather conditions.</font>""",
 				version = "v1"),
-		servers = @Server(url = "/", description = "Default Server URL")
+		servers = @Server(url = "http://localhost:8080", description = "Default Server URL")
 )
 @SpringBootApplication
 public class FoodDeliveryDemoAppApplication {
