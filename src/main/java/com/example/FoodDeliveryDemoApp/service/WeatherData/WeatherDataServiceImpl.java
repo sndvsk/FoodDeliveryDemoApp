@@ -23,9 +23,9 @@ import java.util.stream.Collectors;
 @Component
 public class WeatherDataServiceImpl implements WeatherDataService {
 
-    private WeatherDataRepository weatherDataRepository;
-    private ExternalWeatherDataService externalWeatherDataService;
-    private ExtraFeeWeatherPhenomenonRuleService weatherPhenomenonRuleService;
+    private final WeatherDataRepository weatherDataRepository;
+    private final ExternalWeatherDataService externalWeatherDataService;
+    private final ExtraFeeWeatherPhenomenonRuleService weatherPhenomenonRuleService;
 
 
     private final List<String> neededStationsNames = Arrays.asList("tallinn", "tartu", "pärnu");
@@ -37,9 +37,6 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         this.weatherDataRepository = weatherDataRepository;
         this.externalWeatherDataService = externalWeatherDataService;
         this.weatherPhenomenonRuleService = weatherPhenomenonRuleService;
-    }
-
-    public WeatherDataServiceImpl() {
     }
 
     /**

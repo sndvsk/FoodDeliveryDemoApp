@@ -1,10 +1,11 @@
 package com.example.FoodDeliveryDemoApp.model.rules.ExtraFee;
 
+import com.example.FoodDeliveryDemoApp.model.rules.FeeRule;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "extra_fee_rules_temperature")
-public class ExtraFeeAirTemperatureRule extends ExtraFeeRule {
+public class ExtraFeeAirTemperatureRule implements FeeRule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -30,12 +31,10 @@ public class ExtraFeeAirTemperatureRule extends ExtraFeeRule {
 
     }
 
-    @Override
     public Long getId() {
         return id;
     }
 
-    @Override
     public void setId(Long id) {
         this.id = id;
     }

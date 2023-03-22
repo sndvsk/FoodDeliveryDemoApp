@@ -18,12 +18,12 @@ public class RegionalBaseFeeRule implements FeeRule {
     private String vehicleType;
 
     @Column(name = "regional_base_fee")
-    private Double regionalBaseFee;
+    private Double fee;
 
-    public RegionalBaseFeeRule(String city, String vehicleType, Double regionalBaseFee) {
+    public RegionalBaseFeeRule(String city, String vehicleType, Double fee) {
         this.city = city;
         this.vehicleType = vehicleType;
-        this.regionalBaseFee = regionalBaseFee;
+        this.fee = fee;
     }
 
     public RegionalBaseFeeRule() {
@@ -54,12 +54,13 @@ public class RegionalBaseFeeRule implements FeeRule {
         this.vehicleType = vehicleType;
     }
 
-    public Double getRegionalBaseFee() {
-        return regionalBaseFee;
+    @Override
+    public Double getFee() {
+        return fee;
     }
 
-    public void setRegionalBaseFee(Double regionalBaseFee) {
-        this.regionalBaseFee = regionalBaseFee;
+    @Override
+    public void setFee(Double fee) {
+        this.fee = fee;
     }
-
 }

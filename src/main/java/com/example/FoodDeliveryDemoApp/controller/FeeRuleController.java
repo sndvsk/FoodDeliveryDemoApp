@@ -81,7 +81,6 @@ ________________________________________________________________________________
     }
 
     @DeleteMapping(path ="/base-fee/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PatchMapping(path ="/base-fee/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> deleteRegionalBaseFeeRuleById(
             @Parameter(name = "id", description = "Id of the rule")
             @RequestParam Long id) {
@@ -122,7 +121,7 @@ ________________________________________________________________________________
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PatchMapping(path="/fee-temp", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(path="/fee-temp/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ExtraFeeAirTemperatureRule> patchExtraFeeAirTemperatureRuleById(
             @Parameter(name = "id", description = "Id of the rule")
             @RequestParam Long id) {
@@ -132,7 +131,7 @@ ________________________________________________________________________________
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @DeleteMapping(path="/fee-temp", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path="/fee-temp/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> deleteExtraFeeAirTemperatureRuleById(
             @Parameter(name = "id", description = "Id of the rule")
             @RequestParam Long id) {

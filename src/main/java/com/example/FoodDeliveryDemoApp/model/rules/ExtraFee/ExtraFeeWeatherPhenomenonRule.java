@@ -1,10 +1,11 @@
 package com.example.FoodDeliveryDemoApp.model.rules.ExtraFee;
 
+import com.example.FoodDeliveryDemoApp.model.rules.FeeRule;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "extra_fee_rules_weather_phenomenon")
-public class ExtraFeeWeatherPhenomenonRule extends ExtraFeeRule {
+public class ExtraFeeWeatherPhenomenonRule implements FeeRule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -23,7 +24,6 @@ public class ExtraFeeWeatherPhenomenonRule extends ExtraFeeRule {
     }
 
     public ExtraFeeWeatherPhenomenonRule() {
-
     }
 
     public Long getId() {
