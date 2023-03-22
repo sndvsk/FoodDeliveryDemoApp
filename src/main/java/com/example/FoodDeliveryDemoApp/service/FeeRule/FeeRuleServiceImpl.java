@@ -1,9 +1,7 @@
 package com.example.FoodDeliveryDemoApp.service.FeeRule;
 
-import org.springframework.stereotype.Component;
 
-
-public abstract class FeeRuleServiceImpl implements FeeRuleService {
+public abstract class FeeRuleServiceImpl {
 
 }
 

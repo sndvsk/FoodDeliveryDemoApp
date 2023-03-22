@@ -1,4 +1,4 @@
-package com.example.FoodDeliveryDemoApp.service.FeeRule;
+package com.example.FoodDeliveryDemoApp.service.FeeRule.ExtraFee.WeatherPhenomenonRule;
 
 import com.example.FoodDeliveryDemoApp.exception.feerule.FeeRuleNotFoundException;
 import com.example.FoodDeliveryDemoApp.model.rules.ExtraFee.ExtraFeeWeatherPhenomenonRule;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public abstract class ExtraFeeWeatherPhenomenonRuleServiceImpl implements FeeRuleService {
+public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeatherPhenomenonRuleService {
 
     private final ExtraFeeWeatherPhenomenonRuleRepository weatherPhenomenonRepository;
 

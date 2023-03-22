@@ -1,4 +1,4 @@
-package com.example.FoodDeliveryDemoApp.service.FeeRule;
+package com.example.FoodDeliveryDemoApp.service.FeeRule.ExtraFee.WindSpeedRule;
 
 import com.example.FoodDeliveryDemoApp.model.rules.ExtraFee.ExtraFeeWindSpeedRule;
 import com.example.FoodDeliveryDemoApp.repository.rules.ExtraFeeWindSpeedRuleRepository;
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public abstract class ExtraFeeWindSpeedRuleServiceImpl implements FeeRuleService {
+public class ExtraFeeWindSpeedRuleServiceImpl implements ExtraFeeWindSpeedRuleService {
 
     private ExtraFeeWindSpeedRuleRepository windSpeedRuleRepository;
 

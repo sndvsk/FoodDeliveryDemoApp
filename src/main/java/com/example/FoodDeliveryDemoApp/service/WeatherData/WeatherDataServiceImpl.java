@@ -7,7 +7,7 @@ import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import com.example.FoodDeliveryDemoApp.model.rules.ExtraFee.ExtraFeeWeatherPhenomenonRule;
 import com.example.FoodDeliveryDemoApp.repository.WeatherDataRepository;
 import com.example.FoodDeliveryDemoApp.service.ExternalWeatherData.ExternalWeatherDataService;
-import com.example.FoodDeliveryDemoApp.service.FeeRule.FeeRuleService;
+import com.example.FoodDeliveryDemoApp.service.FeeRule.ExtraFee.WeatherPhenomenonRule.ExtraFeeWeatherPhenomenonRuleService;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
@@ -25,16 +25,18 @@ public class WeatherDataServiceImpl implements WeatherDataService {
 
     private WeatherDataRepository weatherDataRepository;
     private ExternalWeatherDataService externalWeatherDataService;
-    private FeeRuleService feeRuleService;
+    private ExtraFeeWeatherPhenomenonRuleService weatherPhenomenonRuleService;
 
 
     private final List<String> neededStationsNames = Arrays.asList("tallinn", "tartu", "pärnu");
     private final List<String> neededStationsWmo = Arrays.asList("26038", "26242", "41803");
 
-    public WeatherDataServiceImpl(WeatherDataRepository weatherDataRepository, ExternalWeatherDataService externalWeatherDataService, FeeRuleService feeRuleService) {
+    public WeatherDataServiceImpl(WeatherDataRepository weatherDataRepository,
+                                  ExternalWeatherDataService externalWeatherDataService,
+                                  ExtraFeeWeatherPhenomenonRuleService weatherPhenomenonRuleService) {
         this.weatherDataRepository = weatherDataRepository;
         this.externalWeatherDataService = externalWeatherDataService;
-        this.feeRuleService = feeRuleService;
+        this.weatherPhenomenonRuleService = weatherPhenomenonRuleService;
     }
 
     public WeatherDataServiceImpl() {
@@ -142,7 +144,7 @@ public class WeatherDataServiceImpl implements WeatherDataService {
             weatherData.windSpeed = windSpeed;
         }
         if (weatherPhenomenon != null) {
-            ExtraFeeWeatherPhenomenonRule weatherPhenomenonFromRepository = feeRuleService.findByWeatherPhenomenonName(weatherPhenomenon);
+            ExtraFeeWeatherPhenomenonRule weatherPhenomenonFromRepository = weatherPhenomenonRuleService.findByWeatherPhenomenonName(weatherPhenomenon);
             weatherData.weatherPhenomenon = weatherPhenomenonFromRepository.getWeatherPhenomenonName();
         }
         return weatherData;

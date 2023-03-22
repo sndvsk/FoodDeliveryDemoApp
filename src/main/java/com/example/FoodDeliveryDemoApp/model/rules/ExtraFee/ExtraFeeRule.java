@@ -1,4 +1,6 @@
-package com.example.FoodDeliveryDemoApp.model.rules;
+package com.example.FoodDeliveryDemoApp.model.rules.ExtraFee;
+
+import com.example.FoodDeliveryDemoApp.model.rules.FeeRule;
 
 public abstract class ExtraFeeRule implements FeeRule {
 

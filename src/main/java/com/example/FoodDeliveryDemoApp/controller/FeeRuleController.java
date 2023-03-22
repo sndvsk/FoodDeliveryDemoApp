@@ -4,7 +4,10 @@ import com.example.FoodDeliveryDemoApp.model.rules.ExtraFee.ExtraFeeAirTemperatu
 import com.example.FoodDeliveryDemoApp.model.rules.ExtraFee.ExtraFeeWeatherPhenomenonRule;
 import com.example.FoodDeliveryDemoApp.model.rules.ExtraFee.ExtraFeeWindSpeedRule;
 import com.example.FoodDeliveryDemoApp.model.rules.RegionalBaseFeeRule;
-import com.example.FoodDeliveryDemoApp.service.FeeRule.FeeRuleService;
+import com.example.FoodDeliveryDemoApp.service.FeeRule.ExtraFee.AirTemperatureRule.ExtraFeeAirTemperatureRuleServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.FeeRule.ExtraFee.WeatherPhenomenonRule.ExtraFeeWeatherPhenomenonRuleServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.FeeRule.ExtraFee.WindSpeedRule.ExtraFeeWindSpeedRuleServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.FeeRule.RegionalBaseFee.RegionalBaseFeeRuleServiceImpl;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -19,10 +22,20 @@ import java.util.List;
 @Tag(name = "Rules API", description = "Endpoint for managing delivery fee calculation business rules (base and extra fees).")
 public class FeeRuleController {
 
-    private final FeeRuleService feeRuleService;
 
-    public FeeRuleController(FeeRuleService feeRuleService) {
-        this.feeRuleService = feeRuleService;
+    private final RegionalBaseFeeRuleServiceImpl regionalBaseFeeRuleService;
+    private final ExtraFeeAirTemperatureRuleServiceImpl airTemperatureRuleService;
+    private final ExtraFeeWindSpeedRuleServiceImpl windSpeedRuleService;
+    private final ExtraFeeWeatherPhenomenonRuleServiceImpl weatherPhenomenonRuleService;
+
+    public FeeRuleController(RegionalBaseFeeRuleServiceImpl regionalBaseFeeRuleService,
+                             ExtraFeeAirTemperatureRuleServiceImpl airTemperatureRuleService,
+                             ExtraFeeWindSpeedRuleServiceImpl windSpeedRuleService,
+                             ExtraFeeWeatherPhenomenonRuleServiceImpl weatherPhenomenonRuleService) {
+        this.regionalBaseFeeRuleService = regionalBaseFeeRuleService;
+        this.airTemperatureRuleService = airTemperatureRuleService;
+        this.windSpeedRuleService = windSpeedRuleService;
+        this.weatherPhenomenonRuleService = weatherPhenomenonRuleService;
     }
 
     /*
@@ -33,7 +46,7 @@ ________________________________________________________________________________
     @GetMapping(path ="/base-fee", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<RegionalBaseFeeRule>> getAllRegionalBaseFeeRules() {
 
-        List<RegionalBaseFeeRule> response = feeRuleService.getAllRegionalBaseFeeRules();
+        List<RegionalBaseFeeRule> response = regionalBaseFeeRuleService.getAllRegionalBaseFeeRules();
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -41,7 +54,7 @@ ________________________________________________________________________________
     @PostMapping(path="/base-fee", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RegionalBaseFeeRule> addRegionalBaseFeeRule() {
 
-        RegionalBaseFeeRule response = feeRuleService.addBaseFeeRule();
+        RegionalBaseFeeRule response = regionalBaseFeeRuleService.addBaseFeeRule();
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
 
@@ -52,7 +65,7 @@ ________________________________________________________________________________
             @Parameter(name = "id", description = "Id of the rule")
             @RequestParam Long id) {
 
-        RegionalBaseFeeRule response = feeRuleService.getRegionalBaseFeeRuleById(id);
+        RegionalBaseFeeRule response = regionalBaseFeeRuleService.getRegionalBaseFeeRuleById(id);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -62,7 +75,7 @@ ________________________________________________________________________________
             @Parameter(name = "id", description = "Id of the rule")
             @RequestParam Long id) {
 
-        RegionalBaseFeeRule response = feeRuleService.patchRegionalBaseFeeRuleById(id);
+        RegionalBaseFeeRule response = regionalBaseFeeRuleService.patchRegionalBaseFeeRuleById(id);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -73,7 +86,7 @@ ________________________________________________________________________________
             @Parameter(name = "id", description = "Id of the rule")
             @RequestParam Long id) {
 
-        String response = feeRuleService.deleteRegionalBaseFeeRuleById(id);
+        String response = regionalBaseFeeRuleService.deleteRegionalBaseFeeRuleById(id);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -86,7 +99,7 @@ ________________________________________________________________________________
     @GetMapping(path ="/fee-temp", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ExtraFeeAirTemperatureRule>> getAllExtraFeeAirTemperatureRules() {
 
-        List<ExtraFeeAirTemperatureRule> response = feeRuleService.getAllExtraFeeAirTemperatureRules();
+        List<ExtraFeeAirTemperatureRule> response = airTemperatureRuleService.getAllExtraFeeAirTemperatureRules();
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -94,7 +107,7 @@ ________________________________________________________________________________
     @PostMapping(path="/fee-temp", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ExtraFeeAirTemperatureRule> addExtraFeeAirTemperatureRule() {
 
-        ExtraFeeAirTemperatureRule response = feeRuleService.addExtraFeeAirTemperatureRule();
+        ExtraFeeAirTemperatureRule response = airTemperatureRuleService.addExtraFeeAirTemperatureRule();
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -104,7 +117,7 @@ ________________________________________________________________________________
             @Parameter(name = "id", description = "Id of the rule")
             @RequestParam Long id) {
 
-        ExtraFeeAirTemperatureRule response = feeRuleService.getExtraFeeAirTemperatureRuleById(id);
+        ExtraFeeAirTemperatureRule response = airTemperatureRuleService.getExtraFeeAirTemperatureRuleById(id);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -114,7 +127,7 @@ ________________________________________________________________________________
             @Parameter(name = "id", description = "Id of the rule")
             @RequestParam Long id) {
 
-        ExtraFeeAirTemperatureRule response = feeRuleService.patchExtraFeeAirTemperatureRuleById(id);
+        ExtraFeeAirTemperatureRule response = airTemperatureRuleService.patchExtraFeeAirTemperatureRuleById(id);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -124,7 +137,7 @@ ________________________________________________________________________________
             @Parameter(name = "id", description = "Id of the rule")
             @RequestParam Long id) {
 
-        String response = feeRuleService.deleteExtraFeeAirTemperatureRuleById(id);
+        String response = airTemperatureRuleService.deleteExtraFeeAirTemperatureRuleById(id);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -137,7 +150,7 @@ ________________________________________________________________________________
     @GetMapping(path ="/fee-wind", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ExtraFeeWindSpeedRule>> getAllExtraFeeWindSpeedRules() {
 
-        List<ExtraFeeWindSpeedRule> response = feeRuleService.getAllExtraFeeWindSpeedRules();
+        List<ExtraFeeWindSpeedRule> response = windSpeedRuleService.getAllExtraFeeWindSpeedRules();
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -145,7 +158,7 @@ ________________________________________________________________________________
     @PostMapping(path="/fee-wind",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ExtraFeeWindSpeedRule> addExtraFeeWindSpeedRule() {
 
-        ExtraFeeWindSpeedRule response = feeRuleService.addExtraFeeWindSpeedRule();
+        ExtraFeeWindSpeedRule response = windSpeedRuleService.addExtraFeeWindSpeedRule();
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -155,7 +168,7 @@ ________________________________________________________________________________
             @Parameter(name = "id", description = "Id of the rule")
             @RequestParam Long id) {
 
-        ExtraFeeWindSpeedRule response = feeRuleService.getExtraFeeWindSpeedRuleById(id);
+        ExtraFeeWindSpeedRule response = windSpeedRuleService.getExtraFeeWindSpeedRuleById(id);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -165,7 +178,7 @@ ________________________________________________________________________________
             @Parameter(name = "id", description = "Id of the rule")
             @RequestParam Long id) {
 
-        ExtraFeeWindSpeedRule response = feeRuleService.patchExtraFeeWindSpeedRuleById(id);
+        ExtraFeeWindSpeedRule response = windSpeedRuleService.patchExtraFeeWindSpeedRuleById(id);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -175,7 +188,7 @@ ________________________________________________________________________________
             @Parameter(name = "id", description = "Id of the rule")
             @RequestParam Long id) {
 
-        String response = feeRuleService.deleteExtraFeeWindSpeedRuleById(id);
+        String response = windSpeedRuleService.deleteExtraFeeWindSpeedRuleById(id);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -187,14 +200,14 @@ ________________________________________________________________________________
 
     @GetMapping(path ="/fee-phenomenon", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ExtraFeeWeatherPhenomenonRule>> getAllExtraFeeWeatherPhenomenonRules() {
-        List<ExtraFeeWeatherPhenomenonRule> response = feeRuleService.getAllExtraFeeWeatherPhenomenonRules();
+        List<ExtraFeeWeatherPhenomenonRule> response = weatherPhenomenonRuleService.getAllExtraFeeWeatherPhenomenonRules();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping(path="/fee-phenomenon",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ExtraFeeWeatherPhenomenonRule> addExtraFeeWeatherPhenomenonRule() {
 
-        ExtraFeeWeatherPhenomenonRule response = feeRuleService.addExtraFeeWeatherPhenomenonRule();
+        ExtraFeeWeatherPhenomenonRule response = weatherPhenomenonRuleService.addExtraFeeWeatherPhenomenonRule();
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
 
@@ -205,7 +218,7 @@ ________________________________________________________________________________
             @Parameter(name = "id", description = "Id of the rule")
             @RequestParam Long id) {
 
-        ExtraFeeWeatherPhenomenonRule response = feeRuleService.getExtraFeeWeatherPhenomenonRuleById(id);
+        ExtraFeeWeatherPhenomenonRule response = weatherPhenomenonRuleService.getExtraFeeWeatherPhenomenonRuleById(id);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -215,7 +228,7 @@ ________________________________________________________________________________
             @Parameter(name = "id", description = "Id of the rule")
             @RequestParam Long id) {
 
-        ExtraFeeWeatherPhenomenonRule response = feeRuleService.patchExtraFeeWeatherPhenomenonRuleById(id);
+        ExtraFeeWeatherPhenomenonRule response = weatherPhenomenonRuleService.patchExtraFeeWeatherPhenomenonRuleById(id);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -225,7 +238,7 @@ ________________________________________________________________________________
             @Parameter(name = "id", description = "Id of the rule")
             @RequestParam Long id) {
 
-        String response = feeRuleService.deleteExtraFeeWeatherPhenomenonRuleById(id);
+        String response = weatherPhenomenonRuleService.deleteExtraFeeWeatherPhenomenonRuleById(id);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

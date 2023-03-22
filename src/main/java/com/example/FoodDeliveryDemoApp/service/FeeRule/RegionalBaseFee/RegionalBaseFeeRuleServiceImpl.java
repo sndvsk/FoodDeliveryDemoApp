@@ -1,4 +1,4 @@
-package com.example.FoodDeliveryDemoApp.service.FeeRule;
+package com.example.FoodDeliveryDemoApp.service.FeeRule.RegionalBaseFee;
 
 import com.example.FoodDeliveryDemoApp.model.rules.RegionalBaseFeeRule;
 import org.springframework.stereotype.Component;
@@ -6,8 +6,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public abstract class RegionalBaseFeeRuleServiceImpl implements FeeRuleService {
-
+public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleService {
 
     public List<RegionalBaseFeeRule> getAllRegionalBaseFeeRules() {
         return null;
