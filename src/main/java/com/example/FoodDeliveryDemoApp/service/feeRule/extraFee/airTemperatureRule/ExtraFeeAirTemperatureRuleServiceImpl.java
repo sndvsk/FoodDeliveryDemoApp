@@ -5,6 +5,7 @@ import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeAirTemperatureRule;
+import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWindSpeedRule;
 import com.example.FoodDeliveryDemoApp.repository.rules.ExtraFeeAirTemperatureRuleRepository;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +31,12 @@ public class ExtraFeeAirTemperatureRuleServiceImpl implements ExtraFeeAirTempera
         if (fee == null) {
             throw new CustomBadRequestException("Fee must be provided");
         }
+
+        boolean rule = doesAirTemperatureRuleExist(startTemperatureRange, endTemperatureRange);
+        if (rule) {
+            throw new CustomNotFoundException(String.format("Extra fee rule for this air temperature range: start: ´%s´ and end: ´%s´ already exists", startTemperatureRange, endTemperatureRange));
+        }
+
     }
 
     private void validateInputs(Double startTemperatureRange, Double endTemperatureRange, Double fee) {
@@ -47,6 +54,11 @@ public class ExtraFeeAirTemperatureRuleServiceImpl implements ExtraFeeAirTempera
         //noinspection ConstantConditions
         if (endTemperatureRange < startTemperatureRange) {
             throw new CustomBadRequestException(String.format("Provided air temperature range is invalid, end: ´%s´ is lower than start: ´%s´", endTemperatureRange, startTemperatureRange));
+        }
+
+        boolean rule = doesAirTemperatureRuleWithThisFeeExist(startTemperatureRange, endTemperatureRange, fee);
+        if (rule) {
+            throw new CustomNotFoundException(String.format("Extra fee rule for this air temperature range: start: ´%s´, end: ´%s´ and fee: ´%s´ already exists", startTemperatureRange, endTemperatureRange, fee));
         }
 
         // Check if the range is overlapping with any existing range in the database
@@ -73,6 +85,16 @@ public class ExtraFeeAirTemperatureRuleServiceImpl implements ExtraFeeAirTempera
         validateInputs(startTemperatureRange, endTemperatureRange, fee);
 
         return rule1;
+    }
+
+    private boolean doesAirTemperatureRuleExist(Double start, Double end) {
+        Optional<ExtraFeeAirTemperatureRule> rule = airTemperatureRuleRepository.findByStartAirTemperatureRangeAndEndAirTemperatureRange(start, end);
+        return rule.isPresent();
+    }
+
+    private boolean doesAirTemperatureRuleWithThisFeeExist(Double start, Double end, Double fee) {
+        Optional<ExtraFeeAirTemperatureRule> rule = airTemperatureRuleRepository.findByStartAirTemperatureRangeAndEndAirTemperatureRangeAndFee(start, end, fee);
+        return rule.isPresent();
     }
 
     public List<ExtraFeeAirTemperatureRule> getAllExtraFeeAirTemperatureRules() {

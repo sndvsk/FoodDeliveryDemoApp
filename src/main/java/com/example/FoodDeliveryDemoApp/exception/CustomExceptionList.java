@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 @ResponseStatus(value= HttpStatus.BAD_REQUEST)
 public class CustomExceptionList extends IllegalArgumentException {
 
@@ -14,7 +15,6 @@ public class CustomExceptionList extends IllegalArgumentException {
         this.exceptions = exceptions;
     }
 
-    @SuppressWarnings("unused")
     public List<CustomBadRequestException> getExceptions() {
         return exceptions;
     }

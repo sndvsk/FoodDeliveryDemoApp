@@ -12,9 +12,11 @@ import com.example.FoodDeliveryDemoApp.service.feeRule.regionalBaseFee.RegionalB
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.io.StringReader;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
@@ -31,7 +33,8 @@ public class WeatherDataServiceImpl implements WeatherDataService {
 
     public WeatherDataServiceImpl(WeatherDataRepository weatherDataRepository,
                                   ExternalWeatherDataService externalWeatherDataService,
-                                  ExtraFeeWeatherPhenomenonRuleService weatherPhenomenonRuleService, RegionalBaseFeeRuleService baseFeeRuleService) {
+                                  ExtraFeeWeatherPhenomenonRuleService weatherPhenomenonRuleService,
+                                  RegionalBaseFeeRuleService baseFeeRuleService) {
         this.weatherDataRepository = weatherDataRepository;
         this.externalWeatherDataService = externalWeatherDataService;
         this.weatherPhenomenonRuleService = weatherPhenomenonRuleService;
@@ -120,6 +123,44 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         }
     }
 
+    private WeatherData getClosestWeatherDataFromRepository(String city, Instant dt, OffsetDateTime dateTime) {
+        Optional<WeatherData> previousWeatherData = weatherDataRepository.findPreviousWeatherData(city, dt, PageRequest.of(0, 1)).stream().findFirst();
+        Optional<WeatherData> nextWeatherData = weatherDataRepository.findNextWeatherData(city, dt, PageRequest.of(0, 1)).stream().findFirst();
+        if (previousWeatherData.isEmpty() && nextWeatherData.isEmpty()) {
+            throw new CustomNotFoundException(String.format("Weather data for or near this datetime: ´%s´ does not exist", dateTime));
+        }
+
+        if (previousWeatherData.isEmpty()) {
+            return nextWeatherData.get();
+        } else if (nextWeatherData.isEmpty()) {
+            return previousWeatherData.get();
+        } else {
+            Instant previousTimestamp = previousWeatherData.get().getTimestamp();
+            Instant nextTimestamp = nextWeatherData.get().getTimestamp();
+
+            if (isDurationTooFar(Duration.between(previousTimestamp, dt))) {
+                throw new CustomBadRequestException(String.format("Weather data with closest datetime to given datetime is too far: %s", Duration.between(previousTimestamp, dt)));
+            }
+            if (isDurationTooFar(Duration.between(nextTimestamp, dt))) {
+                throw new CustomBadRequestException(String.format("Weather data with closest datetime to given datetime is too far: %s", Duration.between(nextTimestamp, dt)));
+            }
+            return Duration.between(previousTimestamp, dt).compareTo(Duration.between(nextTimestamp, dt)) <= 0
+                    ? previousWeatherData.get()
+                    : nextWeatherData.get();
+        }
+    }
+
+    private boolean isDurationTooFar(Duration duration) {
+        return duration.toHours() > 1;
+    }
+
+    private void validateDateTime(String stationName, OffsetDateTime dateTime) {
+        Optional<WeatherData> weatherData = weatherDataRepository.findByStationNameAndTimestamp(stationName, dateTime.toInstant().truncatedTo(ChronoUnit.SECONDS));
+        if (weatherData.isPresent()) {
+            throw new CustomBadRequestException(String.format("There is already entry for this station: ´%s´ and datetime: ´%s´", stationName, dateTime));
+        }
+    }
+
     public List<WeatherData> getAllWeatherData() {
         List<WeatherData> weatherDataList = weatherDataRepository.findAll();
 
@@ -146,6 +187,7 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         weatherData.setWindSpeed(windSpeed);
 
         if (dateTime != null) {
+            validateDateTime(stationName, dateTime);
             weatherData.setTimestamp(dateTime.toInstant());
         } else {
             weatherData.setTimestamp(Instant.now());
@@ -287,6 +329,7 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         return convertStationsToWeatherData(stationList);
     }
 
+
     /**
      * Retrieves the last weather data available for a given city and datetime.
      * If the datetime is null, it retrieves the latest data available for that city.
@@ -298,19 +341,12 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      */
     public WeatherData getLastDataByCity(String city, OffsetDateTime dateTime) throws CustomNotFoundException {
         if (dateTime == null) {
-            return weatherDataRepository.findFirstByStationNameOrderByTimestampDesc(city.toLowerCase(Locale.ROOT));
+            return weatherDataRepository.findFirstByStationNameOrderByTimestampDesc(city);
         } else {
             Instant dt = dateTime.truncatedTo(ChronoUnit.SECONDS).toInstant();
-            Instant start = dt.minus(1, ChronoUnit.HOURS);
-            Instant end = dt.plus(1, ChronoUnit.HOURS);
+            Optional<WeatherData> sameDtWeatherData = weatherDataRepository.findByStationNameAndTimestamp(city, dt);
 
-            List<WeatherData> weatherDataList = weatherDataRepository.
-                    findByStationNameAndTimestampBetween(city.toLowerCase(Locale.ROOT), start, end);
-
-            Optional<WeatherData> weatherData = weatherDataList.stream().min(Comparator.comparing(WeatherData::getTimestamp));
-
-            return weatherData.
-                    orElseThrow(() -> new CustomNotFoundException(String.format("Weather data for this datetime: ´%s´ does not exist", dateTime)));
+            return sameDtWeatherData.orElseGet(() -> getClosestWeatherDataFromRepository(city, dt, dateTime));
         }
     }
 

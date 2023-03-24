@@ -1,7 +1,6 @@
 package com.example.FoodDeliveryDemoApp.service.deliveryFee;
 
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
-import com.example.FoodDeliveryDemoApp.exception.CustomExceptionList;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import com.example.FoodDeliveryDemoApp.model.DeliveryFee;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
@@ -10,16 +9,15 @@ import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeAirTemperatu
 import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWeatherPhenomenonRule;
 import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWindSpeedRule;
 import com.example.FoodDeliveryDemoApp.repository.DeliveryFeeRepository;
-import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.airTemperatureRule.ExtraFeeAirTemperatureRuleServiceImpl;
-import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.weatherPhenomenonRule.ExtraFeeWeatherPhenomenonRuleServiceImpl;
-import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.windSpeedRule.ExtraFeeWindSpeedRuleServiceImpl;
-import com.example.FoodDeliveryDemoApp.service.feeRule.regionalBaseFee.RegionalBaseFeeRuleServiceImpl;
-import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.airTemperatureRule.ExtraFeeAirTemperatureRuleService;
+import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.weatherPhenomenonRule.ExtraFeeWeatherPhenomenonRuleService;
+import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.windSpeedRule.ExtraFeeWindSpeedRuleService;
+import com.example.FoodDeliveryDemoApp.service.feeRule.regionalBaseFee.RegionalBaseFeeRuleService;
+import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataService;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 
@@ -29,15 +27,19 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
 
     private final DeliveryFeeRepository deliveryFeeRepository;
 
-    private final WeatherDataServiceImpl weatherDataService;
+    private final WeatherDataService weatherDataService;
 
-    private final ExtraFeeAirTemperatureRuleServiceImpl airTemperatureRuleService;
-    private final ExtraFeeWindSpeedRuleServiceImpl windSpeedRuleService;
-    private final ExtraFeeWeatherPhenomenonRuleServiceImpl weatherPhenomenonRuleService;
-    private final RegionalBaseFeeRuleServiceImpl baseFeeRuleService;
+    private final ExtraFeeAirTemperatureRuleService airTemperatureRuleService;
+    private final ExtraFeeWindSpeedRuleService windSpeedRuleService;
+    private final ExtraFeeWeatherPhenomenonRuleService weatherPhenomenonRuleService;
+    private final RegionalBaseFeeRuleService baseFeeRuleService;
 
     public DeliveryFeeServiceImpl(DeliveryFeeRepository deliveryFeeRepository,
-                                  WeatherDataServiceImpl weatherDataService, ExtraFeeAirTemperatureRuleServiceImpl airTemperatureRuleService, ExtraFeeWindSpeedRuleServiceImpl windSpeedRuleService, ExtraFeeWeatherPhenomenonRuleServiceImpl weatherPhenomenonRuleService, RegionalBaseFeeRuleServiceImpl baseFeeRuleService) {
+                                  WeatherDataService weatherDataService,
+                                  ExtraFeeAirTemperatureRuleService airTemperatureRuleService,
+                                  ExtraFeeWindSpeedRuleService windSpeedRuleService,
+                                  ExtraFeeWeatherPhenomenonRuleService weatherPhenomenonRuleService,
+                                  RegionalBaseFeeRuleService baseFeeRuleService) {
         this.deliveryFeeRepository = deliveryFeeRepository;
         this.weatherDataService = weatherDataService;
         this.airTemperatureRuleService = airTemperatureRuleService;
@@ -46,49 +48,42 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
         this.baseFeeRuleService = baseFeeRuleService;
     }
 
+    private TreeMap<String, List<String>> getExistingVehicleTypesForCities() {
+        return baseFeeRuleService.getAllUniqueCitiesWithVehicleTypes();
+    }
+
+    private void checkExistingVehicleTypesForCity(String city, String vehicleType) throws CustomBadRequestException {
+        TreeMap<String, List<String>> citiesAndVehicles = getExistingVehicleTypesForCities();
+        if (citiesAndVehicles.containsKey(city)) {
+            List<String> vehicleTypes = citiesAndVehicles.get(city);
+            if (!vehicleTypes.contains(vehicleType)) {
+                throw new CustomBadRequestException(String.format("This city: ´%s´ does not currently support this vehicle type: ´%s´", city, vehicleType));
+            }
+        } else {
+            throw new CustomBadRequestException(String.format("City: ´%s´ argument is invalid or not supported.", city));
+        }
+    }
+
     /**
      * Validates the inputs provided for calculating the delivery fee.
      *
      * @param city the city for which to calculate the delivery fee. Cannot be null or empty. Must be one of "tallinn", "tartu", or "pärnu".
      * @param vehicleType the type of vehicle used for delivery Cannot be null or empty. Must be one of "car", "scooter", or "bike".
      * @throws CustomBadRequestException if there is an exception validating the inputs provided. Will contain a single DeliveryFeeException object.
-     * @throws CustomExceptionList if there are multiple exceptions validating the inputs provided. Will contain a list of DeliveryFeeException objects.
      */
-    private void validateRequiredInputs(String city, String vehicleType) throws CustomBadRequestException, CustomExceptionList {
-        Set<String> validCityNames = new HashSet<>(
-                Arrays.asList(
-                        "tallinn",
-                        "tartu",
-                        "pärnu")
-        );
-        Set<String> validVehicleTypes = new HashSet<>(
-                Arrays.asList(
-                        "car",
-                        "scooter",
-                        "bike")
-        );
-
-        List<CustomBadRequestException> exceptionList = new ArrayList<>();
+    private void validateRequiredInputs(String city, String vehicleType) throws CustomBadRequestException {
+        //List<CustomBadRequestException> exceptionList = new ArrayList<>();
 
         if (city == null || city.isEmpty()) {
-            exceptionList.add(createException("Parameter city is empty."));
-        } else if (!validCityNames.contains(city)) {
-            exceptionList.add(createException(
-                    String.format("City: ´%s´ argument is invalid or not supported.", city)));
+            throw new CustomBadRequestException(String.format("Parameter city: ´%s´ is empty", city));
         }
-
         if (vehicleType == null || vehicleType.isEmpty()) {
-            exceptionList.add(createException("Parameter vehicle type is empty."));
-        } else if (!validVehicleTypes.contains(vehicleType)) {
-            exceptionList.add(createException(
-                    String.format("Vehicle type: ´%s´ argument is invalid or not supported.", vehicleType)));
+            throw new CustomBadRequestException(String.format("Parameter vehicle type: ´%s´ is empty", vehicleType));
         }
+        city = city.toLowerCase(Locale.ROOT);
+        vehicleType = vehicleType.trim().toLowerCase(Locale.ROOT);
 
-
-        if (!exceptionList.isEmpty()) {
-            throw exceptionList.size() == 1 ? new CustomBadRequestException(exceptionList) : new CustomExceptionList(exceptionList);
-        }
-
+        checkExistingVehicleTypesForCity(city, vehicleType);
     }
 
     /**
@@ -122,7 +117,7 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * @return the DeliveryFee object with the specified ID
      * @throws CustomNotFoundException if no DeliveryFee object with the specified ID exists
      */
-    public DeliveryFee getDeliveryFeeById(Long id) throws CustomBadRequestException {
+    public DeliveryFee getDeliveryFeeById(Long id) throws CustomNotFoundException {
         Optional<DeliveryFee> deliveryFee = deliveryFeeRepository.findById(id);
 
         return deliveryFee.
@@ -133,7 +128,7 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
     /**
      * Overload of the {@link #calculateAndSaveDeliveryFee(String, String, OffsetDateTime)}method with a default {@code dateTime}.
      */
-    public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType) throws CustomBadRequestException, CustomExceptionList {
+    public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType) throws CustomBadRequestException {
         return calculateAndSaveDeliveryFee(city, vehicleType, null);
     }
 
@@ -146,14 +141,12 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * @param dateTime the datetime of when the delivery takes place
      * @return a DeliveryFee object with the delivery fee calculation result
      * @throws CustomBadRequestException if there is an error in the input validation or the fee calculation
-     * @throws CustomExceptionList if there are multiple errors in the input validation
      */
-    public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime) throws CustomBadRequestException, CustomExceptionList {
+    public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime) throws CustomBadRequestException {
+        validateRequiredInputs(city, vehicleType);
 
         city = city.trim().toLowerCase(Locale.ROOT);
         vehicleType = vehicleType.trim().toLowerCase(Locale.ROOT);
-
-        validateRequiredInputs(city, vehicleType);
 
         double deliveryFee = calculateDeliveryFee(city, vehicleType, dateTime);
         DeliveryFee returnDeliveryFee = createNewDeliveryFee(city, vehicleType, deliveryFee, dateTime);
@@ -228,7 +221,7 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * @param airTemperature the air temperature
      * @return the fee based on the air temperature
      */
-    public double calculateAirTemperatureFee(double airTemperature) {
+    public double calculateAirTemperatureFee(double airTemperature) throws CustomBadRequestException {
         ExtraFeeAirTemperatureRule rule = airTemperatureRuleService.getByTemperature(airTemperature);
         Double fee = rule.getFee();
         if (fee < 0) {
@@ -244,7 +237,7 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * @return the fee based on the wind speed
      * @throws CustomBadRequestException if the wind speed is greater than 20.0
      */
-    public double calculateWindSpeedFee(Double windSpeed) {
+    public double calculateWindSpeedFee(Double windSpeed) throws CustomBadRequestException {
         ExtraFeeWindSpeedRule rule = windSpeedRuleService.getByWindSpeed(windSpeed);
         Double fee = rule.getFee();
         if (fee < 0) {
@@ -260,7 +253,7 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * @return the fee based on the weather phenomenon
      * @throws CustomBadRequestException if usage of selected vehicle type is forbidden in those weather conditions
      */
-    public Double calculateWeatherPhenomenonFee(String weatherPhenomenon) {
+    public Double calculateWeatherPhenomenonFee(String weatherPhenomenon) throws CustomBadRequestException {
         ExtraFeeWeatherPhenomenonRule rule = weatherPhenomenonRuleService.getByWeatherPhenomenonName(weatherPhenomenon);
         Double fee = rule.getFee();
         if (fee < 0) {

@@ -22,19 +22,43 @@ public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeather
         if (weatherPhenomenonName == null) {
             throw new CustomBadRequestException("Weather phenomenon name must be provided");
         }
+
         if (fee == null) {
             throw new CustomBadRequestException("Fee must be provided");
         }
+
+        boolean rule = doesWeatherPhenomenonRuleExist(weatherPhenomenonName);
+        if (rule) {
+            throw new CustomNotFoundException(String.format("Extra fee rule for this: ´%s´ weather phenomenon already exists", weatherPhenomenonName));
+        }
+
     }
 
-    private void validateInputs(String weatherPhenomenonName, Double fee) {
-        if (weatherPhenomenonName != null && !weatherPhenomenonName.chars().allMatch(Character::isLetter)) {
-            throw new CustomBadRequestException(String.format("Weather phenomenon name: ´%s´ must contain only letters", weatherPhenomenonName));
+    private void validateInputs(String weatherPhenomenon, Double fee) {
+
+        if (weatherPhenomenon != null && !weatherPhenomenon.chars().allMatch(Character::isLetter)) {
+            throw new CustomBadRequestException(String.format("Weather phenomenon name: ´%s´ must contain only letters", weatherPhenomenon));
         }
 
         if (fee != null && fee < 0.0) {
             throw new CustomBadRequestException(String.format("Fee: ´%s´ must be positive", fee));
         }
+
+        boolean rule = doesWeatherPhenomenonRuleWithThisFeeExist(weatherPhenomenon, fee);
+        if (rule) {
+            throw new CustomNotFoundException(String.format("Extra fee rule for this: ´%s´ weather phenomenon and fee: ´%s´ already exists", weatherPhenomenon, fee));
+        }
+
+    }
+
+    private boolean doesWeatherPhenomenonRuleExist(String weatherPhenomenonName) {
+        Optional<ExtraFeeWeatherPhenomenonRule> rule = weatherPhenomenonRepository.findByWeatherPhenomenonName(weatherPhenomenonName);
+        return rule.isPresent();
+    }
+
+    private boolean doesWeatherPhenomenonRuleWithThisFeeExist(String weatherPhenomenon, Double fee) {
+        Optional<ExtraFeeWeatherPhenomenonRule> rule = weatherPhenomenonRepository.findByWeatherPhenomenonNameAndFee(weatherPhenomenon, fee);
+        return rule.isPresent();
     }
 
     public List<ExtraFeeWeatherPhenomenonRule> getAllExtraFeeWeatherPhenomenonRules() {
@@ -93,10 +117,10 @@ public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeather
         }
     }
 
-    public ExtraFeeWeatherPhenomenonRule getByWeatherPhenomenonName(String weatherPhenomenonName) {
-        Optional<ExtraFeeWeatherPhenomenonRule> weatherPhenomenon = weatherPhenomenonRepository.findByWeatherPhenomenonName(weatherPhenomenonName);
-        return weatherPhenomenon.
-                orElseThrow(() -> new CustomNotFoundException(String.format("Extra fee rule for this: ´%s´ weather phenomenon does not exist", weatherPhenomenonName)));
+    public ExtraFeeWeatherPhenomenonRule getByWeatherPhenomenonName(String weatherPhenomenon) {
+        Optional<ExtraFeeWeatherPhenomenonRule> rule = weatherPhenomenonRepository.findByWeatherPhenomenonName(weatherPhenomenon);
+        return rule.
+                orElseThrow(() -> new CustomNotFoundException(String.format("Extra fee rule for this: ´%s´ weather phenomenon does not exist", weatherPhenomenon)));
     }
 
 }

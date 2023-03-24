@@ -84,6 +84,14 @@ public class DeliveryFee {
         return timestamp;
     }
 
+    /**
+     * Convert Instant to OffsetDateTime to allow client input datetime with server offset.
+     * <p>
+     *  timestamp - UTC in the database, is not shown on client side
+     * rest_timestamp - OffsetDateTime to show on client side so offset of a server can be inputted.
+     * </p>
+     * @param timestamp time in UTC that will be converted to OffsetDateTime
+     */
     public void setTimestamp(Instant timestamp) {
         this.timestamp = timestamp.truncatedTo(ChronoUnit.SECONDS);
         this.rest_timestamp = OffsetDateTime.ofInstant(this.timestamp, ZoneId.systemDefault());

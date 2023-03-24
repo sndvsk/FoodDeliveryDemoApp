@@ -15,4 +15,8 @@ public interface ExtraFeeWindSpeedRuleRepository extends JpaRepository<ExtraFeeW
 
     Optional<ExtraFeeWindSpeedRule> findByStartWindSpeedRangeLessThanEqualAndEndWindSpeedRangeGreaterThanEqual(Double windSpeed, Double windSpeed2);
 
+    Optional<ExtraFeeWindSpeedRule> findByStartWindSpeedRangeAndEndWindSpeedRange(Double start, Double end);
+
+    Optional<ExtraFeeWindSpeedRule> findByStartWindSpeedRangeAndEndWindSpeedRangeAndFee(Double start, Double end, Double fee);
+
 }

@@ -11,4 +11,6 @@ public interface ExtraFeeWeatherPhenomenonRuleRepository extends JpaRepository<E
 
     Optional<ExtraFeeWeatherPhenomenonRule> findByWeatherPhenomenonName(String weatherPhenomenonName);
 
+    Optional<ExtraFeeWeatherPhenomenonRule> findByWeatherPhenomenonNameAndFee(String weatherPhenomenonName, Double fee);
+
 }

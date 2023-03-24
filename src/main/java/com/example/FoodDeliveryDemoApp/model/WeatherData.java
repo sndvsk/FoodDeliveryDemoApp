@@ -42,6 +42,19 @@ public class WeatherData {
     @JsonProperty("timestamp")
     private OffsetDateTime rest_timestamp;
 
+    public WeatherData(Long id, String stationName, Long wmoCode, Double airTemperature, Double windSpeed, String weatherPhenomenon, Instant timestamp) {
+        this.id = id;
+        this.stationName = stationName;
+        this.wmoCode = wmoCode;
+        this.airTemperature = airTemperature;
+        this.windSpeed = windSpeed;
+        this.weatherPhenomenon = weatherPhenomenon;
+        this.timestamp = timestamp.truncatedTo(ChronoUnit.SECONDS);
+    }
+
+    public WeatherData() {
+    }
+
     public Long getId() {
         return id;
     }
@@ -107,4 +120,11 @@ public class WeatherData {
         this.rest_timestamp = OffsetDateTime.ofInstant(this.timestamp, ZoneId.systemDefault());
     }
 
+    public OffsetDateTime getRest_timestamp() {
+        return rest_timestamp;
+    }
+
+    public void setRest_timestamp(OffsetDateTime rest_timestamp) {
+        this.rest_timestamp = rest_timestamp;
+    }
 }

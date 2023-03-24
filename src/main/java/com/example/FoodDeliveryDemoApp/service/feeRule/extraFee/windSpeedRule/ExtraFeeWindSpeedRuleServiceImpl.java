@@ -2,7 +2,6 @@ package com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.windSpeedRule;
 
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
-import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWindSpeedRule;
 import com.example.FoodDeliveryDemoApp.repository.rules.ExtraFeeWindSpeedRuleRepository;
 import org.springframework.stereotype.Component;
@@ -31,6 +30,12 @@ public class ExtraFeeWindSpeedRuleServiceImpl implements ExtraFeeWindSpeedRuleSe
         if (fee == null) {
             throw new CustomBadRequestException("Fee must be provided");
         }
+
+        boolean rule = doesWindSpeedRuleExist(startWindSpeedRange, endWindSpeedRange);
+        if (rule) {
+            throw new CustomNotFoundException(String.format("Extra fee rule for this wind speed range: start: ´%s´ and end: ´%s´ already exists", startWindSpeedRange, endWindSpeedRange));
+        }
+
     }
 
     private  void validateInputs(Double startWindSpeedRange, Double endWindSpeedRange, Double fee) {
@@ -48,6 +53,11 @@ public class ExtraFeeWindSpeedRuleServiceImpl implements ExtraFeeWindSpeedRuleSe
 
         if (fee != null && fee < 0.0) {
             throw new CustomBadRequestException(String.format("Fee: ´%s´ must be positive", fee));
+        }
+
+        boolean rule = doesWindSpeedRuleWithThisFeeExist(startWindSpeedRange, endWindSpeedRange, fee);
+        if (rule) {
+            throw new CustomNotFoundException(String.format("Extra fee rule for this wind speed range: start: ´%s´, end: ´%s´ and fee: ´%s´ already exists", startWindSpeedRange, endWindSpeedRange, fee));
         }
 
         // Check if the range is overlapping with any existing range in the database
@@ -75,6 +85,16 @@ public class ExtraFeeWindSpeedRuleServiceImpl implements ExtraFeeWindSpeedRuleSe
         validateInputs(startWindSpeedRange, endWindSpeedRange, fee);
 
         return rule1;
+    }
+
+    private boolean doesWindSpeedRuleExist(Double start, Double end) {
+        Optional<ExtraFeeWindSpeedRule> rule = windSpeedRuleRepository.findByStartWindSpeedRangeAndEndWindSpeedRange(start, end);
+        return rule.isPresent();
+    }
+
+    private boolean doesWindSpeedRuleWithThisFeeExist(Double start, Double end, Double fee) {
+        Optional<ExtraFeeWindSpeedRule> rule = windSpeedRuleRepository.findByStartWindSpeedRangeAndEndWindSpeedRangeAndFee(start, end, fee);
+        return rule.isPresent();
     }
 
     public List<ExtraFeeWindSpeedRule> getAllExtraFeeWindSpeedRules() {

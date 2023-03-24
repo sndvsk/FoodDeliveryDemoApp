@@ -15,4 +15,8 @@ public interface ExtraFeeAirTemperatureRuleRepository extends JpaRepository<Extr
 
     Optional<ExtraFeeAirTemperatureRule> findByStartAirTemperatureRangeLessThanEqualAndEndAirTemperatureRangeGreaterThanEqual(Double temperature, Double temperature2);
 
+    Optional<ExtraFeeAirTemperatureRule> findByStartAirTemperatureRangeAndEndAirTemperatureRange(Double start, Double end);
+
+    Optional<ExtraFeeAirTemperatureRule> findByStartAirTemperatureRangeAndEndAirTemperatureRangeAndFee(Double start, Double end, Double fee);
+
 }
