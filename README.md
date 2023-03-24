@@ -39,12 +39,14 @@ If you want to get latest data when you want use __/get-weather-from-eea__ endpo
 
 ## How to use
 
-Api documentation in done in SpringDoc OpenAPI Swagger [springdoc-openapi v2](https://springdoc.org/v2/)
+Api documentation in done with SpringDoc OpenAPI Swagger [springdoc-openapi v2](https://springdoc.org/v2/)
 
 Use [Swagger UI](http://localhost:8080/swagger-ui/index.html) to test the endpoints.
+
+![swagger ui look](src/main/resources/misc/swagger_look.png)
 
 Postman can also be used, as well as CURL etc.
 
 ## Tests
 Coverage of DeliveryFeeService is 89%.
-![alt text](src/main/resources/misc/test_coverage_delivery_fee_service.png)
+![delivery fee service test coverage](src/main/resources/misc/test_coverage_delivery_fee_service.png)

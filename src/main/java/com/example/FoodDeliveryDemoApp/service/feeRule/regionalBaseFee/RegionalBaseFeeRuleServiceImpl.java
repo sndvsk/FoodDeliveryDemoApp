@@ -131,6 +131,13 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
         }
     }
 
+    private void validateNewCity(String newCity, String oldCity) {
+        Set<String> check = getAllUniqueCities();
+        if (!check.contains(newCity.toLowerCase(Locale.ROOT))) {
+            throw new CustomBadRequestException(String.format("You dont have rules for: ´%s´. Consider creating new rule instead of patching ´%s´", newCity, oldCity));
+        }
+    }
+
     public List<RegionalBaseFeeRule> getAllRegionalBaseFeeRules() {
         List<RegionalBaseFeeRule> ruleList = baseFeeRuleRepository.findAll();
         if (ruleList.isEmpty()) {
@@ -152,7 +159,11 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
             city = cityOrWmoCode.toLowerCase(Locale.ROOT);
         }
         if (wmoCode == null) {
-            wmoCode = Long.parseLong(cityOrWmoCode);
+            if (cityOrWmoCode.equals(city)) {
+                wmoCode = cityNamesAndCodes.get(city);
+            } else {
+                wmoCode = Long.parseLong(cityOrWmoCode);
+            }
         }
 
         vehicleType = vehicleType.trim().toLowerCase(Locale.ROOT);
@@ -192,14 +203,17 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
         if (city != null) {
             city = city.toLowerCase(Locale.ROOT);
             if (patchedRule.getCity().equalsIgnoreCase(city)) {
-                patchedRule.city = city;
-            } else {
                 checkExistingVehicleTypesForCity(city, vehicleType);
+            } else {
+                validateNewCity(city, patchedRule.getCity());
+                //getByCityAndVehicleType(patchedRule.getCity(), vehicleType);
             }
+            patchedRule.city = city;
         }
         if (vehicleType != null) {
             vehicleType = vehicleType.trim().toLowerCase(Locale.ROOT);
             if (patchedRule.getVehicleType().equalsIgnoreCase(vehicleType)) {
+                checkExistingVehicleTypesForCity(city, vehicleType);
                 patchedRule.vehicleType = vehicleType;
             }
             checkExistingVehicleTypesForCity(city, vehicleType);
