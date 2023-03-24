@@ -1,4 +1,4 @@
-package com.example.FoodDeliveryDemoApp.exception.deliveryFee;
+package com.example.FoodDeliveryDemoApp.exception;
 
 
 import org.assertj.core.util.VisibleForTesting;
@@ -9,26 +9,24 @@ import java.util.List;
 import java.util.Objects;
 
 @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-public class DeliveryFeeBadRequestException extends IllegalArgumentException {
-
-    // todo rename to CustomBadRequestException
+public class CustomBadRequestException extends IllegalArgumentException {
 
     @SuppressWarnings("unused")
-    private List<DeliveryFeeBadRequestException> exceptions;
+    private List<CustomBadRequestException> exceptions;
 
     private String message;
 
-    public DeliveryFeeBadRequestException(String message) {
+    public CustomBadRequestException(String message) {
         super(message);
         this.message = message;
     }
 
-    public DeliveryFeeBadRequestException(List<DeliveryFeeBadRequestException> exceptions) {
+    public CustomBadRequestException(List<CustomBadRequestException> exceptions) {
         super(exceptions.get(0).getMessage());
     }
 
     @SuppressWarnings("unused")
-    public List<DeliveryFeeBadRequestException> getExceptions() {
+    public List<CustomBadRequestException> getExceptions() {
         return exceptions;
     }
 
@@ -37,7 +35,7 @@ public class DeliveryFeeBadRequestException extends IllegalArgumentException {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DeliveryFeeBadRequestException that = (DeliveryFeeBadRequestException) o;
+        CustomBadRequestException that = (CustomBadRequestException) o;
         return Objects.equals(message, that.message);
     }
 

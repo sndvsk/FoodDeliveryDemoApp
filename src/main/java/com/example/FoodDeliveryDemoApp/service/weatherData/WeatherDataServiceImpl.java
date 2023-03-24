@@ -1,13 +1,14 @@
 package com.example.FoodDeliveryDemoApp.service.weatherData;
 
 import com.example.FoodDeliveryDemoApp.dto.WeatherDataDTO;
-import com.example.FoodDeliveryDemoApp.exception.weatherData.WeatherDataBadRequestException;
-import com.example.FoodDeliveryDemoApp.exception.weatherData.WeatherDataNotFoundException;
+import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
+import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWeatherPhenomenonRule;
 import com.example.FoodDeliveryDemoApp.repository.WeatherDataRepository;
 import com.example.FoodDeliveryDemoApp.service.externalWeatherData.ExternalWeatherDataService;
 import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.weatherPhenomenonRule.ExtraFeeWeatherPhenomenonRuleService;
+import com.example.FoodDeliveryDemoApp.service.feeRule.regionalBaseFee.RegionalBaseFeeRuleService;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
@@ -26,17 +27,177 @@ public class WeatherDataServiceImpl implements WeatherDataService {
     private final WeatherDataRepository weatherDataRepository;
     private final ExternalWeatherDataService externalWeatherDataService;
     private final ExtraFeeWeatherPhenomenonRuleService weatherPhenomenonRuleService;
-
-
-    private final List<String> neededStationsNames = Arrays.asList("tallinn", "tartu", "pärnu");
-    private final List<Long> neededStationsWmo = Arrays.asList(26038L, 26242L, 41803L);
+    private final RegionalBaseFeeRuleService baseFeeRuleService;
 
     public WeatherDataServiceImpl(WeatherDataRepository weatherDataRepository,
                                   ExternalWeatherDataService externalWeatherDataService,
-                                  ExtraFeeWeatherPhenomenonRuleService weatherPhenomenonRuleService) {
+                                  ExtraFeeWeatherPhenomenonRuleService weatherPhenomenonRuleService, RegionalBaseFeeRuleService baseFeeRuleService) {
         this.weatherDataRepository = weatherDataRepository;
         this.externalWeatherDataService = externalWeatherDataService;
         this.weatherPhenomenonRuleService = weatherPhenomenonRuleService;
+        this.baseFeeRuleService = baseFeeRuleService;
+    }
+
+    public TreeMap<String, String> getFixedNaming() {
+        return externalWeatherDataService.fixedNaming();
+    }
+
+    private TreeMap<String, Long> getStationNamesAndCodes() throws JAXBException {
+
+        return externalWeatherDataService.getPossibleStationNamesAndCodesFixedNaming();
+    }
+
+    private Set<String> getStationNamesFromRepository() {
+        return baseFeeRuleService.getAllUniqueCities();
+    }
+
+    /**
+     * Validates that the given string of cities are valid and exist in the list of needed station names.
+     *
+     * @param cities a string containing comma-separated city names
+     * @throws CustomBadRequestException if any of the city names are invalid
+     */
+    private void validateCities(String cities) throws CustomBadRequestException {
+
+        Set<String> neededStationsNames = getStationNamesFromRepository();
+        String[] cityArray = cities.split(",");
+        for (String city : cityArray) {
+            if (!neededStationsNames.contains(city.toLowerCase())) {
+                throw new CustomBadRequestException(String.format("Invalid city name: ´%s´", city.trim()));
+            }
+        }
+    }
+
+    private void validateRequiredInputs(String stationName, Double airTemperature, Double windSpeed) {
+
+        if (stationName == null) {
+            throw new CustomBadRequestException("Station name is not provided");
+        }
+
+        Set<String> possibleCities = getStationNamesFromRepository();
+
+        if (!possibleCities.contains(stationName.toLowerCase())) {
+            throw new CustomBadRequestException(String.format("Station name: '%s' is not yet supported by this application", stationName));
+        }
+
+        if (airTemperature == null) {
+            throw new CustomBadRequestException("Air temperature is not provided");
+        }
+        if (windSpeed == null) {
+            throw new CustomBadRequestException("Wind speed is not provided");
+        }
+    }
+
+    private void validateInputs(Double airTemperature, Double windSpeed) {
+        if (airTemperature < -273.15) {
+            throw new CustomBadRequestException(String.format("Provided air temperature: ´%s´ is lower than absolute zero.", airTemperature));
+        } else if (airTemperature > 100.0) {
+            throw new CustomBadRequestException(String.format("Provided air temperature: ´%s´ is too high for Earth surface.", airTemperature));
+        }
+        if (windSpeed < 0.0) {
+            throw new CustomBadRequestException(String.format("Provided wind speed: ´%s´ is lower than zero.", windSpeed));
+        } else if (windSpeed > 150.0) {
+            throw new CustomBadRequestException(String.format("Provided wind speed: ´%s´ is too high for Earth surface.", windSpeed));
+        }
+
+    }
+
+    private Long validateWmoCode(String stationName, Long wmoCode) throws JAXBException {
+
+        TreeMap<String, Long> possibleCities = getStationNamesAndCodes();
+
+        Long expectedWmoCode = possibleCities.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().equals(stationName))
+                .findFirst()
+                .map(Map.Entry::getValue)
+                .orElse(null);
+
+        if (wmoCode == null || Objects.equals(expectedWmoCode, wmoCode)) {
+            return expectedWmoCode;
+        } else {
+            throw new CustomBadRequestException(String.format("Provided wmo code: ´%s´ is not the wmo code for ´%s´", wmoCode, stationName));
+        }
+    }
+
+    public List<WeatherData> getAllWeatherData() {
+        List<WeatherData> weatherDataList = weatherDataRepository.findAll();
+
+        if (weatherDataList.isEmpty()) {
+            throw new CustomNotFoundException("No weather data in the database.");
+        } else {
+            return weatherDataList;
+        }
+    }
+
+    public WeatherData addWeatherData(String stationName, Long wmoCode, Double airTemperature, Double windSpeed, String weatherPhenomenon, OffsetDateTime dateTime) throws JAXBException {
+
+        validateRequiredInputs(stationName, airTemperature, windSpeed);
+        validateInputs(airTemperature, windSpeed);
+
+        stationName = stationName.toLowerCase(Locale.ROOT);
+        Long wmo = validateWmoCode(stationName, wmoCode);
+
+        WeatherData weatherData = new WeatherData();
+
+        weatherData.setStationName(stationName);
+        weatherData.setWmoCode(wmo);
+        weatherData.setAirTemperature(airTemperature);
+        weatherData.setWindSpeed(windSpeed);
+
+        if (dateTime != null) {
+            weatherData.setTimestamp(dateTime.toInstant());
+        } else {
+            weatherData.setTimestamp(Instant.now());
+        }
+
+        if (weatherPhenomenon != null) {
+            ExtraFeeWeatherPhenomenonRule weatherPhenomenonFromRepository = weatherPhenomenonRuleService.getByWeatherPhenomenonName(weatherPhenomenon);
+            String phenomenonName = weatherPhenomenonFromRepository.getWeatherPhenomenonName();
+            weatherData.setWeatherPhenomenon(phenomenonName);
+        }
+
+        return weatherDataRepository.save(weatherData);
+    }
+
+    public WeatherData getWeatherDataById(Long weatherId) throws CustomNotFoundException {
+        Optional<WeatherData> weatherData = weatherDataRepository.findById(weatherId);
+
+        return weatherData.
+                orElseThrow(() -> new CustomNotFoundException(String.format("Weather data for this id: ´%s´ does not exist", weatherId)));
+
+    }
+
+    public WeatherData patchWeatherDataById(Long weatherId, Double airTemperature, Double windSpeed, String weatherPhenomenon) {
+        Optional<WeatherData> weatherData = weatherDataRepository.findById(weatherId);
+
+        WeatherData patchedWeatherData = weatherData
+                .orElseThrow(() -> new CustomNotFoundException(String.format("Weather data for this id: ´%s´ does not exist", weatherId)));
+
+        validateInputs(airTemperature, windSpeed);
+
+        if (airTemperature != null) {
+            patchedWeatherData.airTemperature = airTemperature;
+        }
+
+        if (windSpeed != null) {
+            patchedWeatherData.windSpeed = windSpeed;
+        }
+
+        if (weatherPhenomenon != null) {
+            ExtraFeeWeatherPhenomenonRule weatherPhenomenonFromRepository = weatherPhenomenonRuleService.getByWeatherPhenomenonName(weatherPhenomenon);
+            patchedWeatherData.weatherPhenomenon = weatherPhenomenonFromRepository.getWeatherPhenomenonName();
+        }
+
+        return weatherDataRepository.save(patchedWeatherData);
+    }
+
+    public String deleteWeatherDataById(Long weatherId) {
+        if (weatherDataRepository.existsById(weatherId)) {
+            weatherDataRepository.deleteById(weatherId);
+            return String.format("Weather data with id: ´%s´ was deleted", weatherId);
+        } else
+            throw new CustomNotFoundException(String.format("Weather data for this id: ´%s´ does not exist", weatherId));
     }
 
     /**
@@ -55,8 +216,12 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         // get timestamp from XML
         Instant timestamp = Instant.ofEpochSecond(observations.getTimestamp());
 
+        Set<String> neededStations = getStationNamesFromRepository();
+
+        TreeMap<String, String> fixedNaming = getFixedNaming();
+
         return observations.getStations().stream()
-                .filter(station -> neededStationsWmo.contains(station.getWmocode()))
+                .filter(station -> neededStations.contains(fixedNaming.get(station.getName())))
                 .peek(station -> station.setTimestamp(timestamp))
                 .collect(Collectors.toList());
     }
@@ -68,14 +233,12 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      * @return a list of WeatherData objects created from the Station objects
      */
     public List<WeatherData> convertStationsToWeatherData(List<WeatherDataDTO.Station> stations) {
-        Map<String, String> nameMappings = new HashMap<>();
-        nameMappings.put("Tallinn-Harku", "tallinn");
-        nameMappings.put("Tartu-Tõravere", "tartu");
-        nameMappings.put("Pärnu", "pärnu");
+
+        TreeMap<String, String> fixedNaming = getFixedNaming();
 
         return stations.stream()
                 .map(station -> {
-                    String stationName = nameMappings.getOrDefault(station.getName(), station.getName());
+                    String stationName = fixedNaming.getOrDefault(station.getName(), station.getName());
 
                     WeatherData weatherData = new WeatherData();
                     weatherData.setStationName(stationName);
@@ -113,36 +276,15 @@ public class WeatherDataServiceImpl implements WeatherDataService {
     }
 
     /**
-     * Validates that the given string of cities are valid and exist in the list of needed station names.
-     *
-     * @param cities a string containing comma-separated city names
-     * @throws WeatherDataBadRequestException if any of the city names are invalid
-     */
-    public void validateCities(String cities) throws WeatherDataBadRequestException {
-        String[] cityArray = cities.split(",");
-        for (String city : cityArray) {
-            if (!neededStationsNames.contains(city.trim().toLowerCase())) {
-                throw new WeatherDataBadRequestException(String.format("Invalid city name: ´%s´", city.trim()));
-            }
-        }
-    }
-
-    /**
      * Retrieves weather data from the external weather API and returns it as a list of WeatherData objects.
      *
      * @return a list of WeatherData objects containing the weather data for the needed cities
      * @throws JAXBException if there is an error unmarshalling the XML response from the weather API
      */
-    public List<WeatherData> getWeatherDataFromService() throws JAXBException {
+    public List<WeatherData> getWeatherDataFromExternalService() throws JAXBException {
         String response = externalWeatherDataService.retrieveWeatherObservations();
-        return convertStationsToWeatherData(filterResponse(response));
-    }
-
-    /**
-     * Overload of the {@link #getLastDataByCity(String, OffsetDateTime)} method with a default {@code dateTime}.
-     */
-    public WeatherData getLastDataByCity(String city) {
-        return getLastDataByCity(city, null);
+        List<WeatherDataDTO.Station> stationList = filterResponse(response);
+        return convertStationsToWeatherData(stationList);
     }
 
     /**
@@ -152,19 +294,23 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      * @param city the name of the city for which to retrieve the weather data
      * @param dateTime the date-time for which to retrieve the weather data. If null, retrieves the latest data
      * @return the last weather data for the given city and date-time
-     * @throws WeatherDataNotFoundException if no weather data is found for the given city and datetime
+     * @throws CustomNotFoundException if no weather data is found for the given city and datetime
      */
-    public WeatherData getLastDataByCity(String city, OffsetDateTime dateTime) throws WeatherDataNotFoundException {
+    public WeatherData getLastDataByCity(String city, OffsetDateTime dateTime) throws CustomNotFoundException {
         if (dateTime == null) {
             return weatherDataRepository.findFirstByStationNameOrderByTimestampDesc(city.toLowerCase(Locale.ROOT));
         } else {
-            // todo
-            // find entry in database that is +- 1 hour of the datetime
             Instant dt = dateTime.truncatedTo(ChronoUnit.SECONDS).toInstant();
-            Optional<WeatherData> weatherData = weatherDataRepository.findByStationNameAndTimestamp(city.toLowerCase(Locale.ROOT), dt);
+            Instant start = dt.minus(1, ChronoUnit.HOURS);
+            Instant end = dt.plus(1, ChronoUnit.HOURS);
+
+            List<WeatherData> weatherDataList = weatherDataRepository.
+                    findByStationNameAndTimestampBetween(city.toLowerCase(Locale.ROOT), start, end);
+
+            Optional<WeatherData> weatherData = weatherDataList.stream().min(Comparator.comparing(WeatherData::getTimestamp));
 
             return weatherData.
-                    orElseThrow(() -> new WeatherDataNotFoundException(String.format("Weather data for this datetime: ´%s´ does not exist", dateTime)));
+                    orElseThrow(() -> new CustomNotFoundException(String.format("Weather data for this datetime: ´%s´ does not exist", dateTime)));
         }
     }
 
@@ -174,7 +320,6 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      *
      * @param cities a string representing a comma-separated list of cities to retrieve weather data for (optional)
      * @return a list of WeatherData objects representing the latest weather data for all or a specific set of cities
-     * @throws WeatherDataBadRequestException if any of the city names provided are invalid
      */
     public List<WeatherData> getWeatherDataFromRepository(String cities) {
         List<WeatherData> lastWeatherData = getLastWeatherDataForAllCities();
@@ -196,133 +341,10 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      * @return a list of WeatherData objects representing the weather data retrieved from the service.
      * @throws JAXBException if there is an error in the unmarshalling of the XML response from the service.
      */
-    public List<WeatherData> getAndSaveWeatherDataFromService() throws JAXBException {
-        List<WeatherData> weatherData = getWeatherDataFromService();
+    public List<WeatherData> getAndSaveWeatherDataFromExternalService() throws JAXBException {
+        List<WeatherData> weatherData = getWeatherDataFromExternalService();
         saveWeatherData(weatherData);
         return weatherData;
-    }
-
-    public WeatherData getWeatherDataById(Long weatherId) throws WeatherDataNotFoundException {
-        Optional<WeatherData> weatherData = weatherDataRepository.findById(weatherId);
-
-        return weatherData.
-                orElseThrow(() -> new WeatherDataNotFoundException(String.format("Weather data for this id: ´%s´ does not exist", weatherId)));
-
-    }
-
-    public String deleteWeatherDataById(Long weatherId) {
-        if (weatherDataRepository.existsById(weatherId)) {
-            weatherDataRepository.deleteById(weatherId);
-            return String.format("Weather data with id: ´%s´ was deleted", weatherId);
-        } else
-            throw new WeatherDataNotFoundException(String.format("Weather data for this id: ´%s´ does not exist", weatherId));
-    }
-
-    public WeatherData patchWeatherDataById(Long weatherId, Double airTemperature, Double windSpeed, String weatherPhenomenon) {
-        Optional<WeatherData> weatherData = weatherDataRepository.findById(weatherId);
-
-        WeatherData patchedWeatherData = weatherData
-                .orElseThrow(() -> new WeatherDataNotFoundException(String.format("Weather data for this id: ´%s´ does not exist", weatherId)));
-
-        validateInputs(airTemperature, windSpeed);
-
-        if (airTemperature != null) {
-            patchedWeatherData.airTemperature = airTemperature;
-        }
-
-        if (windSpeed != null) {
-            patchedWeatherData.windSpeed = windSpeed;
-        }
-
-        if (weatherPhenomenon != null) {
-            ExtraFeeWeatherPhenomenonRule weatherPhenomenonFromRepository = weatherPhenomenonRuleService.findByWeatherPhenomenonName(weatherPhenomenon);
-            patchedWeatherData.weatherPhenomenon = weatherPhenomenonFromRepository.getWeatherPhenomenonName();
-        }
-
-        return weatherDataRepository.save(patchedWeatherData);
-    }
-
-    public void validateRequiredInputs(String stationName, Double airTemperature, Double windSpeed) {
-        if (stationName == null) {
-            throw new WeatherDataBadRequestException("Station name is not provided");
-        }
-        if (!neededStationsNames.contains(stationName)) {
-            throw new WeatherDataBadRequestException(String.format("Station name: ´%s´ is invalid or not supported", stationName));
-        }
-        if (airTemperature == null) {
-            throw new WeatherDataBadRequestException("Air temperature is not provided");
-        }
-        if (windSpeed == null) {
-            throw new WeatherDataBadRequestException("Wind speed is not provided");
-        }
-    }
-
-    public void validateInputs(Double airTemperature, Double windSpeed) {
-        if (airTemperature < -273.15) {
-            throw new WeatherDataBadRequestException(String.format("Provided air temperature: ´%s´ is lower than absolute zero.", airTemperature));
-        }
-        if (windSpeed < 0.0) {
-            throw new WeatherDataBadRequestException(String.format("Provided wind speed: ´%s´ is lower than zero.", windSpeed));
-        }
-
-    }
-
-    public List<WeatherData> getAllWeatherData() {
-        List<WeatherData> weatherDataList = weatherDataRepository.findAll();
-
-        if (weatherDataList.isEmpty()) {
-            throw new WeatherDataNotFoundException("No weather data in the database.");
-        } else {
-            return weatherDataList;
-        }
-    }
-
-    public Long getWmoCodeForStation(String stationName, Long wmoCode) {
-        int index = neededStationsNames.indexOf(stationName);
-        if (index >= 0) {
-            return neededStationsWmo.get(index);
-        } else {
-            throw new WeatherDataBadRequestException(String.format("Provided wmo code: ´%s´ is invalid or not supported", wmoCode));
-        }
-    }
-    public Long validateWmoCode(String stationName, Long wmoCode) {
-
-        Long expectedWmoCode = getWmoCodeForStation(stationName, wmoCode);
-
-        if (expectedWmoCode.equals(wmoCode) || wmoCode == null) {
-            return expectedWmoCode;
-        } else {
-            throw new WeatherDataBadRequestException(String.format("Provided wmo code: ´%s´ is not the wmo code for ´%s´", wmoCode, stationName));
-        }
-    }
-
-    public WeatherData addWeatherData(String stationName, Long wmoCode, Double airTemperature, Double windSpeed, String weatherPhenomenon, OffsetDateTime dateTime) {
-
-        stationName = stationName.toLowerCase(Locale.ROOT);
-        validateRequiredInputs(stationName, airTemperature, windSpeed);
-        validateInputs(airTemperature, windSpeed);
-        Long wmo = validateWmoCode(stationName, wmoCode);
-
-        WeatherData weatherData = new WeatherData();
-
-        weatherData.setStationName(stationName);
-        weatherData.setWmoCode(wmo);
-        weatherData.setAirTemperature(airTemperature);
-        weatherData.setWindSpeed(windSpeed);
-
-        if (dateTime != null) {
-            weatherData.setTimestamp(dateTime.toInstant());
-        } else {
-            weatherData.setTimestamp(Instant.now());
-        }
-
-        if (weatherPhenomenon != null) {
-            ExtraFeeWeatherPhenomenonRule weatherPhenomenonFromRepository = weatherPhenomenonRuleService.findByWeatherPhenomenonName(weatherPhenomenon);
-            String phenomenonName = weatherPhenomenonFromRepository.getWeatherPhenomenonName();
-            weatherData.setWeatherPhenomenon(phenomenonName);
-        }
-
-        return weatherDataRepository.save(weatherData);
     }
 
 }

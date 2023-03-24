@@ -1,9 +1,13 @@
 package com.example.FoodDeliveryDemoApp.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
 @SuppressWarnings("unused")
@@ -29,8 +33,12 @@ public class DeliveryFee {
     @Column(name = "weather_id")
     private Long weatherId;
 
+    @JsonIgnore
     @Column(name = "timestamp")
     private Instant timestamp;
+
+    @JsonProperty("timestamp")
+    private OffsetDateTime rest_timestamp;
 
     public Long getId() {
         return id;
@@ -77,6 +85,7 @@ public class DeliveryFee {
     }
 
     public void setTimestamp(Instant timestamp) {
-        this.timestamp = timestamp;
+        this.timestamp = timestamp.truncatedTo(ChronoUnit.SECONDS);
+        this.rest_timestamp = OffsetDateTime.ofInstant(this.timestamp, ZoneId.systemDefault());
     }
 }

@@ -14,14 +14,18 @@ public class RegionalBaseFeeRule implements FeeRule {
     @Column(name = "city")
     public String city;
 
+    @Column(name = "wmo_code")
+    public Long wmoCode;
+
     @Column(name = "vehicle_type")
     public String vehicleType;
 
     @Column(name = "regional_base_fee")
     public Double fee;
 
-    public RegionalBaseFeeRule(String city, String vehicleType, Double fee) {
+    public RegionalBaseFeeRule(String city, Long wmoCode, String vehicleType, Double fee) {
         this.city = city;
+        this.wmoCode = wmoCode;
         this.vehicleType = vehicleType;
         this.fee = fee;
     }
@@ -44,6 +48,14 @@ public class RegionalBaseFeeRule implements FeeRule {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public Long getWmoCode() {
+        return wmoCode;
+    }
+
+    public void setWmoCode(Long wmoCode) {
+        this.wmoCode = wmoCode;
     }
 
     public String getVehicleType() {

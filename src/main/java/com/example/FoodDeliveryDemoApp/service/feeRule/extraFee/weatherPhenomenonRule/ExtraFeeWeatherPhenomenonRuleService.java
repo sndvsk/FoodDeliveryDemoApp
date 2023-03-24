@@ -16,6 +16,5 @@ public interface ExtraFeeWeatherPhenomenonRuleService {
 
     String deleteExtraFeeWeatherPhenomenonRuleById(Long id);
 
-    ExtraFeeWeatherPhenomenonRule findByWeatherPhenomenonName(String weatherPhenomenon);
-
+    ExtraFeeWeatherPhenomenonRule getByWeatherPhenomenonName(String weatherPhenomenon);
 }

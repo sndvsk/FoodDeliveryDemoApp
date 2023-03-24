@@ -39,15 +39,15 @@ public class FeeRuleRepositoryInitializer implements CommandLineRunner {
 
         if (baseFeeCount == 0) {
             List<RegionalBaseFeeRule> baseFeeRules = new ArrayList<>();
-            baseFeeRules.add(new RegionalBaseFeeRule("tallinn", "car", 4.0));
-            baseFeeRules.add(new RegionalBaseFeeRule("tallinn", "scooter", 3.5));
-            baseFeeRules.add(new RegionalBaseFeeRule("tallinn", "bike", 3.0));
-            baseFeeRules.add(new RegionalBaseFeeRule("tartu", "car", 3.5));
-            baseFeeRules.add(new RegionalBaseFeeRule("tartu", "scooter", 3.0));
-            baseFeeRules.add(new RegionalBaseFeeRule("tartu", "bike", 2.5));
-            baseFeeRules.add(new RegionalBaseFeeRule("pärnu", "car", 3.0));
-            baseFeeRules.add(new RegionalBaseFeeRule("pärnu", "scooter", 2.5));
-            baseFeeRules.add(new RegionalBaseFeeRule("pärnu", "bike", 2.0));
+            baseFeeRules.add(new RegionalBaseFeeRule("tallinn", 26038L, "car", 4.0));
+            baseFeeRules.add(new RegionalBaseFeeRule("tallinn", 26038L, "scooter", 3.5));
+            baseFeeRules.add(new RegionalBaseFeeRule("tallinn", 26038L, "bike", 3.0));
+            baseFeeRules.add(new RegionalBaseFeeRule("tartu", 26242L, "car", 3.5));
+            baseFeeRules.add(new RegionalBaseFeeRule("tartu", 26242L, "scooter", 3.0));
+            baseFeeRules.add(new RegionalBaseFeeRule("tartu", 26242L, "bike", 2.5));
+            baseFeeRules.add(new RegionalBaseFeeRule("pärnu", 41803L, "car", 3.0));
+            baseFeeRules.add(new RegionalBaseFeeRule("pärnu", 41803L, "scooter", 2.5));
+            baseFeeRules.add(new RegionalBaseFeeRule("pärnu", 41803L, "bike", 2.0));
             baseFeeRuleRepository.saveAll(baseFeeRules);
         }
 

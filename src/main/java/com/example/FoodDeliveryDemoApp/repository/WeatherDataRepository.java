@@ -21,4 +21,5 @@ public interface WeatherDataRepository extends JpaRepository<WeatherData, Long> 
 
     Optional<WeatherData> findById(Long id);
 
+    List<WeatherData> findByStationNameAndTimestampBetween(String city, Instant start, Instant end);
 }

@@ -26,7 +26,7 @@ public class WeatherDataTask {
     }
 
     private void saveWeatherDataFromService() throws JAXBException {
-        weatherDataService.getAndSaveWeatherDataFromService();
+        weatherDataService.getAndSaveWeatherDataFromExternalService();
     }
 
 }

@@ -10,6 +10,7 @@ import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.windSpeedRule.Ex
 import com.example.FoodDeliveryDemoApp.service.feeRule.regionalBaseFee.RegionalBaseFeeRuleServiceImpl;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.xml.bind.JAXBException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -54,11 +55,12 @@ ________________________________________________________________________________
 
     @PostMapping(path="/fee/base", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RegionalBaseFeeRule> addRegionalBaseFeeRule(
-            @RequestParam String city,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) Long wmoCode,
             @RequestParam String vehicleType,
-            @RequestParam Double fee) {
+            @RequestParam Double fee) throws JAXBException {
 
-        RegionalBaseFeeRule response = regionalBaseFeeRuleService.addBaseFeeRule(city, vehicleType, fee);
+        RegionalBaseFeeRule response = regionalBaseFeeRuleService.addBaseFeeRule(city, wmoCode, vehicleType, fee);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
 
@@ -79,10 +81,11 @@ ________________________________________________________________________________
             @Parameter(name = "id", description = "Id of the rule")
             @PathVariable Long id,
             @RequestParam(required = false) String city,
+            @RequestParam(required = false) Long wmoCode,
             @RequestParam(required = false) String vehicleType,
-            @RequestParam(required = false) Double fee) {
+            @RequestParam(required = false) Double fee) throws JAXBException {
 
-        RegionalBaseFeeRule response = regionalBaseFeeRuleService.patchRegionalBaseFeeRuleById(id, city, vehicleType, fee);
+        RegionalBaseFeeRule response = regionalBaseFeeRuleService.patchRegionalBaseFeeRuleById(id, city, wmoCode, vehicleType, fee);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -225,6 +228,7 @@ ________________________________________________________________________________
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    // no need for it because all existing weather phenomenon's for external weather api are already in database
     @PostMapping(path = "/fee/extra/phenomenon",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ExtraFeeWeatherPhenomenonRule> addExtraFeeWeatherPhenomenonRule(
             @RequestParam String weatherPhenomenonName,

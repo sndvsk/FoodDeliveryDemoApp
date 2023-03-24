@@ -16,18 +16,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.TreeMap;
 
 @RestController
 @RequestMapping("/api/get-weather-from-eea")
 @Tag(name = "Weather Data from Estonian Environment Agency API", description = "Endpoint for getting weather data from Estonian Environment Agency")
-public class WeatherDataFromEEAController {
+public class ExternalWeatherDataController {
 
     private final WeatherDataServiceImpl weatherDataService;
 
     private final ExternalWeatherDataService externalWeatherDataService;
 
     @Autowired
-    public WeatherDataFromEEAController(WeatherDataServiceImpl weatherDataService, ExternalWeatherDataService externalWeatherDataService) {
+    public ExternalWeatherDataController(WeatherDataServiceImpl weatherDataService, ExternalWeatherDataService externalWeatherDataService) {
         this.weatherDataService = weatherDataService;
         this.externalWeatherDataService = externalWeatherDataService;
     }
@@ -42,7 +43,7 @@ public class WeatherDataFromEEAController {
     @Operation(summary = "Save latest weather data from Estonian Environment Agency for Tallinn, Tartu and Pärnu to database")
     public ResponseEntity<List<WeatherData>> getAndSaveWeatherObservations() throws JAXBException {
 
-        List<WeatherData> lastWeatherData = weatherDataService.getAndSaveWeatherDataFromService();
+        List<WeatherData> lastWeatherData = weatherDataService.getAndSaveWeatherDataFromExternalService();
 
         return new ResponseEntity<>(lastWeatherData, HttpStatus.OK);
     }
@@ -52,6 +53,15 @@ public class WeatherDataFromEEAController {
     public ResponseEntity<String> getWeatherDataFromServiceXML() {
 
         String response = externalWeatherDataService.retrieveWeatherObservations();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/stations", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all station names from Estonian Environment Agency")
+    public ResponseEntity<TreeMap<String, Long>> getPossibleStationNamesFromServiceXML() throws JAXBException {
+
+        TreeMap<String, Long> response = externalWeatherDataService.getPossibleStationNamesAndCodes();
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

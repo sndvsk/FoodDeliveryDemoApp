@@ -1,10 +1,14 @@
 package com.example.FoodDeliveryDemoApp.service.deliveryFee;
 
-import com.example.FoodDeliveryDemoApp.exception.deliveryFee.DeliveryFeeBadRequestException;
-import com.example.FoodDeliveryDemoApp.exception.deliveryFee.DeliveryFeeExceptionsList;
-import com.example.FoodDeliveryDemoApp.exception.deliveryFee.DeliveryFeeNotFoundException;
+import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
+import com.example.FoodDeliveryDemoApp.exception.CustomExceptionList;
+import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import com.example.FoodDeliveryDemoApp.model.DeliveryFee;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
+import com.example.FoodDeliveryDemoApp.model.rules.RegionalBaseFeeRule;
+import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeAirTemperatureRule;
+import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWeatherPhenomenonRule;
+import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWindSpeedRule;
 import com.example.FoodDeliveryDemoApp.repository.DeliveryFeeRepository;
 import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.airTemperatureRule.ExtraFeeAirTemperatureRuleServiceImpl;
 import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.weatherPhenomenonRule.ExtraFeeWeatherPhenomenonRuleServiceImpl;
@@ -42,49 +46,122 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
         this.baseFeeRuleService = baseFeeRuleService;
     }
 
-    // todo get rules from services
+    /**
+     * Validates the inputs provided for calculating the delivery fee.
+     *
+     * @param city the city for which to calculate the delivery fee. Cannot be null or empty. Must be one of "tallinn", "tartu", or "pärnu".
+     * @param vehicleType the type of vehicle used for delivery Cannot be null or empty. Must be one of "car", "scooter", or "bike".
+     * @throws CustomBadRequestException if there is an exception validating the inputs provided. Will contain a single DeliveryFeeException object.
+     * @throws CustomExceptionList if there are multiple exceptions validating the inputs provided. Will contain a list of DeliveryFeeException objects.
+     */
+    private void validateRequiredInputs(String city, String vehicleType) throws CustomBadRequestException, CustomExceptionList {
+        Set<String> validCityNames = new HashSet<>(
+                Arrays.asList(
+                        "tallinn",
+                        "tartu",
+                        "pärnu")
+        );
+        Set<String> validVehicleTypes = new HashSet<>(
+                Arrays.asList(
+                        "car",
+                        "scooter",
+                        "bike")
+        );
 
-    // ´static final´ to avoid recreating every time the method ´calculateRegionalBaseFee´ is called
-    private static final Map<String, Map<String, Double>> cityVehicleFees = Map.of(
-            "tallinn",
-            Map.of("car", 4.0, "scooter", 3.5, "bike", 3.0),
-            "tartu",
-            Map.of("car", 3.5, "scooter", 3.0, "bike", 2.5),
-            "pärnu",
-            Map.of("car", 3.0, "scooter", 2.5, "bike", 2.0)
-    );
+        List<CustomBadRequestException> exceptionList = new ArrayList<>();
 
-    // ´static final´ to avoid recreating every time the method ´calculateWeatherPhenomenonFee´ is called
-    private static final Map<String, Double> weatherPhenomenonFees = Map.ofEntries(
-            Map.entry("Light sleet", 1.0),
-            Map.entry("Moderate sleet", 1.0),
-            Map.entry("Light snow shower", 1.0),
-            Map.entry("Moderate snow shower", 1.0),
-            Map.entry("Heavy snow shower", 1.0),
-            Map.entry("Light snowfall", 1.0),
-            Map.entry("Moderate snowfall", 1.0),
-            Map.entry("Heavy snowfall", 1.0),
-            Map.entry("Blowing snow", 1.0),
-            Map.entry("Drifting snow", 1.0),
-            Map.entry("Light shower", 0.5),
-            Map.entry("Moderate shower", 0.5),
-            Map.entry("Heavy shower", 0.5),
-            Map.entry("Light rain", 0.5),
-            Map.entry("Moderate rain", 0.5),
-            Map.entry("Heavy rain", 0.5),
-            Map.entry("Glaze", -1.0),
-            Map.entry("Hail", -1.0),
-            Map.entry("Thunder", -1.0),
-            Map.entry("Thunderstorm", -1.0)
-    );
+        if (city == null || city.isEmpty()) {
+            exceptionList.add(createException("Parameter city is empty."));
+        } else if (!validCityNames.contains(city)) {
+            exceptionList.add(createException(
+                    String.format("City: ´%s´ argument is invalid or not supported.", city)));
+        }
+
+        if (vehicleType == null || vehicleType.isEmpty()) {
+            exceptionList.add(createException("Parameter vehicle type is empty."));
+        } else if (!validVehicleTypes.contains(vehicleType)) {
+            exceptionList.add(createException(
+                    String.format("Vehicle type: ´%s´ argument is invalid or not supported.", vehicleType)));
+        }
+
+
+        if (!exceptionList.isEmpty()) {
+            throw exceptionList.size() == 1 ? new CustomBadRequestException(exceptionList) : new CustomExceptionList(exceptionList);
+        }
+
+    }
 
     /**
-     * Saves the order data to the repository.
+     * Creates a new DeliveryFeeException with the given message.
      *
-     * @param deliveryFee the delivery fee object to be saved
+     * @param message the error message to include in the exception
+     * @return the newly created DeliveryFeeException
      */
-    public void saveDeliveryFee(DeliveryFee deliveryFee) {
-        deliveryFeeRepository.save(deliveryFee);
+    private CustomBadRequestException createException(String message) {
+        return new CustomBadRequestException(message);
+    }
+
+    /**
+     * Retrieves a list of all DeliveryFee objects from the deliveryFeeRepository.
+     *
+     * @return a list of all DeliveryFee objects in the deliveryFeeRepository
+     */
+    public List<DeliveryFee> getAllDeliveryFees() throws CustomNotFoundException {
+        List<DeliveryFee> deliveryFeeList = deliveryFeeRepository.findAll();
+        if (deliveryFeeList.isEmpty()) {
+            throw new CustomNotFoundException("There are no calculated delivery fees");
+        } else {
+            return deliveryFeeList;
+        }
+    }
+
+    /**
+     * Retrieves a DeliveryFee object from the deliveryFeeRepository by its ID.
+     *
+     * @param id the ID of the delivery fee to retrieve
+     * @return the DeliveryFee object with the specified ID
+     * @throws CustomNotFoundException if no DeliveryFee object with the specified ID exists
+     */
+    public DeliveryFee getDeliveryFeeById(Long id) throws CustomBadRequestException {
+        Optional<DeliveryFee> deliveryFee = deliveryFeeRepository.findById(id);
+
+        return deliveryFee.
+                orElseThrow(() -> new CustomNotFoundException("This delivery fee calculation does not exist"));
+
+    }
+
+    /**
+     * Overload of the {@link #calculateAndSaveDeliveryFee(String, String, OffsetDateTime)}method with a default {@code dateTime}.
+     */
+    public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType) throws CustomBadRequestException, CustomExceptionList {
+        return calculateAndSaveDeliveryFee(city, vehicleType, null);
+    }
+
+    /**
+     * Main method to validate inputs, calculate delivery fee, create DeliveryFee object and save it to database.
+     * Calculates the delivery fee and returns an DeliveryFee object with the result.
+     *
+     * @param city the city for which to calculate the delivery fee
+     * @param vehicleType the type of vehicle used for delivery
+     * @param dateTime the datetime of when the delivery takes place
+     * @return a DeliveryFee object with the delivery fee calculation result
+     * @throws CustomBadRequestException if there is an error in the input validation or the fee calculation
+     * @throws CustomExceptionList if there are multiple errors in the input validation
+     */
+    public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime) throws CustomBadRequestException, CustomExceptionList {
+
+        city = city.trim().toLowerCase(Locale.ROOT);
+        vehicleType = vehicleType.trim().toLowerCase(Locale.ROOT);
+
+        validateRequiredInputs(city, vehicleType);
+
+        double deliveryFee = calculateDeliveryFee(city, vehicleType, dateTime);
+        DeliveryFee returnDeliveryFee = createNewDeliveryFee(city, vehicleType, deliveryFee, dateTime);
+
+        saveDeliveryFee(returnDeliveryFee);
+
+        return returnDeliveryFee;
+
     }
 
     /**
@@ -112,8 +189,10 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * @return the weather condition fee for the city and vehicle type
      */
     public Double calculateRegionalBaseFee(String city, String vehicleType) {
-        Map<String, Double> totalFees = cityVehicleFees.get(city);
-        return totalFees.get(vehicleType);
+        RegionalBaseFeeRule rule = baseFeeRuleService.getByCityAndVehicleType(city, vehicleType);
+        @SuppressWarnings("UnnecessaryLocalVariable")
+        Double fee = rule.getFee();
+        return fee;
     }
 
     /**
@@ -150,12 +229,12 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * @return the fee based on the air temperature
      */
     public double calculateAirTemperatureFee(double airTemperature) {
-        if (airTemperature < -10.0) {
-            return 1;
-        } else if (airTemperature < 0.0) {
-            return 0.5;
+        ExtraFeeAirTemperatureRule rule = airTemperatureRuleService.getByTemperature(airTemperature);
+        Double fee = rule.getFee();
+        if (fee < 0) {
+            throw new CustomBadRequestException(String.format("Usage of selected vehicle type is forbidden: air temperature ´%s´ is too low", airTemperature));
         }
-        return 0;
+        return fee;
     }
 
     /**
@@ -163,15 +242,15 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      *
      * @param windSpeed the wind speed
      * @return the fee based on the wind speed
-     * @throws DeliveryFeeBadRequestException if the wind speed is greater than 20.0
+     * @throws CustomBadRequestException if the wind speed is greater than 20.0
      */
     public double calculateWindSpeedFee(Double windSpeed) {
-        if (windSpeed > 20.0) {
-            throw new DeliveryFeeBadRequestException("Usage of selected vehicle type is forbidden: wind speed too high");
-        } else if (windSpeed > 10.0) {
-            return 0.5;
+        ExtraFeeWindSpeedRule rule = windSpeedRuleService.getByWindSpeed(windSpeed);
+        Double fee = rule.getFee();
+        if (fee < 0) {
+            throw new CustomBadRequestException(String.format("Usage of selected vehicle type is forbidden: wind speed ´%s´ is too high", windSpeed));
         }
-        return 0;
+        return fee;
     }
 
     /**
@@ -179,69 +258,15 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      *
      * @param weatherPhenomenon the name of weather phenomenon
      * @return the fee based on the weather phenomenon
-     * @throws DeliveryFeeBadRequestException if usage of selected vehicle type is forbidden in those weather conditions
+     * @throws CustomBadRequestException if usage of selected vehicle type is forbidden in those weather conditions
      */
     public Double calculateWeatherPhenomenonFee(String weatherPhenomenon) {
-        Double fee = weatherPhenomenonFees.getOrDefault(weatherPhenomenon, 0.0);
-        if (fee == -1.0) {
-            throw new DeliveryFeeBadRequestException("Usage of selected vehicle type is forbidden");
+        ExtraFeeWeatherPhenomenonRule rule = weatherPhenomenonRuleService.getByWeatherPhenomenonName(weatherPhenomenon);
+        Double fee = rule.getFee();
+        if (fee < 0) {
+            throw new CustomBadRequestException(String.format("Usage of selected vehicle type is forbidden: weather phenomenon ´%s´ is dangerous", weatherPhenomenon));
         }
         return fee;
-    }
-
-    /**
-     * Validates the inputs provided for calculating the delivery fee.
-     *
-     * @param city the city for which to calculate the delivery fee. Cannot be null or empty. Must be one of "tallinn", "tartu", or "pärnu".
-     * @param vehicleType the type of vehicle used for delivery Cannot be null or empty. Must be one of "car", "scooter", or "bike".
-     * @throws DeliveryFeeBadRequestException if there is an exception validating the inputs provided. Will contain a single DeliveryFeeException object.
-     * @throws DeliveryFeeExceptionsList if there are multiple exceptions validating the inputs provided. Will contain a list of DeliveryFeeException objects.
-     */
-    public void validateInputs(String city, String vehicleType) throws DeliveryFeeBadRequestException, DeliveryFeeExceptionsList {
-        Set<String> validCityNames = new HashSet<>(
-                Arrays.asList(
-                        "tallinn",
-                        "tartu",
-                        "pärnu")
-        );
-        Set<String> validVehicleTypes = new HashSet<>(
-                Arrays.asList(
-                        "car",
-                        "scooter",
-                        "bike")
-        );
-
-        List<DeliveryFeeBadRequestException> exceptionList = new ArrayList<>();
-
-        if (city == null || city.isEmpty()) {
-            exceptionList.add(createException("Parameter city is empty."));
-        } else if (!validCityNames.contains(city)) {
-            exceptionList.add(createException(
-                            String.format("City: ´%s´ argument is invalid or not supported.", city)));
-        }
-
-        if (vehicleType == null || vehicleType.isEmpty()) {
-            exceptionList.add(createException("Parameter vehicle type is empty."));
-        } else if (!validVehicleTypes.contains(vehicleType)) {
-            exceptionList.add(createException(
-                            String.format("Vehicle type: ´%s´ argument is invalid or not supported.", vehicleType)));
-        }
-
-
-        if (!exceptionList.isEmpty()) {
-            throw exceptionList.size() == 1 ? new DeliveryFeeBadRequestException(exceptionList) : new DeliveryFeeExceptionsList(exceptionList);
-        }
-
-    }
-
-    /**
-     * Creates a new DeliveryFeeException with the given message.
-     *
-     * @param message the error message to include in the exception
-     * @return the newly created DeliveryFeeException
-     */
-    public DeliveryFeeBadRequestException createException(String message) {
-        return new DeliveryFeeBadRequestException(message);
     }
 
     /**
@@ -263,9 +288,9 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
         WeatherData weatherData = weatherDataService.getLastDataByCity(city, dateTime);
 
         if (dateTime == null) {
-            deliveryFee.setTimestamp(Instant.now().truncatedTo(ChronoUnit.SECONDS));
+            deliveryFee.setTimestamp(Instant.now());
         } else {
-            deliveryFee.setTimestamp(dateTime.truncatedTo(ChronoUnit.SECONDS).toInstant());
+            deliveryFee.setTimestamp(weatherData.getTimestamp());
         }
 
         deliveryFee.setWeatherId(weatherData.getId());
@@ -274,66 +299,12 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
     }
 
     /**
-     * Overload of the {@link #calculateAndSaveDeliveryFee(String, String, OffsetDateTime)}method with a default {@code dateTime}.
-     */
-    public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType) throws DeliveryFeeBadRequestException, DeliveryFeeExceptionsList {
-        return calculateAndSaveDeliveryFee(city, vehicleType, null);
-    }
-
-    /**
-     * Main method to validate inputs, calculate delivery fee, create DeliveryFee object and save it to database.
-     * Calculates the delivery fee and returns an DeliveryFee object with the result.
+     * Saves the order data to the repository.
      *
-     * @param city the city for which to calculate the delivery fee
-     * @param vehicleType the type of vehicle used for delivery
-     * @param dateTime the datetime of when the delivery takes place
-     * @return a DeliveryFee object with the delivery fee calculation result
-     * @throws DeliveryFeeBadRequestException if there is an error in the input validation or the fee calculation
-     * @throws DeliveryFeeExceptionsList if there are multiple errors in the input validation
+     * @param deliveryFee the delivery fee object to be saved
      */
-    public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime) throws DeliveryFeeBadRequestException, DeliveryFeeExceptionsList {
-
-        city = city.trim().toLowerCase(Locale.ROOT);
-        vehicleType = vehicleType.trim().toLowerCase(Locale.ROOT);
-
-        validateInputs(city, vehicleType);
-
-        double deliveryFee = calculateDeliveryFee(city, vehicleType, dateTime);
-        DeliveryFee returnDeliveryFee = createNewDeliveryFee(city, vehicleType, deliveryFee, dateTime);
-
-        saveDeliveryFee(returnDeliveryFee);
-
-        return returnDeliveryFee;
-
-    }
-
-    /**
-     * Retrieves a DeliveryFee object from the deliveryFeeRepository by its ID.
-     *
-     * @param id the ID of the delivery fee to retrieve
-     * @return the DeliveryFee object with the specified ID
-     * @throws DeliveryFeeNotFoundException if no DeliveryFee object with the specified ID exists
-     */
-    public DeliveryFee getDeliveryFeeById(Long id) throws DeliveryFeeBadRequestException {
-        Optional<DeliveryFee> deliveryFee = deliveryFeeRepository.findById(id);
-
-        return deliveryFee.
-                orElseThrow(() -> new DeliveryFeeNotFoundException("This delivery fee calculation does not exist"));
-
-    }
-
-    /**
-     * Retrieves a list of all DeliveryFee objects from the deliveryFeeRepository.
-     *
-     * @return a list of all DeliveryFee objects in the deliveryFeeRepository
-     */
-    public List<DeliveryFee> getAllDeliveryFees() throws DeliveryFeeNotFoundException {
-        List<DeliveryFee> deliveryFeeList = deliveryFeeRepository.findAll();
-        if (deliveryFeeList.isEmpty()) {
-            throw new DeliveryFeeNotFoundException("There are no calculated delivery fees");
-        } else {
-            return deliveryFeeList;
-        }
+    public void saveDeliveryFee(DeliveryFee deliveryFee) {
+        deliveryFeeRepository.save(deliveryFee);
     }
 
 }

@@ -46,4 +46,5 @@ Use [Swagger UI](http://localhost:8080/swagger-ui/index.html) to test the endpoi
 Postman can also be used, as well as CURL etc.
 
 ## Tests
-Coverage of DevileryFeeComponent is 100%.
+Coverage of DeliveryFeeService is 89%.
+![alt text](src/main/resources/misc/test_coverage_delivery_fee_service.png)

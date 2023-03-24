@@ -1,6 +1,6 @@
 package com.example.FoodDeliveryDemoApp.controller;
 
-import com.example.FoodDeliveryDemoApp.exception.weatherData.WeatherDataNotFoundException;
+import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataService;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,7 +43,7 @@ public class WeatherDataController {
             @ApiResponse(responseCode = "404", description = "No weather data found for the provided cities", content = @Content)})*/
     public ResponseEntity<List<WeatherData>> getWeatherObservations() throws JAXBException {
 
-        List<WeatherData> lastWeatherData = weatherDataService.getWeatherDataFromService();
+        List<WeatherData> lastWeatherData = weatherDataService.getWeatherDataFromExternalService();
 
         return new ResponseEntity<>(lastWeatherData, HttpStatus.OK);
     }
@@ -66,7 +66,7 @@ public class WeatherDataController {
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all weather data")
-    public ResponseEntity<List<WeatherData>> getAllWeatherData() throws WeatherDataNotFoundException {
+    public ResponseEntity<List<WeatherData>> getAllWeatherData() throws CustomNotFoundException {
 
         List<WeatherData> weatherData = weatherDataService.getAllWeatherData();
 
@@ -87,7 +87,7 @@ public class WeatherDataController {
             @Parameter(name = "weatherPhenomenon", description = "Weather phenomenon", example = "Clear")
             @RequestParam String weatherPhenomenon,
             @Parameter(name = "timestamp", description = "Time for weather data", example = "2023-03-22T12:15:00+02:00")
-            @RequestParam(required = false) OffsetDateTime dateTime) throws WeatherDataNotFoundException {
+            @RequestParam(required = false) OffsetDateTime dateTime) throws CustomNotFoundException, JAXBException {
 
         WeatherData weatherData = weatherDataService.addWeatherData(stationName, wmoCode, airTemperature, windSpeed, weatherPhenomenon, dateTime);
 
@@ -98,13 +98,13 @@ public class WeatherDataController {
     @Operation(summary = "Get weather data by id")
     public ResponseEntity<WeatherData> getWeatherDataById(
             @Parameter(name = "id", description = "Id of weather data", in = ParameterIn.PATH, example = "1" )
-            @PathVariable(value = "id") Long weatherId) throws WeatherDataNotFoundException {
+            @PathVariable(value = "id") Long weatherId) throws CustomNotFoundException {
 
         WeatherData weatherData = weatherDataService.getWeatherDataById(weatherId);
 
         return new ResponseEntity<>(weatherData, HttpStatus.OK);
     }
-    
+
     @PatchMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get weather data by id")
     public ResponseEntity<WeatherData> patchWeatherDataById(
@@ -115,7 +115,7 @@ public class WeatherDataController {
             @Parameter(name = "weatherPhenomenon", description = "Weather phenomenon", example = "Clear" )
             @RequestParam(required = false) String weatherPhenomenon,
             @Parameter(name = "id", description = "Id of weather data", in = ParameterIn.PATH, example = "1" )
-            @PathVariable(value = "id") Long weatherId) throws WeatherDataNotFoundException {
+            @PathVariable(value = "id") Long weatherId) throws CustomNotFoundException {
 
         WeatherData weatherData = weatherDataService.patchWeatherDataById(weatherId, airTemperature, windSpeed, weatherPhenomenon);
 
@@ -126,7 +126,7 @@ public class WeatherDataController {
     @Operation(summary = "Get weather data by id")
     public ResponseEntity<String> deleteWeatherDataById(
             @Parameter(name = "id", description = "Id of weather data", in = ParameterIn.PATH, example = "1" )
-            @PathVariable(value = "id") Long weatherId) throws WeatherDataNotFoundException {
+            @PathVariable(value = "id") Long weatherId) throws CustomNotFoundException {
 
         String response = weatherDataService.deleteWeatherDataById(weatherId);
 

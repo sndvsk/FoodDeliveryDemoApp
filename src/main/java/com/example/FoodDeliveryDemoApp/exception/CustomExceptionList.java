@@ -1,4 +1,4 @@
-package com.example.FoodDeliveryDemoApp.exception.deliveryFee;
+package com.example.FoodDeliveryDemoApp.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -6,25 +6,23 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.List;
 
 @ResponseStatus(value= HttpStatus.BAD_REQUEST)
-public class DeliveryFeeExceptionsList extends IllegalArgumentException {
+public class CustomExceptionList extends IllegalArgumentException {
 
-    // todo rename to CustomBadRequestExceptionList
+    private final List<CustomBadRequestException> exceptions;
 
-    private final List<DeliveryFeeBadRequestException> exceptions;
-
-    public DeliveryFeeExceptionsList(List<DeliveryFeeBadRequestException> exceptions) {
+    public CustomExceptionList(List<CustomBadRequestException> exceptions) {
         this.exceptions = exceptions;
     }
 
     @SuppressWarnings("unused")
-    public List<DeliveryFeeBadRequestException> getExceptions() {
+    public List<CustomBadRequestException> getExceptions() {
         return exceptions;
     }
 
     @Override
     public String getMessage() {
         StringBuilder sb = new StringBuilder("DeliveryFeeExceptionsList: [");
-        for (DeliveryFeeBadRequestException ex : exceptions) {
+        for (CustomBadRequestException ex : exceptions) {
             sb.append(ex.getMessage()).append("; ");
         }
         sb.append("]");

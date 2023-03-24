@@ -16,4 +16,5 @@ public interface ExtraFeeWindSpeedRuleService {
 
     String deleteExtraFeeWindSpeedRuleById(Long id);
 
+    ExtraFeeWindSpeedRule getByWindSpeed(Double windSpeed);
 }

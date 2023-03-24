@@ -1,8 +1,8 @@
 package com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.windSpeedRule;
 
-import com.example.FoodDeliveryDemoApp.exception.feeRule.FeeRuleBadRequestException;
-import com.example.FoodDeliveryDemoApp.exception.feeRule.FeeRuleNotFoundException;
-import com.example.FoodDeliveryDemoApp.exception.weatherData.WeatherDataBadRequestException;
+import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
+import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
+import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWindSpeedRule;
 import com.example.FoodDeliveryDemoApp.repository.rules.ExtraFeeWindSpeedRuleRepository;
 import org.springframework.stereotype.Component;
@@ -19,10 +19,68 @@ public class ExtraFeeWindSpeedRuleServiceImpl implements ExtraFeeWindSpeedRuleSe
         this.windSpeedRuleRepository = windSpeedRuleRepository;
     }
 
+    // todo add documentation
+
+    private void validateRequiredInputs(Double startWindSpeedRange, Double endWindSpeedRange, Double fee) {
+        if (startWindSpeedRange == null) {
+            throw new CustomBadRequestException("Start of wind speed range must be provided");
+        }
+        if (endWindSpeedRange == null) {
+            throw new CustomBadRequestException("End of wind speed range must be provided");
+        }
+        if (fee == null) {
+            throw new CustomBadRequestException("Fee must be provided");
+        }
+    }
+
+    private  void validateInputs(Double startWindSpeedRange, Double endWindSpeedRange, Double fee) {
+
+        if (startWindSpeedRange != null && startWindSpeedRange < 0.0) {
+            throw new CustomBadRequestException(String.format("Provided wind speed: ´%s´ is lower than zero.", startWindSpeedRange));
+        }
+        if (endWindSpeedRange != null && endWindSpeedRange < 0.0) {
+            throw new CustomBadRequestException(String.format("Provided wind speed: ´%s´ is lower than zero.", endWindSpeedRange));
+        }
+        //noinspection ConstantConditions
+        if (endWindSpeedRange < startWindSpeedRange) {
+            throw new CustomBadRequestException(String.format("Provided wind speed range is invalid, end: ´%s´ is lower than start: ´%s´", endWindSpeedRange, startWindSpeedRange));
+        }
+
+        if (fee != null && fee < 0.0) {
+            throw new CustomBadRequestException(String.format("Fee: ´%s´ must be positive", fee));
+        }
+
+        // Check if the range is overlapping with any existing range in the database
+        Long overlappingRanges = windSpeedRuleRepository.countOverlappingRanges(startWindSpeedRange, endWindSpeedRange);
+        if (overlappingRanges > 0) {
+            throw new CustomBadRequestException("Provided wind speed range is overlapping with an existing range in the database");
+        }
+
+    }
+
+    private ExtraFeeWindSpeedRule patchValidateInputs(Long id, Double startWindSpeedRange, Double endWindSpeedRange, Double fee) {
+
+        Optional<ExtraFeeWindSpeedRule> rule = windSpeedRuleRepository.findById(id);
+
+        ExtraFeeWindSpeedRule rule1 = rule
+                .orElseThrow(() -> new CustomNotFoundException(String.format("Extra fee wind speed rule for this id: ´%s´ does not exist", id)));
+
+        if (startWindSpeedRange == null) {
+            startWindSpeedRange = rule1.getStartWindSpeedRange();
+        }
+        if (endWindSpeedRange == null) {
+            endWindSpeedRange = rule1.getEndWindSpeedRange();
+        }
+
+        validateInputs(startWindSpeedRange, endWindSpeedRange, fee);
+
+        return rule1;
+    }
+
     public List<ExtraFeeWindSpeedRule> getAllExtraFeeWindSpeedRules() {
         List<ExtraFeeWindSpeedRule> ruleList = windSpeedRuleRepository.findAll();
         if (ruleList.isEmpty()) {
-            throw new FeeRuleNotFoundException("No extra fee wind speed rules in the database.");
+            throw new CustomNotFoundException("No extra fee wind speed rules in the database.");
         } else {
             return ruleList;
         }
@@ -31,7 +89,7 @@ public class ExtraFeeWindSpeedRuleServiceImpl implements ExtraFeeWindSpeedRuleSe
     public ExtraFeeWindSpeedRule addExtraFeeWindSpeedRule(Double startWindSpeedRange, Double endWindSpeedRange, Double fee) {
 
         validateRequiredInputs(startWindSpeedRange, endWindSpeedRange, fee);
-        validateInputs(startWindSpeedRange, endWindSpeedRange);
+        validateInputs(startWindSpeedRange, endWindSpeedRange, fee);
 
         ExtraFeeWindSpeedRule rule = new ExtraFeeWindSpeedRule();
 
@@ -42,48 +100,15 @@ public class ExtraFeeWindSpeedRuleServiceImpl implements ExtraFeeWindSpeedRuleSe
         return windSpeedRuleRepository.save(rule);
     }
 
-    private void validateRequiredInputs(Double startWindSpeedRange, Double endWindSpeedRange, Double fee) {
-        if (startWindSpeedRange == null) {
-            throw new FeeRuleBadRequestException("Start of wind speed range must be provided");
-        }
-        if (endWindSpeedRange == null) {
-            throw new FeeRuleBadRequestException("End of wind speed range must be provided");
-        }
-        if (fee == null) {
-            throw new FeeRuleBadRequestException("Fee must be provided");
-        }
-    }
-
-    private void validateInputs(Double startWindSpeedRange, Double endWindSpeedRange) {
-
-        // todo validate considering existing ranges in repository
-
-        if (startWindSpeedRange != null && startWindSpeedRange < 0.0) {
-            throw new WeatherDataBadRequestException(String.format("Provided wind speed: ´%s´ is lower than zero.", startWindSpeedRange));
-        }
-        if (endWindSpeedRange != null && endWindSpeedRange < 0.0) {
-            throw new FeeRuleBadRequestException(String.format("Provided wind speed: ´%s´ is lower than zero.", endWindSpeedRange));
-        }
-        //noinspection ConstantConditions
-        if (endWindSpeedRange < startWindSpeedRange) {
-            throw new FeeRuleBadRequestException(String.format("Provided wind speed range is invalid, end: ´%s´ is lower than start: ´%s´", endWindSpeedRange, startWindSpeedRange));
-        }
-    }
-
     public ExtraFeeWindSpeedRule getExtraFeeWindSpeedRuleById(Long id) {
         Optional<ExtraFeeWindSpeedRule> rule = windSpeedRuleRepository.findById(id);
         return rule
-                .orElseThrow(() -> new FeeRuleNotFoundException(String.format("Extra fee wind speed rule for this id: ´%s´ does not exist", id)));
+                .orElseThrow(() -> new CustomNotFoundException(String.format("Extra fee wind speed rule for this id: ´%s´ does not exist", id)));
     }
 
     public ExtraFeeWindSpeedRule patchExtraFeeWindSpeedRuleById(Long id, Double startWindSpeedRange, Double endWindSpeedRange, Double fee) {
 
-        validateInputs(startWindSpeedRange, endWindSpeedRange);
-
-        Optional<ExtraFeeWindSpeedRule> rule = windSpeedRuleRepository.findById(id);
-
-        ExtraFeeWindSpeedRule patchedRule = rule
-                .orElseThrow(() -> new FeeRuleNotFoundException(String.format("Extra fee wind speed rule for this id: ´%s´ does not exist", id)));
+        ExtraFeeWindSpeedRule patchedRule = patchValidateInputs(id, startWindSpeedRange, endWindSpeedRange, fee);
 
         if (startWindSpeedRange != null) {
             patchedRule.startWindSpeedRange = startWindSpeedRange;
@@ -103,8 +128,14 @@ public class ExtraFeeWindSpeedRuleServiceImpl implements ExtraFeeWindSpeedRuleSe
             windSpeedRuleRepository.deleteById(id);
             return String.format("Extra fee wind speed rule with id: ´%s´ was deleted", id);
         } else {
-            throw new FeeRuleNotFoundException(String.format("Extra fee wind speed rule for this id: ´%s´ does not exist", id));
+            throw new CustomNotFoundException(String.format("Extra fee wind speed rule for this id: ´%s´ does not exist", id));
         }
+    }
+
+    public ExtraFeeWindSpeedRule getByWindSpeed(Double windSpeed) {
+        Optional<ExtraFeeWindSpeedRule> rule = windSpeedRuleRepository.findByStartWindSpeedRangeLessThanEqualAndEndWindSpeedRangeGreaterThanEqual(windSpeed, windSpeed);
+        return rule
+                .orElseThrow(() -> new CustomNotFoundException(String.format("Extra fee wind speed rule for this wind speed: ´%s´ does not exist", windSpeed)));
     }
 
 }

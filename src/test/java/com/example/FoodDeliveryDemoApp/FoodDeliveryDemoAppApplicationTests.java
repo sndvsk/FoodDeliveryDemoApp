@@ -1,6 +1,7 @@
 package com.example.FoodDeliveryDemoApp;
 
 import com.example.FoodDeliveryDemoApp.controller.FeeRuleController;
+import com.example.FoodDeliveryDemoApp.scheduler.WeatherDataTask;
 import com.example.FoodDeliveryDemoApp.service.deliveryFee.DeliveryFeeServiceImpl;
 import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.airTemperatureRule.ExtraFeeAirTemperatureRuleServiceImpl;
 import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.weatherPhenomenonRule.ExtraFeeWeatherPhenomenonRuleServiceImpl;
@@ -9,7 +10,7 @@ import com.example.FoodDeliveryDemoApp.service.feeRule.regionalBaseFee.RegionalB
 import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataServiceImpl;
 import com.example.FoodDeliveryDemoApp.controller.DeliveryFeeController;
 import com.example.FoodDeliveryDemoApp.controller.WeatherDataController;
-import com.example.FoodDeliveryDemoApp.controller.WeatherDataFromEEAController;
+import com.example.FoodDeliveryDemoApp.controller.ExternalWeatherDataController;
 import com.example.FoodDeliveryDemoApp.service.externalWeatherData.ExternalWeatherDataServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,10 @@ class FoodDeliveryDemoAppApplicationTests {
 	private WeatherDataController weatherDataController;
 
 	@Autowired
-	private WeatherDataFromEEAController weatherDataFromEEAController;
+	private ExternalWeatherDataController externalWeatherDataController;
+
+	@Autowired
+	private WeatherDataTask weatherDataTask;
 
 	@Autowired
 	private DeliveryFeeServiceImpl deliveryFeeService;
@@ -57,9 +61,12 @@ class FoodDeliveryDemoAppApplicationTests {
 	@Test
 	void contextLoads() {
 		assertThat(deliveryFeeController).isNotNull();
+		assertThat(externalWeatherDataController).isNotNull();
 		assertThat(feeRuleController).isNotNull();
 		assertThat(weatherDataController).isNotNull();
-		assertThat(weatherDataFromEEAController).isNotNull();
+
+		assertThat(weatherDataTask).isNotNull();
+
 		assertThat(deliveryFeeService).isNotNull();
 		assertThat(externalWeatherDataService).isNotNull();
 		assertThat(airTemperatureRuleService).isNotNull();

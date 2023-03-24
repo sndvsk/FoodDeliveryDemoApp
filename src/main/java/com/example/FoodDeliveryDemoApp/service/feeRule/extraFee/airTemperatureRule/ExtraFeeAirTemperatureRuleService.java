@@ -16,4 +16,5 @@ public interface ExtraFeeAirTemperatureRuleService {
 
     String deleteExtraFeeAirTemperatureRuleById(Long id);
 
+    ExtraFeeAirTemperatureRule getByTemperature(double airTemperature);
 }
