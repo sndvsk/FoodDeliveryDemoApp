@@ -2,6 +2,7 @@ package com.example.FoodDeliveryDemoApp.controller;
 
 import com.example.FoodDeliveryDemoApp.dto.WeatherDataDTO;
 import com.example.FoodDeliveryDemoApp.service.externalWeatherData.ExternalWeatherDataService;
+import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataService;
 import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataServiceImpl;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,12 +30,12 @@ import java.util.TreeMap;
 @Tag(name = "Weather Data from Estonian Environment Agency API", description = "Endpoint for getting weather data from Estonian Environment Agency")
 public class ExternalWeatherDataController {
 
-    private final WeatherDataServiceImpl weatherDataService;
+    private final WeatherDataService weatherDataService;
 
     private final ExternalWeatherDataService externalWeatherDataService;
 
     @Autowired
-    public ExternalWeatherDataController(WeatherDataServiceImpl weatherDataService, ExternalWeatherDataService externalWeatherDataService) {
+    public ExternalWeatherDataController(WeatherDataService weatherDataService, ExternalWeatherDataService externalWeatherDataService) {
         this.weatherDataService = weatherDataService;
         this.externalWeatherDataService = externalWeatherDataService;
     }

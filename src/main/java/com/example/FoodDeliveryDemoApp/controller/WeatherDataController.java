@@ -35,6 +35,7 @@ public class WeatherDataController {
      * Retrieves the latest weather data for all supported cities from external weather API.
      *
      * @return a ResponseEntity containing a list of WeatherData objects representing the latest weather observations for all cities
+     * @throws JAXBException if there is an error parsing the XML request body
      */
     @GetMapping(path= "/cities", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get latest weather data from Estonian Environment Agency for Tallinn, Tartu and Pärnu")
@@ -86,7 +87,7 @@ public class WeatherDataController {
      * @param dateTime yime for when weather data should be added. Showed with a timezone offset of a server
      * @return ResponseEntity with WeatherData and HttpStatus.OK if successful
      * @throws CustomNotFoundException if the weather data with the specified if does not exist
-     * @throws JAXBException if an error occurred while processing weather data
+     * @throws JAXBException if there is an error parsing the XML request body
      */
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Add weather data")

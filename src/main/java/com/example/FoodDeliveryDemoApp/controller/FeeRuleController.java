@@ -4,9 +4,13 @@ import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeAirTemperatu
 import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWeatherPhenomenonRule;
 import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWindSpeedRule;
 import com.example.FoodDeliveryDemoApp.model.rules.RegionalBaseFeeRule;
+import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.airTemperatureRule.ExtraFeeAirTemperatureRuleService;
 import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.airTemperatureRule.ExtraFeeAirTemperatureRuleServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.weatherPhenomenonRule.ExtraFeeWeatherPhenomenonRuleService;
 import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.weatherPhenomenonRule.ExtraFeeWeatherPhenomenonRuleServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.windSpeedRule.ExtraFeeWindSpeedRuleService;
 import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.windSpeedRule.ExtraFeeWindSpeedRuleServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.feeRule.regionalBaseFee.RegionalBaseFeeRuleService;
 import com.example.FoodDeliveryDemoApp.service.feeRule.regionalBaseFee.RegionalBaseFeeRuleServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,15 +29,15 @@ import java.util.List;
 @Tag(name = "Rules API", description = "Endpoint for managing delivery fee calculation business rules (base and extra fees)")
 public class FeeRuleController {
 
-    private final RegionalBaseFeeRuleServiceImpl regionalBaseFeeRuleService;
-    private final ExtraFeeAirTemperatureRuleServiceImpl airTemperatureRuleService;
-    private final ExtraFeeWindSpeedRuleServiceImpl windSpeedRuleService;
-    private final ExtraFeeWeatherPhenomenonRuleServiceImpl weatherPhenomenonRuleService;
+    private final RegionalBaseFeeRuleService regionalBaseFeeRuleService;
+    private final ExtraFeeAirTemperatureRuleService airTemperatureRuleService;
+    private final ExtraFeeWindSpeedRuleService windSpeedRuleService;
+    private final ExtraFeeWeatherPhenomenonRuleService weatherPhenomenonRuleService;
 
-    public FeeRuleController(RegionalBaseFeeRuleServiceImpl regionalBaseFeeRuleService,
-                             ExtraFeeAirTemperatureRuleServiceImpl airTemperatureRuleService,
-                             ExtraFeeWindSpeedRuleServiceImpl windSpeedRuleService,
-                             ExtraFeeWeatherPhenomenonRuleServiceImpl weatherPhenomenonRuleService) {
+    public FeeRuleController(RegionalBaseFeeRuleService regionalBaseFeeRuleService,
+                             ExtraFeeAirTemperatureRuleService airTemperatureRuleService,
+                             ExtraFeeWindSpeedRuleService windSpeedRuleService,
+                             ExtraFeeWeatherPhenomenonRuleService weatherPhenomenonRuleService) {
         this.regionalBaseFeeRuleService = regionalBaseFeeRuleService;
         this.airTemperatureRuleService = airTemperatureRuleService;
         this.windSpeedRuleService = windSpeedRuleService;
