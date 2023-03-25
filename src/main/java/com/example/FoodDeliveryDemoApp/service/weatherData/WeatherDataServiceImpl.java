@@ -41,15 +41,30 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         this.baseFeeRuleService = baseFeeRuleService;
     }
 
-    public TreeMap<String, String> getFixedNaming() {
+    /**
+     * Returns a TreeMap of fixed naming values retrieved from the external weather data service.
+     *
+     * @return a TreeMap of fixed naming values
+     */
+    private TreeMap<String, String> getFixedNaming() {
         return externalWeatherDataService.fixedNaming();
     }
 
+    /**
+     * Returns a TreeMap of possible station names and codes retrieved from the external weather data service using fixed naming.
+     *
+     * @return a TreeMap of station names and codes
+     * @throws JAXBException if an error occurs while retrieving the data
+     */
     private TreeMap<String, Long> getStationNamesAndCodes() throws JAXBException {
-
         return externalWeatherDataService.getPossibleStationNamesAndCodesFixedNaming();
     }
 
+    /**
+     * Returns a Set of all unique city names retrieved from the base fee rule service.
+     *
+     * @return a Set of all unique city names
+     */
     private Set<String> getStationNamesFromRepository() {
         return baseFeeRuleService.getAllUniqueCities();
     }
@@ -71,7 +86,16 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         }
     }
 
-    private void validateRequiredInputs(String stationName, Double airTemperature, Double windSpeed) {
+    /**
+     * Validates the required inputs for weather data.
+     *
+     * @param stationName the name of the station where the weather data was collected
+     * @param airTemperature the air temperature at the station in degrees Celsius
+     * @param windSpeed the wind speed at the station in kilometers per hour
+     * @throws CustomBadRequestException if any of the required inputs are missing or invalid
+     * @throws CustomBadRequestException if the station is not supported by application
+     */
+    private void validateRequiredInputs(String stationName, Double airTemperature, Double windSpeed) throws CustomBadRequestException {
 
         if (stationName == null) {
             throw new CustomBadRequestException("Station name is not provided");
@@ -91,7 +115,14 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         }
     }
 
-    private void validateInputs(Double airTemperature, Double windSpeed) {
+    /**
+     * Validates the input air temperature and wind speed to ensure they are within valid ranges.
+     *
+     * @param airTemperature the air temperature to be validated
+     * @param windSpeed the wind speed to be validated
+     * @throws CustomBadRequestException if either airTemperature or windSpeed is outside of the valid range
+     */
+    private void validateInputs(Double airTemperature, Double windSpeed) throws CustomBadRequestException {
         if (airTemperature < -273.15) {
             throw new CustomBadRequestException(String.format("Provided air temperature: ´%s´ is lower than absolute zero.", airTemperature));
         } else if (airTemperature > 100.0) {
@@ -105,7 +136,16 @@ public class WeatherDataServiceImpl implements WeatherDataService {
 
     }
 
-    private Long validateWmoCode(String stationName, Long wmoCode) throws JAXBException {
+    /**
+     * Validates the provided wmo code is correct for the provided station name.
+     *
+     * @param stationName the name of the weather station
+     * @param wmoCode the wmo code to be validated
+     * @return the wmo code if it is correct for the provided station name, or null otherwise
+     * @throws JAXBException if there is an error getting the station names and codes
+     * @throws CustomBadRequestException if the provided wmo code is not correct for the provided stationName
+     */
+    private Long validateWmoCode(String stationName, Long wmoCode) throws JAXBException, CustomBadRequestException {
 
         TreeMap<String, Long> possibleCities = getStationNamesAndCodes();
 
@@ -123,7 +163,17 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         }
     }
 
-    private WeatherData getClosestWeatherDataFromRepository(String city, Instant dt, OffsetDateTime dateTime) {
+    /**
+     * Finds the closest WeatherData object to the provided city, date, and time, and returns it.
+     *
+     * @param city the name of the city
+     * @param dt the date and time to search around
+     * @param dateTime the full date and time object, used for error messages
+     * @return the closest WeatherData object to the provided city, date, and time
+     * @throws CustomNotFoundException if there is no WeatherData object for or near the provided datetime
+     * @throws CustomBadRequestException if the closest WeatherData object to the provided datetime is too far away
+     */
+    private WeatherData getClosestWeatherDataFromRepository(String city, Instant dt, OffsetDateTime dateTime) throws CustomNotFoundException, CustomBadRequestException {
         Optional<WeatherData> previousWeatherData = weatherDataRepository.findPreviousWeatherData(city, dt, PageRequest.of(0, 1)).stream().findFirst();
         Optional<WeatherData> nextWeatherData = weatherDataRepository.findNextWeatherData(city, dt, PageRequest.of(0, 1)).stream().findFirst();
         if (previousWeatherData.isEmpty() && nextWeatherData.isEmpty()) {
@@ -150,18 +200,37 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         }
     }
 
+    /**
+     * Determines whether a duration is greater than one hour.
+     *
+     * @param duration the duration to check
+     * @return true if the duration is greater than one hour, false otherwise
+     */
     private boolean isDurationTooFar(Duration duration) {
         return duration.toHours() > 1;
     }
 
-    private void validateDateTime(String stationName, OffsetDateTime dateTime) {
+    /**
+     * Validates that a WeatherData object for the provided stationName and dateTime does not already exist.
+     *
+     * @param stationName the name of the weather station
+     * @param dateTime the date and time to check for an existing WeatherData object
+     * @throws CustomBadRequestException if a WeatherData object for the provided stationName and datetime already exists
+     */
+    private void validateDateTime(String stationName, OffsetDateTime dateTime) throws CustomBadRequestException {
         Optional<WeatherData> weatherData = weatherDataRepository.findByStationNameAndTimestamp(stationName, dateTime.toInstant().truncatedTo(ChronoUnit.SECONDS));
         if (weatherData.isPresent()) {
             throw new CustomBadRequestException(String.format("There is already entry for this station: ´%s´ and datetime: ´%s´", stationName, dateTime));
         }
     }
 
-    public List<WeatherData> getAllWeatherData() {
+    /**
+     * Retrieves all WeatherData objects in the database.
+     *
+     * @return a list of all WeatherData objects in the database
+     * @throws CustomNotFoundException if there are no WeatherData objects in the database
+     */
+    public List<WeatherData> getAllWeatherData() throws CustomNotFoundException {
         List<WeatherData> weatherDataList = weatherDataRepository.findAll();
 
         if (weatherDataList.isEmpty()) {
@@ -171,6 +240,19 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         }
     }
 
+    /**
+     * Adds a new WeatherData object to the database.
+     *
+     * @param stationName the name of the weather station
+     * @param wmoCode the wmo code for the weather station
+     * @param airTemperature the air temperature for the weather observation
+     * @param windSpeed the wind speed for the weather observation
+     * @param weatherPhenomenon the weather phenomenon for the weather observation
+     * @param dateTime (optional) the date and time for the weather observation
+     * @return the newly created WeatherData object
+     * @throws JAXBException if there is an error getting the station names and codes
+     * @throws CustomBadRequestException if any of the inputs are invalid or the wmo code is incorrect for the provided station name
+     */
     public WeatherData addWeatherData(String stationName, Long wmoCode, Double airTemperature, Double windSpeed, String weatherPhenomenon, OffsetDateTime dateTime) throws JAXBException {
 
         validateRequiredInputs(stationName, airTemperature, windSpeed);
@@ -202,6 +284,13 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         return weatherDataRepository.save(weatherData);
     }
 
+    /**
+     * Retrieves a WeatherData object by its ID from the database.
+     *
+     * @param weatherId the ID of the weather data to retrieve
+     * @return the WeatherData object with the specified ID
+     * @throws CustomNotFoundException if the specified ID does not correspond to any weather data in the database
+     */
     public WeatherData getWeatherDataById(Long weatherId) throws CustomNotFoundException {
         Optional<WeatherData> weatherData = weatherDataRepository.findById(weatherId);
 
@@ -210,7 +299,20 @@ public class WeatherDataServiceImpl implements WeatherDataService {
 
     }
 
-    public WeatherData patchWeatherDataById(Long weatherId, Double airTemperature, Double windSpeed, String weatherPhenomenon) {
+    /**
+     * Updates the air temperature, wind speed, and/or weather phenomenon of a WeatherData object with the specified id
+     * in the database.
+     *
+     * @param weatherId the ID of the weather data to update
+     * @param airTemperature the new air temperature (null if it should not be updated)
+     * @param windSpeed the new wind speed (null if it should not be updated)
+     * @param weatherPhenomenon the new weather phenomenon (null if it should not be updated)
+     * @return the updated WeatherData object
+     * @throws CustomNotFoundException if the specified ID does not correspond to any weather data in the database
+     * @throws CustomBadRequestException if the air temperature and/or wind speed are not provided
+     */
+
+    public WeatherData patchWeatherDataById(Long weatherId, Double airTemperature, Double windSpeed, String weatherPhenomenon) throws CustomNotFoundException {
         Optional<WeatherData> weatherData = weatherDataRepository.findById(weatherId);
 
         WeatherData patchedWeatherData = weatherData
@@ -234,7 +336,14 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         return weatherDataRepository.save(patchedWeatherData);
     }
 
-    public String deleteWeatherDataById(Long weatherId) {
+    /**
+     * Deletes a WeatherData object with the specified ID from the database.
+     *
+     * @param weatherId the ID of the weather data to delete
+     * @return a message indicating that the weather data was deleted
+     * @throws CustomNotFoundException if the specified ID does not correspond to any weather data in the database
+     */
+    public String deleteWeatherDataById(Long weatherId) throws CustomNotFoundException {
         if (weatherDataRepository.existsById(weatherId)) {
             weatherDataRepository.deleteById(weatherId);
             return String.format("Weather data with id: ´%s´ was deleted", weatherId);

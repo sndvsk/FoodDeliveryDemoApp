@@ -48,10 +48,22 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
         this.baseFeeRuleService = baseFeeRuleService;
     }
 
+    /**
+     * Retrieves a TreeMap containing all existing vehicle types for each city from the base fee rule service.
+     *
+     * @return a TreeMap where each key is a city name and the corresponding value is a list of vehicle types available in that city
+     */
     private TreeMap<String, List<String>> getExistingVehicleTypesForCities() {
         return baseFeeRuleService.getAllUniqueCitiesWithVehicleTypes();
     }
 
+    /**
+     * Checks if the given city supports the given vehicle type.
+     *
+     * @param city the name of the city to check
+     * @param vehicleType the type of the vehicle to check
+     * @throws CustomBadRequestException if the city does not support the vehicle type, or if the city argument is invalid or not supported
+     */
     private void checkExistingVehicleTypesForCity(String city, String vehicleType) throws CustomBadRequestException {
         TreeMap<String, List<String>> citiesAndVehicles = getExistingVehicleTypesForCities();
         if (citiesAndVehicles.containsKey(city)) {
@@ -67,12 +79,11 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
     /**
      * Validates the inputs provided for calculating the delivery fee.
      *
-     * @param city the city for which to calculate the delivery fee. Cannot be null or empty. Must be one of "tallinn", "tartu", or "pärnu".
-     * @param vehicleType the type of vehicle used for delivery Cannot be null or empty. Must be one of "car", "scooter", or "bike".
-     * @throws CustomBadRequestException if there is an exception validating the inputs provided. Will contain a single DeliveryFeeException object.
+     * @param city the city for which to calculate the delivery fee
+     * @param vehicleType the type of vehicle used for delivery
+     * @throws CustomBadRequestException if there is an exception validating the inputs provided
      */
     private void validateRequiredInputs(String city, String vehicleType) throws CustomBadRequestException {
-        //List<CustomBadRequestException> exceptionList = new ArrayList<>();
 
         if (city == null || city.isEmpty()) {
             throw new CustomBadRequestException(String.format("Parameter city: ´%s´ is empty", city));
@@ -87,19 +98,10 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
     }
 
     /**
-     * Creates a new DeliveryFeeException with the given message.
-     *
-     * @param message the error message to include in the exception
-     * @return the newly created DeliveryFeeException
-     */
-    private CustomBadRequestException createException(String message) {
-        return new CustomBadRequestException(message);
-    }
-
-    /**
      * Retrieves a list of all DeliveryFee objects from the deliveryFeeRepository.
      *
      * @return a list of all DeliveryFee objects in the deliveryFeeRepository
+     * @throws CustomNotFoundException if there are no delivery fees in repository
      */
     public List<DeliveryFee> getAllDeliveryFees() throws CustomNotFoundException {
         List<DeliveryFee> deliveryFeeList = deliveryFeeRepository.findAll();
@@ -111,11 +113,11 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
     }
 
     /**
-     * Retrieves a DeliveryFee object from the deliveryFeeRepository by its ID.
+     * Retrieves a DeliveryFee object from the deliveryFeeRepository by its id.
      *
-     * @param id the ID of the delivery fee to retrieve
-     * @return the DeliveryFee object with the specified ID
-     * @throws CustomNotFoundException if no DeliveryFee object with the specified ID exists
+     * @param id the id of the delivery fee to retrieve
+     * @return the DeliveryFee object with the specified id
+     * @throws CustomNotFoundException if no DeliveryFee object with the specified id exists
      */
     public DeliveryFee getDeliveryFeeById(Long id) throws CustomNotFoundException {
         Optional<DeliveryFee> deliveryFee = deliveryFeeRepository.findById(id);
@@ -163,7 +165,7 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      *
      * @param city the city for which to calculate the delivery fee
      * @param vehicleType the type of vehicle used for delivery
-     * @param dateTime the date and time for which to calculate the delivery fee. If null, the current date and time will be used (optional)
+     * @param dateTime (optional) the date and time for which to calculate the delivery fee. If null, the current date and time will be used
      * @return the delivery fee for the given city, vehicle type, and datetime if provided
      */
     public Double calculateDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime) {
@@ -193,7 +195,7 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      *
      * @param city the city for which to calculate the delivery fee
      * @param vehicleType the type of vehicle used for delivery
-     * @param dateTime the date and time for which to calculate the delivery fee. If null, the current date and time will be used (optional)
+     * @param dateTime (optional) the date and time for which to calculate the delivery fee. If null, the current date and time will be used
      * @return the weather condition fee for the specified city, vehicle type, and datetime
      */
     public Double calculateWeatherConditionFee(String city, String vehicleType, OffsetDateTime dateTime) {
@@ -235,7 +237,7 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      *
      * @param windSpeed the wind speed
      * @return the fee based on the wind speed
-     * @throws CustomBadRequestException if the wind speed is greater than 20.0
+     * @throws CustomBadRequestException if the wind speed is too high
      */
     public double calculateWindSpeedFee(Double windSpeed) throws CustomBadRequestException {
         ExtraFeeWindSpeedRule rule = windSpeedRuleService.getByWindSpeed(windSpeed);
@@ -268,7 +270,7 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * @param city the city for which to calculate the delivery fee
      * @param vehicleType the type of vehicle used for delivery
      * @param deliveryFeePrice the calculated delivery fee
-     * @param dateTime the date and time for which to calculate the delivery fee. If null, the current date and time will be used (optional)
+     * @param dateTime (optional) the date and time for which to calculate the delivery fee. If null, the current date and time will be used
      * @return a new DeliveryFee object with the specified parameters
      */
     public DeliveryFee createNewDeliveryFee(String city, String vehicleType, double deliveryFeePrice, OffsetDateTime dateTime) {

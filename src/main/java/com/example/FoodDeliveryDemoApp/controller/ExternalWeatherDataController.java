@@ -82,7 +82,7 @@ public class ExternalWeatherDataController {
      * @throws JAXBException if there is an error while parsing the weather data from the service
      */
     @GetMapping(path = "/stations", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all station names from Estonian Environment Agency")
+    @Operation(summary = "Get all station names and its wmo codes from Estonian Environment Agency")
     public ResponseEntity<TreeMap<String, Long>> getPossibleStationNamesFromServiceXML() throws JAXBException {
 
         TreeMap<String, Long> response = externalWeatherDataService.getPossibleStationNamesAndCodes();
