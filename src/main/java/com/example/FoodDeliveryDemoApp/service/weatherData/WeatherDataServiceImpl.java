@@ -199,26 +199,52 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         }
 
         if (previousWeatherData.isEmpty()) {
-            return nextWeatherData.get();
+            WeatherData nextWeatherD = nextWeatherData.get();
+            checkDurationBetween(dt, nextWeatherD.getTimestamp());
+            return nextWeatherD;
         } else if (nextWeatherData.isEmpty()) {
-            return previousWeatherData.get();
+            WeatherData previousWeatherD = previousWeatherData.get();
+            checkDurationBetween(dt, previousWeatherD.getTimestamp());
+            return previousWeatherD;
         } else {
             Instant previousTimestamp = previousWeatherData.get().getTimestamp();
             Instant nextTimestamp = nextWeatherData.get().getTimestamp();
 
             if (isDurationTooFar(Duration.between(previousTimestamp, dt))) {
                 throw new CustomBadRequestException(
-                        String.format("Weather data with closest datetime to given datetime is too far: %s",
-                                Duration.between(previousTimestamp, dt)));
+                        String.format("Weather data with closest datetime to given datetime is too far: %s (in hours)",
+                                Duration.between(previousTimestamp, dt).toHours()));
             }
             if (isDurationTooFar(Duration.between(nextTimestamp, dt))) {
                 throw new CustomBadRequestException(
-                        String.format("Weather data with closest datetime to given datetime is too far: %s",
-                                Duration.between(nextTimestamp, dt)));
+                        String.format("Weather data with closest datetime to given datetime is too far: %s (in hours)",
+                                Duration.between(nextTimestamp, dt).toHours()));
             }
             return Duration.between(previousTimestamp, dt).compareTo(Duration.between(nextTimestamp, dt)) <= 0
                     ? previousWeatherData.get()
                     : nextWeatherData.get();
+        }
+    }
+
+    /**
+     * Checks the duration between two timestamps and returns the second timestamp if the difference
+     * between them is less than one hour
+     *
+     * @param timestamp1 the first timestamp
+     * @param timestamp2 the second timestamp
+     * @return the second timestamp if the duration between them is less than one hour
+     * @throws CustomBadRequestException if the duration between the timestamps is greater than or equal to one hour
+     * and provides an error message with the duration between them
+     */
+    @SuppressWarnings("UnusedReturnValue")
+    private Instant checkDurationBetween(Instant timestamp1, Instant timestamp2) {
+        Duration duration = Duration.between(timestamp1, timestamp2);
+        if (duration.compareTo(Duration.ofHours(1)) < 0) {
+            return timestamp2;
+        } else {
+            throw new CustomBadRequestException(
+                    String.format("Weather data with closest datetime to given datetime is too far: %s (in hours)",
+                            Duration.between(timestamp1, timestamp2).toHours()));
         }
     }
 

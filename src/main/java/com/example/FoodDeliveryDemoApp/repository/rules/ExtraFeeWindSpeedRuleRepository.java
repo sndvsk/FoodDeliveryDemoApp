@@ -15,6 +15,15 @@ public interface ExtraFeeWindSpeedRuleRepository extends JpaRepository<ExtraFeeW
             "AND w.endWindSpeedRange >= :startWindSpeedRange")
     Long countOverlappingRanges(Double startWindSpeedRange, Double endWindSpeedRange);
 
+    @Query("SELECT COUNT(w) FROM ExtraFeeWindSpeedRule w " +
+            "WHERE (" +
+            "(w.startWindSpeedRange <= :startWindSpeedRange " +
+            "AND w.endWindSpeedRange >= :endWindSpeedRange) " +
+            "OR " +
+            "(w.startWindSpeedRange >= :startWindSpeedRange " +
+            "AND w.endWindSpeedRange <= :endWindSpeedRange))")
+    Long countInsideRange(Double startWindSpeedRange, Double endWindSpeedRange);
+
     Optional<ExtraFeeWindSpeedRule>
         findByStartWindSpeedRangeLessThanEqualAndEndWindSpeedRangeGreaterThanEqual(Double windSpeed, Double windSpeed2);
 

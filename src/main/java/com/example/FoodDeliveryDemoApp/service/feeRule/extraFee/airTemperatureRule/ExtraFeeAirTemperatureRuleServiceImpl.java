@@ -125,6 +125,10 @@ public class ExtraFeeAirTemperatureRuleServiceImpl implements ExtraFeeAirTempera
         if (overlappingRanges > 0) {
             throw new CustomBadRequestException("Provided air temperature range is overlapping with an existing range in the database");
         }
+        Long overlappingInsideRanges = airTemperatureRuleRepository.countInsideRange(startTemperatureRange, endTemperatureRange);
+        if (overlappingInsideRanges > 0) {
+            throw new CustomBadRequestException("Provided air temperature range is overlapping with an existing range in the database");
+        }
     }
 
     /**

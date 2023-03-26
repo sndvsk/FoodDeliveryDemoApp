@@ -246,7 +246,7 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
      * @throws JAXBException if there is an error parsing the XML request body
      */
     public RegionalBaseFeeRule addBaseFeeRule(String city, Long wmoCode, String vehicleType, Double fee)
-            throws JAXBException {
+            throws JAXBException, CustomBadRequestException {
 
         validateRequiredInputs(city, wmoCode, vehicleType, fee);
 
@@ -268,6 +268,7 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
         vehicleType = vehicleType.trim().toLowerCase(Locale.ROOT);
 
         validateInputs(city, wmoCode, vehicleType, fee, cityNamesAndCodes);
+        city = city.toLowerCase(Locale.ROOT);
         checkExistingVehicleTypesForCity(city, vehicleType);
 
         RegionalBaseFeeRule rule = new RegionalBaseFeeRule();

@@ -15,6 +15,15 @@ public interface ExtraFeeAirTemperatureRuleRepository extends JpaRepository<Extr
             "AND w.endAirTemperatureRange >= :startTemperatureRange")
     Long countOverlappingRanges(Double startTemperatureRange, Double endTemperatureRange);
 
+    @Query("SELECT COUNT(w) FROM ExtraFeeAirTemperatureRule w " +
+            "WHERE (" +
+            "(w.startAirTemperatureRange <= :startTemperatureRange " +
+            "AND w.endAirTemperatureRange >= :endTemperatureRange) " +
+            "OR " +
+            "(w.startAirTemperatureRange >= :startTemperatureRange " +
+            "AND w.endAirTemperatureRange <= :endTemperatureRange))")
+    Long countInsideRange(Double startTemperatureRange, Double endTemperatureRange);
+
     Optional<ExtraFeeAirTemperatureRule>
         findByStartAirTemperatureRangeLessThanEqualAndEndAirTemperatureRangeGreaterThanEqual
             (Double temperature, Double temperature2);

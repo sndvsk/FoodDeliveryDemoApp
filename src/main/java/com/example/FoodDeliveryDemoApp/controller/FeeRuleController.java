@@ -71,7 +71,7 @@ ________________________________________________________________________________
      * @throws JAXBException if there is an error parsing the XML request body
      */
     @PostMapping(path="/fee/base", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Add regional base fee rule. You can do it with city name or wmo code.")
+    @Operation(summary = "Add regional base fee rule. You can do it with city name or wmo code. By default all weather fees apply to new vehicle types.")
     public ResponseEntity<RegionalBaseFeeRule> addRegionalBaseFeeRule(
             @Parameter(name = "city", description = "City name", example = "")
             @RequestParam(required = false) String city,

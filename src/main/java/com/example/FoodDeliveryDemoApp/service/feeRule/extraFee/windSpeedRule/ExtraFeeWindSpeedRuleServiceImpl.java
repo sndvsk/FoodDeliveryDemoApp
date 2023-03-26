@@ -139,6 +139,12 @@ public class ExtraFeeWindSpeedRuleServiceImpl implements ExtraFeeWindSpeedRuleSe
             throw new CustomBadRequestException(
                     "Provided wind speed range is overlapping with an existing range in the database");
         }
+
+        Long overlappingInsideRanges = windSpeedRuleRepository.countInsideRange(startWindSpeedRange, endWindSpeedRange);
+        if (overlappingInsideRanges > 0) {
+            throw new CustomBadRequestException(
+                    "Provided wind speed range is overlapping with an existing range in the database");
+        }
     }
 
     /**

@@ -160,6 +160,12 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
 
         Function<WeatherData, Double> feeFunction = vehicleTypeToFeeFunction.get(vehicleType);
 
+        if (feeFunction == null) {
+            feeFunction = weatherData1 -> calculateAirTemperatureFee(weatherData.getAirTemperature())
+                    + calculateWindSpeedFee(weatherData.getWindSpeed())
+                    + calculateWeatherPhenomenonFee(weatherData.getWeatherPhenomenon());
+        }
+
         return feeFunction.apply(weatherData);
     }
 
