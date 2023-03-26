@@ -1,6 +1,7 @@
 package com.example.FoodDeliveryDemoApp.repository;
 
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,7 +23,8 @@ public interface WeatherDataRepository extends JpaRepository<WeatherData, Long> 
 
     Optional<WeatherData> findByStationNameAndTimestamp(String stationName, Instant timestamp);
 
-    Optional<WeatherData> findById(Long id);
+    @NotNull
+    Optional<WeatherData> findById(@NotNull Long id);
 
     //List<WeatherData> findByStationNameAndTimestampBetween(String city, Instant start, Instant end);
 

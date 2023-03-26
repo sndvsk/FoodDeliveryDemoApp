@@ -57,6 +57,9 @@ class FoodDeliveryDemoAppApplicationTests {
 	@Autowired
 	private WeatherDataServiceImpl weatherDataService;
 
+	@Autowired
+	private FoodDeliveryDemoAppApplication application;
+
 
 	@Test
 	void contextLoads() {
@@ -75,6 +78,7 @@ class FoodDeliveryDemoAppApplicationTests {
 		assertThat(regionalBaseFeeRuleService).isNotNull();
 		assertThat(weatherDataService).isNotNull();
 
+		assertThat(application).isNotNull();
 	}
 
 }

@@ -49,12 +49,15 @@ public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeather
      * @param fee a Double representing the fee to be validated
      * @throws CustomBadRequestException if the provided weather phenomenon name doesn't contain only letters
      * @throws CustomBadRequestException if the provided fee is not positive
-     * @throws CustomNotFoundException if a rule for the provided weather phenomenon name and fee already exists
+     * @throws CustomBadRequestException if a rule for the provided weather phenomenon name and fee already exists
      */
     private void validateInputs(String weatherPhenomenon, Double fee) throws CustomBadRequestException, CustomNotFoundException {
 
-        if (weatherPhenomenon != null && !weatherPhenomenon.chars().allMatch(Character::isLetter)) {
-            throw new CustomBadRequestException(String.format("Weather phenomenon name: ´%s´ must contain only letters", weatherPhenomenon));
+        if (weatherPhenomenon != null) {
+            weatherPhenomenon = weatherPhenomenon.replaceAll("\u00A0", "").replaceAll("\\u00A0", "").replaceAll(" ", "");
+            if (!weatherPhenomenon.chars().allMatch(Character::isLetter)) {
+                throw new CustomBadRequestException(String.format("Weather phenomenon name: ´%s´ must contain only letters", weatherPhenomenon));
+            }
         }
 
         if (fee != null && fee < 0.0) {
@@ -63,7 +66,7 @@ public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeather
 
         boolean rule = doesWeatherPhenomenonRuleWithThisFeeExist(weatherPhenomenon, fee);
         if (rule) {
-            throw new CustomNotFoundException(String.format("Extra fee rule for this: ´%s´ weather phenomenon and fee: ´%s´ already exists", weatherPhenomenon, fee));
+            throw new CustomBadRequestException(String.format("Extra fee rule for this: ´%s´ weather phenomenon and fee: ´%s´ already exists", weatherPhenomenon, fee));
         }
 
     }
@@ -114,7 +117,6 @@ public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeather
      * @return an ExtraFeeWeatherPhenomenonRule object representing the newly added rule
      */
     public ExtraFeeWeatherPhenomenonRule addExtraFeeWeatherPhenomenonRule(String weatherPhenomenonName, Double fee) {
-
         validateRequiredInputs(weatherPhenomenonName, fee);
         validateInputs(weatherPhenomenonName, fee);
 

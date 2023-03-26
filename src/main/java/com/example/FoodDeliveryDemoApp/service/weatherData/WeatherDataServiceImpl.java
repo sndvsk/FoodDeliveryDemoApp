@@ -358,7 +358,7 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      * @return a list of DTO Station objects containing the weather data for the needed cities
      * @throws JAXBException if there is an error unmarshalling the XML response
      */
-    public List<WeatherDataDTO.Station> filterResponse(String response) throws JAXBException {
+    private List<WeatherDataDTO.Station> filterResponse(String response) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(WeatherDataDTO.Observations.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         StringReader reader = new StringReader(response);
@@ -383,7 +383,7 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      * @param stations a list of DTO Station objects containing weather data
      * @return a list of WeatherData objects created from the Station objects
      */
-    public List<WeatherData> convertStationsToWeatherData(List<WeatherDataDTO.Station> stations) {
+    private List<WeatherData> convertStationsToWeatherData(List<WeatherDataDTO.Station> stations) {
 
         TreeMap<String, String> fixedNaming = getFixedNaming();
 
@@ -410,7 +410,7 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      *
      * @return a list of WeatherData objects representing the last data entry for all cities
      */
-    public List<WeatherData> getLastWeatherDataForAllCities() {
+    private List<WeatherData> getLastWeatherDataForAllCitiesFromRepository() {
         Instant lastEntryTimestamp = weatherDataRepository.findTopByOrderByIdDesc().getTimestamp();
         return weatherDataRepository.findByTimestamp(lastEntryTimestamp);
     }
@@ -420,7 +420,7 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      *
      * @param weatherDataList the list of weather data to be saved
      */
-    public void saveWeatherData(List<WeatherData> weatherDataList) {
+    private void saveWeatherData(List<WeatherData> weatherDataList) {
         for (WeatherData weatherData: weatherDataList) {
             weatherDataRepository.save(weatherData);
         }
@@ -466,8 +466,8 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      * @param cities a string representing a comma-separated list of cities to retrieve weather data for (optional)
      * @return a list of WeatherData objects representing the latest weather data for all or a specific set of cities
      */
-    public List<WeatherData> getWeatherDataFromRepository(String cities) {
-        List<WeatherData> lastWeatherData = getLastWeatherDataForAllCities();
+    public List<WeatherData> getLastWeatherDataForAllCities(String cities) {
+        List<WeatherData> lastWeatherData = getLastWeatherDataForAllCitiesFromRepository();
 
         if (cities != null) {
             String finalCities = cities.toLowerCase(Locale.ROOT);

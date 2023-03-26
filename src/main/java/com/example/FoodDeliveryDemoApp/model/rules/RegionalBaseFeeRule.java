@@ -38,6 +38,7 @@ public class RegionalBaseFeeRule implements FeeRule {
         return id;
     }
 
+    @SuppressWarnings("unused")
     public void setId(Long id) {
         this.id = id;
     }
@@ -75,4 +76,6 @@ public class RegionalBaseFeeRule implements FeeRule {
     public void setFee(Double fee) {
         this.fee = fee;
     }
+
+
 }

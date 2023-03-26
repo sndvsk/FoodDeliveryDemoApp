@@ -77,12 +77,6 @@ public class ExtraFeeWindSpeedRuleServiceImpl implements ExtraFeeWindSpeedRuleSe
             throw new CustomBadRequestException(String.format("Extra fee rule for this wind speed range: start: ´%s´, end: ´%s´ and fee: ´%s´ already exists", startWindSpeedRange, endWindSpeedRange, fee));
         }
 
-        // Check if the range is overlapping with any existing range in the database
-        Long overlappingRanges = windSpeedRuleRepository.countOverlappingRanges(startWindSpeedRange, endWindSpeedRange);
-        if (overlappingRanges > 0) {
-            throw new CustomBadRequestException("Provided wind speed range is overlapping with an existing range in the database");
-        }
-
     }
 
     /**
@@ -112,6 +106,21 @@ public class ExtraFeeWindSpeedRuleServiceImpl implements ExtraFeeWindSpeedRuleSe
         validateInputs(startWindSpeedRange, endWindSpeedRange, fee);
 
         return rule1;
+    }
+
+    /**
+     * Validates and checks if the wind speed range overlaps with any existing range in the database.
+     *
+     * @param startWindSpeedRange the start value of the wind speed range to be added.
+     * @param endWindSpeedRange the end value of the wind speed range to be added
+     * @throws CustomBadRequestException if the wind speed range overlaps with an existing range in the database
+     */
+    private void addValidateInputs(Double startWindSpeedRange, Double endWindSpeedRange) {
+        // Check if the range is overlapping with any existing range in the database
+        Long overlappingRanges = windSpeedRuleRepository.countOverlappingRanges(startWindSpeedRange, endWindSpeedRange);
+        if (overlappingRanges > 0) {
+            throw new CustomBadRequestException("Provided wind speed range is overlapping with an existing range in the database");
+        }
     }
 
     /**
@@ -166,6 +175,7 @@ public class ExtraFeeWindSpeedRuleServiceImpl implements ExtraFeeWindSpeedRuleSe
 
         validateRequiredInputs(startWindSpeedRange, endWindSpeedRange, fee);
         validateInputs(startWindSpeedRange, endWindSpeedRange, fee);
+        addValidateInputs(startWindSpeedRange, endWindSpeedRange);
 
         ExtraFeeWindSpeedRule rule = new ExtraFeeWindSpeedRule();
 
@@ -199,7 +209,6 @@ public class ExtraFeeWindSpeedRuleServiceImpl implements ExtraFeeWindSpeedRuleSe
      * @return the updated ExtraFeeWindSpeedRule object
      */
     public ExtraFeeWindSpeedRule patchExtraFeeWindSpeedRuleById(Long id, Double startWindSpeedRange, Double endWindSpeedRange, Double fee) {
-
         ExtraFeeWindSpeedRule patchedRule = patchValidateInputs(id, startWindSpeedRange, endWindSpeedRange, fee);
 
         if (startWindSpeedRange != null) {

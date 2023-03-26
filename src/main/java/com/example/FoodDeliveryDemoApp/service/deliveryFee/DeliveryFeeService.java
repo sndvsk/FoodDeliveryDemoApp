@@ -14,24 +14,9 @@ public interface DeliveryFeeService {
 
     DeliveryFee getDeliveryFeeById(Long id) throws CustomNotFoundException;
 
+    @SuppressWarnings("UnusedReturnValue")
     DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType) throws CustomBadRequestException;
 
     DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime) throws CustomBadRequestException;
-
-    Double calculateDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime);
-
-    Double calculateRegionalBaseFee(String city, String vehicleType);
-
-    Double calculateWeatherConditionFee(String city, String vehicleType, OffsetDateTime dateTime);
-
-    double calculateAirTemperatureFee(double airTemperature) throws CustomBadRequestException;
-
-    double calculateWindSpeedFee(Double windSpeed) throws CustomBadRequestException;
-
-    Double calculateWeatherPhenomenonFee(String weatherPhenomenon) throws CustomBadRequestException;
-
-    DeliveryFee createNewDeliveryFee(String city, String vehicleType, double deliveryFeePrice, OffsetDateTime dateTime);
-
-    void saveDeliveryFee(DeliveryFee deliveryFee);
 
 }

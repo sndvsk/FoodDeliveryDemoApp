@@ -3,7 +3,6 @@ package com.example.FoodDeliveryDemoApp.controller;
 import com.example.FoodDeliveryDemoApp.dto.WeatherDataDTO;
 import com.example.FoodDeliveryDemoApp.service.externalWeatherData.ExternalWeatherDataService;
 import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataService;
-import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataServiceImpl;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -52,7 +51,7 @@ public class ExternalWeatherDataController {
 
         List<WeatherData> lastWeatherData = weatherDataService.getAndSaveWeatherDataFromExternalService();
 
-        return new ResponseEntity<>(lastWeatherData, HttpStatus.OK);
+        return new ResponseEntity<>(lastWeatherData, HttpStatus.CREATED);
     }
 
     /**

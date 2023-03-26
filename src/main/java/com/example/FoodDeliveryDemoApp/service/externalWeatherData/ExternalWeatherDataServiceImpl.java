@@ -31,6 +31,17 @@ public class ExternalWeatherDataServiceImpl implements ExternalWeatherDataServic
                 .build();
     }
 
+    private WeatherDataDTO.Observations getObservations() throws JAXBException {
+        String response = retrieveWeatherObservations();
+        JAXBContext jaxbContext = JAXBContext.newInstance(WeatherDataDTO.Observations.class);
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        StringReader reader = new StringReader(response);
+        @SuppressWarnings("UnnecessaryLocalVariable")
+        WeatherDataDTO.Observations observations = (WeatherDataDTO.Observations) unmarshaller.unmarshal(reader);
+
+        return observations;
+    }
+
     /**
      * Retrieves weather observations from an external service using WebClient.
      *
@@ -65,17 +76,6 @@ public class ExternalWeatherDataServiceImpl implements ExternalWeatherDataServic
         }
     }
 
-    private WeatherDataDTO.Observations getObservations() throws JAXBException {
-        String response = retrieveWeatherObservations();
-        JAXBContext jaxbContext = JAXBContext.newInstance(WeatherDataDTO.Observations.class);
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        StringReader reader = new StringReader(response);
-        @SuppressWarnings("UnnecessaryLocalVariable")
-        WeatherDataDTO.Observations observations = (WeatherDataDTO.Observations) unmarshaller.unmarshal(reader);
-
-        return observations;
-    }
-
     public TreeMap<String, Long> getPossibleStationNamesAndCodes() throws JAXBException {
         WeatherDataDTO.Observations observations = getObservations();
 
@@ -107,7 +107,15 @@ public class ExternalWeatherDataServiceImpl implements ExternalWeatherDataServic
         return stationNamesAndCodes;
     }
 
-    public TreeMap<String, String> fixedNaming() {
+    // todo make this mapping automated
+    /**
+     * This method returns a TreeMap that contains a fixed naming mapping.
+     *
+     * Each key represents the original name, while the value represents
+     * the new fixed name.
+     * @return a TreeMap<String, String> object containing the fixed naming mapping.
+     */
+    public final TreeMap<String, String> fixedNaming() {
         TreeMap<String, String> nameMapping = new TreeMap<>();
         nameMapping.put("Aesoo", "aesoo");
         nameMapping.put("Ahja", "ahja");

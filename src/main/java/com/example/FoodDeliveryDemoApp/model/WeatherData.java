@@ -10,7 +10,6 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
-@SuppressWarnings("unused")
 @Entity
 @Table(name = "weather_data")
 public class WeatherData {
@@ -52,6 +51,15 @@ public class WeatherData {
         this.timestamp = timestamp.truncatedTo(ChronoUnit.SECONDS);
     }
 
+    public WeatherData(String stationName, Long wmoCode, Double airTemperature, Double windSpeed, String weatherPhenomenon, Instant timestamp) {
+        this.stationName = stationName;
+        this.wmoCode = wmoCode;
+        this.airTemperature = airTemperature;
+        this.windSpeed = windSpeed;
+        this.weatherPhenomenon = weatherPhenomenon;
+        this.timestamp = timestamp;
+    }
+
     public WeatherData() {
     }
 
@@ -59,6 +67,7 @@ public class WeatherData {
         return id;
     }
 
+    @SuppressWarnings("unused")
     public void setId(Long id) {
         this.id = id;
     }
@@ -124,6 +133,7 @@ public class WeatherData {
         return rest_timestamp;
     }
 
+    @SuppressWarnings("unused")
     public void setRest_timestamp(OffsetDateTime rest_timestamp) {
         this.rest_timestamp = rest_timestamp;
     }

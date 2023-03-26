@@ -30,6 +30,7 @@ public class ExtraFeeWeatherPhenomenonRule implements FeeRule {
         return id;
     }
 
+    @SuppressWarnings("unused")
     public void setId(Long id) {
         this.id = id;
     }

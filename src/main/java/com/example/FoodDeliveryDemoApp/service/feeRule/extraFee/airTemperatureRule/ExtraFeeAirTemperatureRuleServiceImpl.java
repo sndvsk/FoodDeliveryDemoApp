@@ -54,7 +54,6 @@ public class ExtraFeeAirTemperatureRuleServiceImpl implements ExtraFeeAirTempera
      * @param fee fee to be charged for the extra fee air temperature rule
      * @throws CustomBadRequestException if fee is not positive
      * @throws CustomBadRequestException if air temperature is lower than absolute zero
-     * @throws CustomBadRequestException if the provided air temperature range is overlapping with any existing range in the database
      * @throws CustomBadRequestException if there is already an existing rule for the given air temperature range with the provided fee
      */
     private void validateInputs(Double startTemperatureRange, Double endTemperatureRange, Double fee) throws  CustomBadRequestException {
@@ -70,7 +69,7 @@ public class ExtraFeeAirTemperatureRuleServiceImpl implements ExtraFeeAirTempera
             throw new CustomBadRequestException(String.format("Provided air temperature: ´%s´ is lower than absolute zero.", endTemperatureRange));
         }
         //noinspection ConstantConditions
-        if (endTemperatureRange < startTemperatureRange) {
+        if (Math.abs(endTemperatureRange) < Math.abs(startTemperatureRange)) {
             throw new CustomBadRequestException(String.format("Provided air temperature range is invalid, end: ´%s´ is lower than start: ´%s´", endTemperatureRange, startTemperatureRange));
         }
 
@@ -79,11 +78,6 @@ public class ExtraFeeAirTemperatureRuleServiceImpl implements ExtraFeeAirTempera
             throw new CustomBadRequestException(String.format("Extra fee rule for this air temperature range: start: ´%s´, end: ´%s´ and fee: ´%s´ already exists", startTemperatureRange, endTemperatureRange, fee));
         }
 
-        // Check if the range is overlapping with any existing range in the database
-        Long overlappingRanges = airTemperatureRuleRepository.countOverlappingRanges(startTemperatureRange, endTemperatureRange);
-        if (overlappingRanges > 0) {
-            throw new CustomBadRequestException("Provided air temperature range is overlapping with an existing range in the database");
-        }
     }
 
     /**
@@ -114,6 +108,23 @@ public class ExtraFeeAirTemperatureRuleServiceImpl implements ExtraFeeAirTempera
         validateInputs(startTemperatureRange, endTemperatureRange, fee);
 
         return rule1;
+    }
+
+
+    /**
+     * Validates the input range for air temperature rules to ensure it does not overlap with an existing range in the database.
+     *
+     * Throws a CustomBadRequestException with a message if an overlapping range exists in the database
+     * @param startTemperatureRange the start of the input temperature range
+     * @param endTemperatureRange the end of the input temperature range
+     * @throws CustomBadRequestException if the provided air temperature range is overlapping with any existing range in the database
+     */
+    private void addValidateInputs(Double startTemperatureRange, Double endTemperatureRange) {
+        // Check if the range is overlapping with any existing range in the database
+        Long overlappingRanges = airTemperatureRuleRepository.countOverlappingRanges(startTemperatureRange, endTemperatureRange);
+        if (overlappingRanges > 0) {
+            throw new CustomBadRequestException("Provided air temperature range is overlapping with an existing range in the database");
+        }
     }
 
     /**
@@ -168,6 +179,7 @@ public class ExtraFeeAirTemperatureRuleServiceImpl implements ExtraFeeAirTempera
 
         validateRequiredInputs(startTemperatureRange, endTemperatureRange, fee);
         validateInputs(startTemperatureRange, endTemperatureRange, fee);
+        addValidateInputs(startTemperatureRange, endTemperatureRange);
 
         ExtraFeeAirTemperatureRule rule = new ExtraFeeAirTemperatureRule();
 
@@ -201,7 +213,6 @@ public class ExtraFeeAirTemperatureRuleServiceImpl implements ExtraFeeAirTempera
      * @return the updated ExtraFeeAirTemperatureRule object
      */
     public ExtraFeeAirTemperatureRule patchExtraFeeAirTemperatureRuleById(Long id, Double startTemperatureRange, Double endTemperatureRange, Double fee) {
-
         ExtraFeeAirTemperatureRule patchedRule = patchValidateInputs(id, startTemperatureRange, endTemperatureRange, fee);
 
         if (startTemperatureRange != null) {

@@ -1,4 +1,4 @@
-package com.example.FoodDeliveryDemoApp.service;
+package com.example.FoodDeliveryDemoApp.unit.service;
 
 import com.example.FoodDeliveryDemoApp.model.rules.RegionalBaseFeeRule;
 import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeAirTemperatureRule;
@@ -20,9 +20,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+//import java.time.Instant;
+//import java.time.LocalDateTime;
+//import java.time.ZoneOffset;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,7 +73,7 @@ public class DeliveryFeeServiceTests {
 
     // todo add tests
 
-    // Instant instant = Instant.parse("2023-03-20T12:15:00Z");
+    // Instant instant = Instant.parse("2023-03-20T12:15:00Z"); can be used in new tests
     // LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
 
     private WeatherData setupWeatherData(String city,
@@ -405,6 +405,7 @@ public class DeliveryFeeServiceTests {
         double windSpeedFee = -1;
         double weatherPhenomenonFee = 0.0;
         double weatherConditionFee = airTemperatureFee + windSpeedFee + weatherPhenomenonFee;
+        //noinspection unused
         double deliveryFee = regionalBaseFee + weatherConditionFee;
 
         TreeMap<String, List<String>> citiesAndVehicleTypes = citiesAndVehicleTypes();
@@ -471,6 +472,7 @@ public class DeliveryFeeServiceTests {
         double windSpeedFee = 0.5;
         double weatherPhenomenonFee = -1;
         double weatherConditionFee = airTemperatureFee + windSpeedFee + weatherPhenomenonFee;
+        //noinspection unused
         double deliveryFee = regionalBaseFee + weatherConditionFee;
 
         TreeMap<String, List<String>> citiesAndVehicleTypes = citiesAndVehicleTypes();

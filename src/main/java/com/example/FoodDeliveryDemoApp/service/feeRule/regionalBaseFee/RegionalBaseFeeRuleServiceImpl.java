@@ -140,9 +140,11 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
             throw new CustomBadRequestException(String.format("Fee: ´%s´ must be positive", fee));
         }
 
-        if (vehicleType != null && !vehicleType.chars().allMatch(Character::isLetter)) {
-            vehicleType = vehicleType.trim().toLowerCase(Locale.ROOT);
-            throw new CustomBadRequestException(String.format("Vehicle type: ´%s´ must contain only letters", vehicleType));
+        if (vehicleType != null ) {
+            vehicleType = vehicleType.replaceAll(" ", "").replaceAll("\u00A0", "").replaceAll("\\u00A0", "");
+            if (!vehicleType.chars().allMatch(Character::isLetter)) {
+                throw new CustomBadRequestException(String.format("Vehicle type: ´%s´ must contain only letters", vehicleType));
+            }
         }
 
         if (city != null) {
@@ -282,10 +284,9 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
      * @throws CustomNotFoundException if no rule exists with the provided id
      */
     public RegionalBaseFeeRule patchRegionalBaseFeeRuleById(Long id, String city, Long wmoCode, String vehicleType, Double fee) throws JAXBException, CustomNotFoundException {
-
         TreeMap<String, Long> cityNamesAndCodes = getCityNamesAndCodes();
 
-        String check = validateCityAndWmoCode(city, wmoCode, cityNamesAndCodes);
+        validateCityAndWmoCode(city, wmoCode, cityNamesAndCodes);
         validateInputs(city, wmoCode, vehicleType, fee, cityNamesAndCodes);
 
         Optional<RegionalBaseFeeRule> rule = baseFeeRuleRepository.findById(id);

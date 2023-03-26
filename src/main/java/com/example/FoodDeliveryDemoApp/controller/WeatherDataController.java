@@ -39,7 +39,7 @@ public class WeatherDataController {
      */
     @GetMapping(path= "/cities", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get latest weather data from Estonian Environment Agency for Tallinn, Tartu and Pärnu")
-    public ResponseEntity<List<WeatherData>> getWeatherObservations() throws JAXBException {
+    public ResponseEntity<List<WeatherData>> getWeatherDataForAllSupportedCities() throws JAXBException {
 
         List<WeatherData> lastWeatherData = weatherDataService.getWeatherDataFromExternalService();
 
@@ -54,10 +54,10 @@ public class WeatherDataController {
      */
     @GetMapping(path ="/cities/{cities}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get latest weather data for supported cities")
-    public ResponseEntity<List<WeatherData>> getWeatherDataFromService(
+    public ResponseEntity<List<WeatherData>> getWeatherDataForSelectedCities(
             @PathVariable(value = "cities") String cities) {
 
-        List<WeatherData> lastWeatherData = weatherDataService.getWeatherDataFromRepository(cities);
+        List<WeatherData> lastWeatherData = weatherDataService.getLastWeatherDataForAllCities(cities);
 
         return new ResponseEntity<>(lastWeatherData, HttpStatus.OK);
     }
@@ -107,7 +107,7 @@ public class WeatherDataController {
 
         WeatherData weatherData = weatherDataService.addWeatherData(stationName, wmoCode, airTemperature, windSpeed, weatherPhenomenon, dateTime);
 
-        return new ResponseEntity<>(weatherData, HttpStatus.OK);
+        return new ResponseEntity<>(weatherData, HttpStatus.CREATED);
     }
 
     /**

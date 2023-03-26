@@ -98,6 +98,149 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
     }
 
     /**
+     * Calculates the delivery fee for a given city and vehicle type at a specific date and time.
+     * It takes into account the regional base fee and the weather condition fee.
+     *
+     * @param city the city for which to calculate the delivery fee
+     * @param vehicleType the type of vehicle used for delivery
+     * @param dateTime (optional) the date and time for which to calculate the delivery fee. If null, the current date and time will be used
+     * @return the delivery fee for the given city, vehicle type, and datetime if provided
+     */
+    private Double calculateDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime) {
+
+        double regionalFee = calculateRegionalBaseFee(city, vehicleType);
+        double weatherConditionFee = calculateWeatherConditionFee(city, vehicleType, dateTime);
+
+        return regionalFee + weatherConditionFee;
+    }
+
+    /**
+     * Calculates the weather condition fee for a given city and vehicle type. It takes into account the air temperature, wind speed and weather phenomenon.
+     *
+     * @param city the city for which to calculate the delivery fee
+     * @param vehicleType the type of vehicle used for delivery
+     * @return the weather condition fee for the city and vehicle type
+     */
+    private Double calculateRegionalBaseFee(String city, String vehicleType) {
+        RegionalBaseFeeRule rule = baseFeeRuleService.getByCityAndVehicleType(city, vehicleType);
+        @SuppressWarnings("UnnecessaryLocalVariable")
+        Double fee = rule.getFee();
+        return fee;
+    }
+
+    /**
+     * Calculates the weather condition fee for a given city and vehicle type at a specific datetime. It takes into account the air temperature, wind speed and weather phenomenon.
+     *
+     * @param city the city for which to calculate the delivery fee
+     * @param vehicleType the type of vehicle used for delivery
+     * @param dateTime (optional) the date and time for which to calculate the delivery fee. If null, the current date and time will be used
+     * @return the weather condition fee for the specified city, vehicle type, and datetime
+     */
+    private Double calculateWeatherConditionFee(String city, String vehicleType, OffsetDateTime dateTime) {
+
+        WeatherData weatherData = weatherDataService.getLastDataByCity(city, dateTime);
+
+        // A map that maps each vehicle type to its corresponding fee calculation function
+        Map<String, Function<WeatherData, Double>> vehicleTypeToFeeFunction = Map.of(
+                "car", weatherData1 -> 0.0,
+                "scooter", weatherData1 -> calculateAirTemperatureFee(weatherData1.getAirTemperature())
+                        + calculateWeatherPhenomenonFee(weatherData1.getWeatherPhenomenon()),
+                "bike", weatherData1 -> calculateAirTemperatureFee(weatherData1.getAirTemperature())
+                        + calculateWindSpeedFee(weatherData1.getWindSpeed())
+                        + calculateWeatherPhenomenonFee(weatherData1.getWeatherPhenomenon())
+        );
+
+        Function<WeatherData, Double> feeFunction = vehicleTypeToFeeFunction.get(vehicleType);
+
+        return feeFunction.apply(weatherData);
+    }
+
+    /**
+     * Calculates the fee based on the air temperature.
+     *
+     * @param airTemperature the air temperature
+     * @return the fee based on the air temperature
+     */
+    private double calculateAirTemperatureFee(double airTemperature) throws CustomBadRequestException {
+        ExtraFeeAirTemperatureRule rule = airTemperatureRuleService.getByTemperature(airTemperature);
+        Double fee = rule.getFee();
+        if (fee < 0) {
+            throw new CustomBadRequestException(String.format("Usage of selected vehicle type is forbidden: air temperature ´%s´ is too low", airTemperature));
+        }
+        return fee;
+    }
+
+    /**
+     * Calculates the fee based on the wind speed. (only for bike)
+     *
+     * @param windSpeed the wind speed
+     * @return the fee based on the wind speed
+     * @throws CustomBadRequestException if the wind speed is too high
+     */
+    private double calculateWindSpeedFee(Double windSpeed) throws CustomBadRequestException {
+        ExtraFeeWindSpeedRule rule = windSpeedRuleService.getByWindSpeed(windSpeed);
+        Double fee = rule.getFee();
+        if (fee < 0) {
+            throw new CustomBadRequestException(String.format("Usage of selected vehicle type is forbidden: wind speed ´%s´ is too high", windSpeed));
+        }
+        return fee;
+    }
+
+    /**
+     * Calculates the fee based on the weather phenomenon. (only for scooter and bike)
+     *
+     * @param weatherPhenomenon the name of weather phenomenon
+     * @return the fee based on the weather phenomenon
+     * @throws CustomBadRequestException if usage of selected vehicle type is forbidden in those weather conditions
+     */
+    private Double calculateWeatherPhenomenonFee(String weatherPhenomenon) throws CustomBadRequestException {
+        ExtraFeeWeatherPhenomenonRule rule = weatherPhenomenonRuleService.getByWeatherPhenomenonName(weatherPhenomenon);
+        Double fee = rule.getFee();
+        if (fee < 0) {
+            throw new CustomBadRequestException(String.format("Usage of selected vehicle type is forbidden: weather phenomenon ´%s´ is dangerous", weatherPhenomenon));
+        }
+        return fee;
+    }
+
+    /**
+     * Creates a new DeliveryFee object with the specified parameters.
+     *
+     * @param city the city for which to calculate the delivery fee
+     * @param vehicleType the type of vehicle used for delivery
+     * @param deliveryFeePrice the calculated delivery fee
+     * @param dateTime (optional) the date and time for which to calculate the delivery fee. If null, the current date and time will be used
+     * @return a new DeliveryFee object with the specified parameters
+     */
+    private DeliveryFee createNewDeliveryFee(String city, String vehicleType, double deliveryFeePrice, OffsetDateTime dateTime) {
+
+        DeliveryFee deliveryFee = new DeliveryFee();
+        deliveryFee.setCity(city);
+        deliveryFee.setVehicleType(vehicleType);
+        deliveryFee.setDeliveryFee(deliveryFeePrice);
+
+        WeatherData weatherData = weatherDataService.getLastDataByCity(city, dateTime);
+
+        if (dateTime == null) {
+            deliveryFee.setTimestamp(Instant.now());
+        } else {
+            deliveryFee.setTimestamp(weatherData.getTimestamp());
+        }
+
+        deliveryFee.setWeatherId(weatherData.getId());
+
+        return deliveryFee;
+    }
+
+    /**
+     * Saves the order data to the repository.
+     *
+     * @param deliveryFee the delivery fee object to be saved
+     */
+    private void saveDeliveryFee(DeliveryFee deliveryFee) {
+        deliveryFeeRepository.save(deliveryFee);
+    }
+
+    /**
      * Retrieves a list of all DeliveryFee objects from the deliveryFeeRepository.
      *
      * @return a list of all DeliveryFee objects in the deliveryFeeRepository
@@ -157,149 +300,6 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
 
         return returnDeliveryFee;
 
-    }
-
-    /**
-     * Calculates the delivery fee for a given city and vehicle type at a specific date and time.
-     * It takes into account the regional base fee and the weather condition fee.
-     *
-     * @param city the city for which to calculate the delivery fee
-     * @param vehicleType the type of vehicle used for delivery
-     * @param dateTime (optional) the date and time for which to calculate the delivery fee. If null, the current date and time will be used
-     * @return the delivery fee for the given city, vehicle type, and datetime if provided
-     */
-    public Double calculateDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime) {
-
-        double regionalFee = calculateRegionalBaseFee(city, vehicleType);
-        double weatherConditionFee = calculateWeatherConditionFee(city, vehicleType, dateTime);
-
-        return regionalFee + weatherConditionFee;
-    }
-
-    /**
-     * Calculates the weather condition fee for a given city and vehicle type. It takes into account the air temperature, wind speed and weather phenomenon.
-     *
-     * @param city the city for which to calculate the delivery fee
-     * @param vehicleType the type of vehicle used for delivery
-     * @return the weather condition fee for the city and vehicle type
-     */
-    public Double calculateRegionalBaseFee(String city, String vehicleType) {
-        RegionalBaseFeeRule rule = baseFeeRuleService.getByCityAndVehicleType(city, vehicleType);
-        @SuppressWarnings("UnnecessaryLocalVariable")
-        Double fee = rule.getFee();
-        return fee;
-    }
-
-    /**
-     * Calculates the weather condition fee for a given city and vehicle type at a specific datetime. It takes into account the air temperature, wind speed and weather phenomenon.
-     *
-     * @param city the city for which to calculate the delivery fee
-     * @param vehicleType the type of vehicle used for delivery
-     * @param dateTime (optional) the date and time for which to calculate the delivery fee. If null, the current date and time will be used
-     * @return the weather condition fee for the specified city, vehicle type, and datetime
-     */
-    public Double calculateWeatherConditionFee(String city, String vehicleType, OffsetDateTime dateTime) {
-
-        WeatherData weatherData = weatherDataService.getLastDataByCity(city, dateTime);
-
-        // A map that maps each vehicle type to its corresponding fee calculation function
-        Map<String, Function<WeatherData, Double>> vehicleTypeToFeeFunction = Map.of(
-                "car", weatherData1 -> 0.0,
-                "scooter", weatherData1 -> calculateAirTemperatureFee(weatherData1.getAirTemperature())
-                        + calculateWeatherPhenomenonFee(weatherData1.getWeatherPhenomenon()),
-                "bike", weatherData1 -> calculateAirTemperatureFee(weatherData1.getAirTemperature())
-                        + calculateWindSpeedFee(weatherData1.getWindSpeed())
-                        + calculateWeatherPhenomenonFee(weatherData1.getWeatherPhenomenon())
-        );
-
-        Function<WeatherData, Double> feeFunction = vehicleTypeToFeeFunction.get(vehicleType);
-
-        return feeFunction.apply(weatherData);
-    }
-
-    /**
-     * Calculates the fee based on the air temperature.
-     *
-     * @param airTemperature the air temperature
-     * @return the fee based on the air temperature
-     */
-    public double calculateAirTemperatureFee(double airTemperature) throws CustomBadRequestException {
-        ExtraFeeAirTemperatureRule rule = airTemperatureRuleService.getByTemperature(airTemperature);
-        Double fee = rule.getFee();
-        if (fee < 0) {
-            throw new CustomBadRequestException(String.format("Usage of selected vehicle type is forbidden: air temperature ´%s´ is too low", airTemperature));
-        }
-        return fee;
-    }
-
-    /**
-     * Calculates the fee based on the wind speed. (only for bike)
-     *
-     * @param windSpeed the wind speed
-     * @return the fee based on the wind speed
-     * @throws CustomBadRequestException if the wind speed is too high
-     */
-    public double calculateWindSpeedFee(Double windSpeed) throws CustomBadRequestException {
-        ExtraFeeWindSpeedRule rule = windSpeedRuleService.getByWindSpeed(windSpeed);
-        Double fee = rule.getFee();
-        if (fee < 0) {
-            throw new CustomBadRequestException(String.format("Usage of selected vehicle type is forbidden: wind speed ´%s´ is too high", windSpeed));
-        }
-        return fee;
-    }
-
-    /**
-     * Calculates the fee based on the weather phenomenon. (only for scooter and bike)
-     *
-     * @param weatherPhenomenon the name of weather phenomenon
-     * @return the fee based on the weather phenomenon
-     * @throws CustomBadRequestException if usage of selected vehicle type is forbidden in those weather conditions
-     */
-    public Double calculateWeatherPhenomenonFee(String weatherPhenomenon) throws CustomBadRequestException {
-        ExtraFeeWeatherPhenomenonRule rule = weatherPhenomenonRuleService.getByWeatherPhenomenonName(weatherPhenomenon);
-        Double fee = rule.getFee();
-        if (fee < 0) {
-            throw new CustomBadRequestException(String.format("Usage of selected vehicle type is forbidden: weather phenomenon ´%s´ is dangerous", weatherPhenomenon));
-        }
-        return fee;
-    }
-
-    /**
-     * Creates a new DeliveryFee object with the specified parameters.
-     *
-     * @param city the city for which to calculate the delivery fee
-     * @param vehicleType the type of vehicle used for delivery
-     * @param deliveryFeePrice the calculated delivery fee
-     * @param dateTime (optional) the date and time for which to calculate the delivery fee. If null, the current date and time will be used
-     * @return a new DeliveryFee object with the specified parameters
-     */
-    public DeliveryFee createNewDeliveryFee(String city, String vehicleType, double deliveryFeePrice, OffsetDateTime dateTime) {
-
-        DeliveryFee deliveryFee = new DeliveryFee();
-        deliveryFee.setCity(city);
-        deliveryFee.setVehicleType(vehicleType);
-        deliveryFee.setDeliveryFee(deliveryFeePrice);
-
-        WeatherData weatherData = weatherDataService.getLastDataByCity(city, dateTime);
-
-        if (dateTime == null) {
-            deliveryFee.setTimestamp(Instant.now());
-        } else {
-            deliveryFee.setTimestamp(weatherData.getTimestamp());
-        }
-
-        deliveryFee.setWeatherId(weatherData.getId());
-
-        return deliveryFee;
-    }
-
-    /**
-     * Saves the order data to the repository.
-     *
-     * @param deliveryFee the delivery fee object to be saved
-     */
-    public void saveDeliveryFee(DeliveryFee deliveryFee) {
-        deliveryFeeRepository.save(deliveryFee);
     }
 
 }

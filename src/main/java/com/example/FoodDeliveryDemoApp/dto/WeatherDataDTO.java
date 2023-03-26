@@ -5,6 +5,7 @@ import jakarta.xml.bind.annotation.*;
 import java.time.Instant;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class WeatherDataDTO {
 
     @SuppressWarnings({"unused"})
@@ -72,7 +73,6 @@ public class WeatherDataDTO {
         }
     }
 
-    @SuppressWarnings("unused")
     @XmlRootElement(name = "observations")
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class Observations {
