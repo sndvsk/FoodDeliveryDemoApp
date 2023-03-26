@@ -21,6 +21,7 @@ public class CustomBadRequestException extends IllegalArgumentException {
         this.message = message;
     }
 
+
     public CustomBadRequestException(List<CustomBadRequestException> exceptions) {
         super(exceptions.get(0).getMessage());
     }
