@@ -86,7 +86,10 @@ public class ExtraFeeWindSpeedRuleFromControllerIT {
 
         // Send a POST request to the needed endpoint
         ResponseEntity<ExtraFeeWindSpeedRule> response = restTemplate.exchange(
-                "http://localhost:" + port + String.format("/api/rules/fee/extra/windspeed?startWindSpeedRange=%s&endWindSpeedRange=%s&fee=%s", startRange, endRange, fee),
+                "http://localhost:" + port +
+                        String.format("/api/rules/fee/extra/" +
+                                "windspeed?startWindSpeedRange=%s&endWindSpeedRange=%s&fee=%s",
+                                startRange, endRange, fee),
                 HttpMethod.POST, new HttpEntity<>(null, headers), ExtraFeeWindSpeedRule.class
         );
 
@@ -168,7 +171,8 @@ public class ExtraFeeWindSpeedRuleFromControllerIT {
         Response response = client.newCall(request).execute();
         assertEquals(response.code(), HttpStatus.OK.value());
 
-        ExtraFeeWindSpeedRule ruleResponse = objectMapper.readValue(Objects.requireNonNull(response.body()).bytes(), ExtraFeeWindSpeedRule.class);
+        ExtraFeeWindSpeedRule ruleResponse =
+                objectMapper.readValue(Objects.requireNonNull(response.body()).bytes(), ExtraFeeWindSpeedRule.class);
 
         assertNotNull(ruleResponse);
         assertNotNull(ruleResponse.getId());

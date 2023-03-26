@@ -12,7 +12,6 @@ import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-
 @ControllerAdvice
 public class ResponseBodyInterceptor implements ResponseBodyAdvice<Object> {
 
@@ -25,15 +24,18 @@ public class ResponseBodyInterceptor implements ResponseBodyAdvice<Object> {
     }
 
     @Override
-    public boolean supports(@NotNull MethodParameter returnType, @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(@NotNull MethodParameter returnType,
+                            @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
         return true;
     }
 
     @Override
     public Object beforeBodyWrite(Object body, @NotNull MethodParameter returnType,
-                                  @NotNull MediaType selectedContentType, @NotNull Class<? extends HttpMessageConverter<?>> selectedConverterType,
+                                  @NotNull MediaType selectedContentType,
+                                  @NotNull Class<? extends HttpMessageConverter<?>> selectedConverterType,
                                   @NotNull ServerHttpRequest request, @NotNull ServerHttpResponse response) {
-        loggingService.displayResp(((ServletServerHttpRequest) request).getServletRequest(), ((ServletServerHttpResponse) response).getServletResponse(),body);
+        loggingService.displayResp(((ServletServerHttpRequest) request).getServletRequest(),
+                ((ServletServerHttpResponse) response).getServletResponse(),body);
         return body;
     }
 }

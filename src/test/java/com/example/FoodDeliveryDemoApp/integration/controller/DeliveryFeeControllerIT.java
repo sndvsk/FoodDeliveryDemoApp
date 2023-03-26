@@ -4,6 +4,7 @@ import com.example.FoodDeliveryDemoApp.model.DeliveryFee;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -55,7 +56,8 @@ public class DeliveryFeeControllerIT {
 
         // Act
         ResponseEntity<DeliveryFee> response = restTemplate.exchange(
-                "http://localhost:" + port + String.format("/api/delivery-fee?city=%s&vehicleType=%s", city, vehicleType),
+                "http://localhost:" + port +
+                        String.format("/api/delivery-fee?city=%s&vehicleType=%s", city, vehicleType),
                 HttpMethod.POST, new HttpEntity<>(null, headers), DeliveryFee.class
         );
 
@@ -102,7 +104,8 @@ public class DeliveryFeeControllerIT {
         assertTrue(deliveryFeeList.size() > 0);
     }
 
-    public void testGetExistingDeliveryFeeById(Long id, String city, String vehicleType, double deliveryFeePrice, OffsetDateTime timestamp) {
+    public void testGetExistingDeliveryFeeById(
+            Long id, String city, String vehicleType, double deliveryFeePrice, OffsetDateTime timestamp) {
 
         ResponseEntity<DeliveryFee> response = restTemplate.exchange(
                 "http://localhost:" + port + String.format("/api/delivery-fee/%s", id),

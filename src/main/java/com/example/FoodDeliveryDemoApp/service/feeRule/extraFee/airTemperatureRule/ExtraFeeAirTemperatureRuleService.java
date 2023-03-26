@@ -8,11 +8,13 @@ public interface ExtraFeeAirTemperatureRuleService {
 
     List<ExtraFeeAirTemperatureRule> getAllExtraFeeAirTemperatureRules();
 
-    ExtraFeeAirTemperatureRule addExtraFeeAirTemperatureRule(Double startTemperatureRange, Double endTemperatureRange, Double fee);
+    ExtraFeeAirTemperatureRule addExtraFeeAirTemperatureRule(
+            Double startTemperatureRange, Double endTemperatureRange, Double fee);
 
     ExtraFeeAirTemperatureRule getExtraFeeAirTemperatureRuleById(Long id);
 
-    ExtraFeeAirTemperatureRule patchExtraFeeAirTemperatureRuleById(Long id, Double startTemperatureRange, Double endTemperatureRange, Double fee);
+    ExtraFeeAirTemperatureRule patchExtraFeeAirTemperatureRuleById(
+            Long id, Double startTemperatureRange, Double endTemperatureRange, Double fee);
 
     String deleteExtraFeeAirTemperatureRuleById(Long id);
 

@@ -15,55 +15,21 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class LoggingServiceImpl implements LoggingService{
+public class LoggingServiceImpl implements LoggingService {
 
     // based on https://github.com/oldfr/Basic-CRUD-API/tree/master/src/main/java/com/example/basiccrudAPIs
 
     final Logger logger = LoggerFactory.getLogger(LoggingServiceImpl.class);
 
-    @Override
-    public void displayReq(HttpServletRequest request, Object body) {
-        StringBuilder reqMessage = new StringBuilder();
-        Map<String,String> parameters = getParameters(request);
-
-        reqMessage.append("REQUEST ");
-        reqMessage.append("method = [").append(request.getMethod()).append("]");
-        reqMessage.append(" path = [").append(request.getRequestURI()).append("] ");
-
-        if(!parameters.isEmpty()) {
-            reqMessage.append(" parameters = [").append(parameters).append("] ");
-        }
-
-        if(!Objects.isNull(body)) {
-            reqMessage.append(" body = [").append(body).append("]");
-        }
-
-        logger.info("log Request: {}", reqMessage);
-    }
-
-    @Override
-    public void displayResp(HttpServletRequest request, HttpServletResponse response, Object body) {
-        StringBuilder respMessage = new StringBuilder();
-        Map<String, String> headers = getHeaders(response);
-        respMessage.append("RESPONSE ");
-        respMessage.append("method = [").append(request.getMethod()).append("]");
-        if (!headers.isEmpty()) {
-            respMessage.append(" ResponseHeaders = [").append(headers).append("]");
-        }
-        if (body instanceof List<?> list) {
-            for (Object obj : list) {
-                String objString = getObjectString(obj);
-                respMessage.append(" ").append(objString);
-            }
-        } else {
-            String objString = getObjectString(body);
-            respMessage.append(" ").append(objString);
-        }
-        logger.info("logResponse: {}", respMessage);
-    }
-
     // can be implemented using lookup table (hashmap)
-    private String getObjectString(Object obj) {
+
+    /**
+     * Converts an object to a string representation based on its class.
+     * This method is used to generate a log message for the response body.
+     *
+     * @param obj the object to be converted to a string
+    */
+     private String getObjectString(Object obj) {
         switch (obj.getClass().getSimpleName()) {
             case "DeliveryFee":
                 DeliveryFee deliveryFee = (DeliveryFee) obj;
@@ -135,6 +101,12 @@ public class LoggingServiceImpl implements LoggingService{
     }
 
 
+    /**
+     * A helper method to extract the headers from an HTTP response and return them as a Map.
+     *
+     * @param response the HttpServletResponse object representing the HTTP response
+     * @return a Map containing the headers and their corresponding values from the HTTP response
+     */
     private Map<String,String> getHeaders(HttpServletResponse response) {
         Map<String,String> headers = new HashMap<>();
         Collection<String> headerMap = response.getHeaderNames();
@@ -144,6 +116,12 @@ public class LoggingServiceImpl implements LoggingService{
         return headers;
     }
 
+    /**
+     * A helper method to extract the query parameters from an HTTP request and return them as a Map.
+     *
+     * @param request the HttpServletRequest object representing the HTTP request
+     * @return a Map containing the query parameters and their corresponding values from the HTTP request
+     */
     private Map<String,String> getParameters(HttpServletRequest request) {
         Map<String,String> parameters = new HashMap<>();
         Enumeration<String> params = request.getParameterNames();
@@ -153,6 +131,61 @@ public class LoggingServiceImpl implements LoggingService{
             parameters.put(paramName,paramValue);
         }
         return parameters;
+    }
+
+    /**
+     * Displays the HTTP request information with the provided HttpServletRequest object and request body.
+     * The request method, path and parameters are included in the message along with the request body if it's not null.
+     *
+     * @param request the HttpServletRequest object that contains the request information
+     * @param body the request body object, can be null
+     */
+    @Override
+    public void displayReq(HttpServletRequest request, Object body) {
+        StringBuilder reqMessage = new StringBuilder();
+        Map<String,String> parameters = getParameters(request);
+
+        reqMessage.append("REQUEST ");
+        reqMessage.append("method = [").append(request.getMethod()).append("]");
+        reqMessage.append(" path = [").append(request.getRequestURI()).append("] ");
+
+        if(!parameters.isEmpty()) {
+            reqMessage.append(" parameters = [").append(parameters).append("] ");
+        }
+
+        if(!Objects.isNull(body)) {
+            reqMessage.append(" body = [").append(body).append("]");
+        }
+
+        logger.info("log Request: {}", reqMessage);
+    }
+
+    /**
+     * Logs the details of a HTTP response received by the server.
+     *
+     * @param request the HTTP request associated with the response
+     * @param response the HTTP response to be logged
+     * @param body the body of the response, if any
+     */
+    @Override
+    public void displayResp(HttpServletRequest request, HttpServletResponse response, Object body) {
+        StringBuilder respMessage = new StringBuilder();
+        Map<String, String> headers = getHeaders(response);
+        respMessage.append("RESPONSE ");
+        respMessage.append("method = [").append(request.getMethod()).append("]");
+        if (!headers.isEmpty()) {
+            respMessage.append(" ResponseHeaders = [").append(headers).append("]");
+        }
+        if (body instanceof List<?> list) {
+            for (Object obj : list) {
+                String objString = getObjectString(obj);
+                respMessage.append(" ").append(objString);
+            }
+        } else {
+            String objString = getObjectString(body);
+            respMessage.append(" ").append(objString);
+        }
+        logger.info("logResponse: {}", respMessage);
     }
 
 }

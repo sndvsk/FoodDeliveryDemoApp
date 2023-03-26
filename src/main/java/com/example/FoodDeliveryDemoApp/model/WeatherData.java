@@ -41,7 +41,8 @@ public class WeatherData {
     @JsonProperty("timestamp")
     private OffsetDateTime rest_timestamp;
 
-    public WeatherData(Long id, String stationName, Long wmoCode, Double airTemperature, Double windSpeed, String weatherPhenomenon, Instant timestamp) {
+    public WeatherData(Long id, String stationName, Long wmoCode, Double airTemperature,
+                       Double windSpeed, String weatherPhenomenon, Instant timestamp) {
         this.id = id;
         this.stationName = stationName;
         this.wmoCode = wmoCode;
@@ -51,7 +52,8 @@ public class WeatherData {
         this.timestamp = timestamp.truncatedTo(ChronoUnit.SECONDS);
     }
 
-    public WeatherData(String stationName, Long wmoCode, Double airTemperature, Double windSpeed, String weatherPhenomenon, Instant timestamp) {
+    public WeatherData(String stationName, Long wmoCode, Double airTemperature,
+                       Double windSpeed, String weatherPhenomenon, Instant timestamp) {
         this.stationName = stationName;
         this.wmoCode = wmoCode;
         this.airTemperature = airTemperature;

@@ -6,11 +6,11 @@ import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWeatherPheno
 import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWindSpeedRule;
 import com.example.FoodDeliveryDemoApp.service.deliveryFee.DeliveryFeeService;
 import com.example.FoodDeliveryDemoApp.service.deliveryFee.DeliveryFeeServiceImpl;
-import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.airTemperatureRule.ExtraFeeAirTemperatureRuleServiceImpl;
-import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.weatherPhenomenonRule.ExtraFeeWeatherPhenomenonRuleServiceImpl;
-import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.windSpeedRule.ExtraFeeWindSpeedRuleServiceImpl;
-import com.example.FoodDeliveryDemoApp.service.feeRule.regionalBaseFee.RegionalBaseFeeRuleServiceImpl;
-import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataServiceImpl;
+import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.airTemperatureRule.ExtraFeeAirTemperatureRuleService;
+import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.weatherPhenomenonRule.ExtraFeeWeatherPhenomenonRuleService;
+import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.windSpeedRule.ExtraFeeWindSpeedRuleService;
+import com.example.FoodDeliveryDemoApp.service.feeRule.regionalBaseFee.RegionalBaseFeeRuleService;
+import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataService;
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.model.DeliveryFee;
 import com.example.FoodDeliveryDemoApp.model.WeatherData;
@@ -33,19 +33,19 @@ public class DeliveryFeeServiceTests {
     private DeliveryFeeService deliveryFeeService;
 
     @Mock
-    private WeatherDataServiceImpl weatherDataService;
+    private WeatherDataService weatherDataService;
 
     @Mock
-    private ExtraFeeAirTemperatureRuleServiceImpl airTemperatureRuleService;
+    private ExtraFeeAirTemperatureRuleService airTemperatureRuleService;
 
     @Mock
-    private ExtraFeeWindSpeedRuleServiceImpl windSpeedRuleService;
+    private ExtraFeeWindSpeedRuleService windSpeedRuleService;
 
     @Mock
-    private ExtraFeeWeatherPhenomenonRuleServiceImpl weatherPhenomenonRuleService;
+    private ExtraFeeWeatherPhenomenonRuleService weatherPhenomenonRuleService;
 
     @Mock
-    private RegionalBaseFeeRuleServiceImpl baseFeeRuleService;
+    private RegionalBaseFeeRuleService baseFeeRuleService;
 
     @Mock
     private DeliveryFeeRepository deliveryFeeRepository;
@@ -99,7 +99,8 @@ public class DeliveryFeeServiceTests {
         return baseFeeRule;
     }
 
-    private ExtraFeeAirTemperatureRule setupAirTemperatureRule(Double startAirTemperatureRange, Double endAirTemperatureRange, Double fee) {
+    private ExtraFeeAirTemperatureRule setupAirTemperatureRule(
+            Double startAirTemperatureRange, Double endAirTemperatureRange, Double fee) {
         ExtraFeeAirTemperatureRule airTemperatureRule = new ExtraFeeAirTemperatureRule();
         airTemperatureRule.setStartAirTemperatureRange(startAirTemperatureRange);
         airTemperatureRule.setEndAirTemperatureRange(endAirTemperatureRange);
@@ -107,7 +108,8 @@ public class DeliveryFeeServiceTests {
         return airTemperatureRule;
     }
 
-    private ExtraFeeWindSpeedRule setupWindSpeedRule(Double startWindSpeedRange, Double endWindSpeedRange, Double fee) {
+    private ExtraFeeWindSpeedRule setupWindSpeedRule(
+            Double startWindSpeedRange, Double endWindSpeedRange, Double fee) {
         ExtraFeeWindSpeedRule windSpeedRule = new ExtraFeeWindSpeedRule();
         windSpeedRule.setStartWindSpeedRange(startWindSpeedRange);
         windSpeedRule.setEndWindSpeedRange(endWindSpeedRange);
@@ -162,9 +164,15 @@ public class DeliveryFeeServiceTests {
 
         WeatherData weatherData = setupWeatherData(city, weatherPhenomenonName, wmo, airTemperature, windSpeed);
         RegionalBaseFeeRule baseFeeRule = setupBaseFeeRule(city, wmo, vehicleType, regionalBaseFee);
-        ExtraFeeAirTemperatureRule airTemperatureRule = setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
-        ExtraFeeWindSpeedRule windSpeedRule = setupWindSpeedRule(windSpeedRangeStart, windSpeedRangeEnd, windSpeedFee);
-        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule = setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
+
+        ExtraFeeAirTemperatureRule airTemperatureRule =
+                setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
+
+        ExtraFeeWindSpeedRule windSpeedRule =
+                setupWindSpeedRule(windSpeedRangeStart, windSpeedRangeEnd, windSpeedFee);
+
+        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule =
+                setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
 
         when(weatherDataService.getLastDataByCity(city, null)).thenReturn(weatherData);
 
@@ -172,7 +180,8 @@ public class DeliveryFeeServiceTests {
         doReturn(citiesAndVehicleTypes).when(baseFeeRuleService).getAllUniqueCitiesWithVehicleTypes();
         doReturn(airTemperatureRule).when(airTemperatureRuleService).getByTemperature(weatherData.getAirTemperature());
         doReturn(windSpeedRule).when(windSpeedRuleService).getByWindSpeed(windSpeed);
-        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService).getByWeatherPhenomenonName(weatherPhenomenonName);
+        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService)
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
 
         DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
 
@@ -184,7 +193,8 @@ public class DeliveryFeeServiceTests {
         verify(baseFeeRuleService, times(1)).getAllUniqueCitiesWithVehicleTypes();
         verify(airTemperatureRuleService, times(0)).getByTemperature(airTemperature);
         verify(windSpeedRuleService, times(0)).getByWindSpeed(windSpeed);
-        verify(weatherPhenomenonRuleService, times(0)).getByWeatherPhenomenonName(weatherPhenomenonName);
+        verify(weatherPhenomenonRuleService, times(0))
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
 
         verifyNoMoreInteractions(weatherDataService);
         verifyNoMoreInteractions(baseFeeRuleService);
@@ -224,9 +234,13 @@ public class DeliveryFeeServiceTests {
 
         WeatherData weatherData = setupWeatherData(city, weatherPhenomenonName, wmo, airTemperature, windSpeed);
         RegionalBaseFeeRule baseFeeRule = setupBaseFeeRule(city, wmo, vehicleType, regionalBaseFee);
-        ExtraFeeAirTemperatureRule airTemperatureRule = setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
+        ExtraFeeAirTemperatureRule airTemperatureRule =
+                setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
+
         ExtraFeeWindSpeedRule windSpeedRule = setupWindSpeedRule(windSpeedRangeStart, windSpeedRangeEnd, windSpeedFee);
-        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule = setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
+
+        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule =
+                setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
 
         when(weatherDataService.getLastDataByCity(city, null))
                 .thenReturn(weatherData);
@@ -235,7 +249,8 @@ public class DeliveryFeeServiceTests {
         doReturn(citiesAndVehicleTypes).when(baseFeeRuleService).getAllUniqueCitiesWithVehicleTypes();
         doReturn(airTemperatureRule).when(airTemperatureRuleService).getByTemperature(weatherData.getAirTemperature());
         doReturn(windSpeedRule).when(windSpeedRuleService).getByWindSpeed(windSpeed);
-        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService).getByWeatherPhenomenonName(weatherPhenomenonName);
+        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService)
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
 
         DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
 
@@ -247,7 +262,8 @@ public class DeliveryFeeServiceTests {
         verify(baseFeeRuleService, times(1)).getAllUniqueCitiesWithVehicleTypes();
         verify(airTemperatureRuleService, times(1)).getByTemperature(airTemperature);
         verify(windSpeedRuleService, times(0)).getByWindSpeed(windSpeed);
-        verify(weatherPhenomenonRuleService, times(1)).getByWeatherPhenomenonName(weatherPhenomenonName);
+        verify(weatherPhenomenonRuleService, times(1))
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
 
         verifyNoMoreInteractions(weatherDataService);
         verifyNoMoreInteractions(baseFeeRuleService);
@@ -287,9 +303,13 @@ public class DeliveryFeeServiceTests {
 
         WeatherData weatherData = setupWeatherData(city, weatherPhenomenonName, wmo, airTemperature, windSpeed);
         RegionalBaseFeeRule baseFeeRule = setupBaseFeeRule(city, wmo, vehicleType, regionalBaseFee);
-        ExtraFeeAirTemperatureRule airTemperatureRule = setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
+
+        ExtraFeeAirTemperatureRule airTemperatureRule =
+                setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
         ExtraFeeWindSpeedRule windSpeedRule = setupWindSpeedRule(windSpeedRangeStart, windSpeedRangeEnd, windSpeedFee);
-        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule = setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
+
+        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule =
+                setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
 
         when(weatherDataService.getLastDataByCity(city, null)).thenReturn(weatherData);
 
@@ -297,7 +317,8 @@ public class DeliveryFeeServiceTests {
         doReturn(citiesAndVehicleTypes).when(baseFeeRuleService).getAllUniqueCitiesWithVehicleTypes();
         doReturn(airTemperatureRule).when(airTemperatureRuleService).getByTemperature(weatherData.getAirTemperature());
         doReturn(windSpeedRule).when(windSpeedRuleService).getByWindSpeed(windSpeed);
-        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService).getByWeatherPhenomenonName(weatherPhenomenonName);
+        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService)
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
 
         DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
 
@@ -309,7 +330,8 @@ public class DeliveryFeeServiceTests {
         verify(baseFeeRuleService, times(1)).getAllUniqueCitiesWithVehicleTypes();
         verify(airTemperatureRuleService, times(1)).getByTemperature(airTemperature);
         verify(windSpeedRuleService, times(1)).getByWindSpeed(windSpeed);
-        verify(weatherPhenomenonRuleService, times(1)).getByWeatherPhenomenonName(weatherPhenomenonName);
+        verify(weatherPhenomenonRuleService, times(1))
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
 
         verifyNoMoreInteractions(weatherDataService);
         verifyNoMoreInteractions(baseFeeRuleService);
@@ -349,19 +371,31 @@ public class DeliveryFeeServiceTests {
 
         WeatherData weatherData = setupWeatherData(city, weatherPhenomenonName, wmo, airTemperature, windSpeed);
         RegionalBaseFeeRule baseFeeRule = setupBaseFeeRule(city, wmo, vehicleType, regionalBaseFee);
-        ExtraFeeAirTemperatureRule airTemperatureRule = setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
+        ExtraFeeAirTemperatureRule airTemperatureRule =
+                setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
+
         ExtraFeeWindSpeedRule windSpeedRule = setupWindSpeedRule(windSpeedRangeStart, windSpeedRangeEnd, windSpeedFee);
-        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule = setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
 
-        when(weatherDataService.getLastDataByCity(city.toLowerCase(Locale.ROOT), null)).thenReturn(weatherData);
+        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule =
+                setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
 
-        doReturn(baseFeeRule).when(baseFeeRuleService).getByCityAndVehicleType(city.toLowerCase(Locale.ROOT), vehicleType.toLowerCase(Locale.ROOT));
-        doReturn(citiesAndVehicleTypes).when(baseFeeRuleService).getAllUniqueCitiesWithVehicleTypes();
+        when(weatherDataService.getLastDataByCity(city.toLowerCase(Locale.ROOT), null))
+                .thenReturn(weatherData);
+
+        doReturn(baseFeeRule).when(baseFeeRuleService)
+                .getByCityAndVehicleType(city.toLowerCase(Locale.ROOT), vehicleType.toLowerCase(Locale.ROOT));
+
+        doReturn(citiesAndVehicleTypes).when(baseFeeRuleService)
+                .getAllUniqueCitiesWithVehicleTypes();
+
         doReturn(airTemperatureRule).when(airTemperatureRuleService).getByTemperature(weatherData.getAirTemperature());
         doReturn(windSpeedRule).when(windSpeedRuleService).getByWindSpeed(windSpeed);
-        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService).getByWeatherPhenomenonName(weatherPhenomenonName);
 
-        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city.toLowerCase(Locale.ROOT), vehicleType.toLowerCase(Locale.ROOT), null);
+        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService)
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
+
+        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(
+                city.toLowerCase(Locale.ROOT), vehicleType.toLowerCase(Locale.ROOT), null);
 
         assertNotNull(response);
         assertEquals(deliveryFee, response.getDeliveryFee());
@@ -371,7 +405,8 @@ public class DeliveryFeeServiceTests {
         verify(baseFeeRuleService, times(1)).getAllUniqueCitiesWithVehicleTypes();
         verify(airTemperatureRuleService, times(0)).getByTemperature(airTemperature);
         verify(windSpeedRuleService, times(0)).getByWindSpeed(windSpeed);
-        verify(weatherPhenomenonRuleService, times(0)).getByWeatherPhenomenonName(weatherPhenomenonName);
+        verify(weatherPhenomenonRuleService, times(0))
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
 
         verifyNoMoreInteractions(weatherDataService);
         verifyNoMoreInteractions(baseFeeRuleService);
@@ -412,9 +447,14 @@ public class DeliveryFeeServiceTests {
 
         WeatherData weatherData = setupWeatherData(city, weatherPhenomenonName, wmo, airTemperature, windSpeed);
         RegionalBaseFeeRule baseFeeRule = setupBaseFeeRule(city, wmo, vehicleType, regionalBaseFee);
-        ExtraFeeAirTemperatureRule airTemperatureRule = setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
+
+        ExtraFeeAirTemperatureRule airTemperatureRule =
+                setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
+
         ExtraFeeWindSpeedRule windSpeedRule = setupWindSpeedRule(windSpeedRangeStart, windSpeedRangeEnd, windSpeedFee);
-        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule = setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
+
+        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule =
+                setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
 
         when(weatherDataService.getLastDataByCity(city, null)).thenReturn(weatherData);
 
@@ -422,9 +462,11 @@ public class DeliveryFeeServiceTests {
         doReturn(citiesAndVehicleTypes).when(baseFeeRuleService).getAllUniqueCitiesWithVehicleTypes();
         doReturn(airTemperatureRule).when(airTemperatureRuleService).getByTemperature(weatherData.getAirTemperature());
         doReturn(windSpeedRule).when(windSpeedRuleService).getByWindSpeed(windSpeed);
-        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService).getByWeatherPhenomenonName(weatherPhenomenonName);
+        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService)
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
 
-        CustomBadRequestException exception = new CustomBadRequestException(String.format("Usage of selected vehicle type is forbidden: wind speed ´%s´ is too high", windSpeed));
+        CustomBadRequestException exception = new CustomBadRequestException(
+                String.format("Usage of selected vehicle type is forbidden: wind speed ´%s´ is too high", windSpeed));
 
         try {
             deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
@@ -438,7 +480,8 @@ public class DeliveryFeeServiceTests {
         verify(baseFeeRuleService, times(1)).getByCityAndVehicleType(city, vehicleType);
         verify(airTemperatureRuleService, times(1)).getByTemperature(airTemperature);
         verify(windSpeedRuleService, times(1)).getByWindSpeed(windSpeed);
-        verify(weatherPhenomenonRuleService, times(0)).getByWeatherPhenomenonName(weatherPhenomenonName);
+        verify(weatherPhenomenonRuleService, times(0))
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
 
         verifyNoMoreInteractions(weatherDataService);
         verifyNoMoreInteractions(baseFeeRuleService);
@@ -479,9 +522,14 @@ public class DeliveryFeeServiceTests {
 
         WeatherData weatherData = setupWeatherData(city, weatherPhenomenonName, wmo, airTemperature, windSpeed);
         RegionalBaseFeeRule baseFeeRule = setupBaseFeeRule(city, wmo, vehicleType, regionalBaseFee);
-        ExtraFeeAirTemperatureRule airTemperatureRule = setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
+
+        ExtraFeeAirTemperatureRule airTemperatureRule =
+                setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
+
         ExtraFeeWindSpeedRule windSpeedRule = setupWindSpeedRule(windSpeedRangeStart, windSpeedRangeEnd, windSpeedFee);
-        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule = setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
+
+        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule =
+                setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
 
         when(weatherDataService.getLastDataByCity(city, null)).thenReturn(weatherData);
 
@@ -489,9 +537,12 @@ public class DeliveryFeeServiceTests {
         doReturn(citiesAndVehicleTypes).when(baseFeeRuleService).getAllUniqueCitiesWithVehicleTypes();
         doReturn(airTemperatureRule).when(airTemperatureRuleService).getByTemperature(weatherData.getAirTemperature());
         doReturn(windSpeedRule).when(windSpeedRuleService).getByWindSpeed(windSpeed);
-        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService).getByWeatherPhenomenonName(weatherPhenomenonName);
+        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService)
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
 
-        CustomBadRequestException exception = new CustomBadRequestException(String.format("Usage of selected vehicle type is forbidden: weather phenomenon ´%s´ is dangerous", weatherPhenomenonName));
+        CustomBadRequestException exception = new CustomBadRequestException(
+                String.format("Usage of selected vehicle type is forbidden: weather phenomenon ´%s´ is dangerous",
+                        weatherPhenomenonName));
 
         try {
             deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType);
@@ -505,7 +556,8 @@ public class DeliveryFeeServiceTests {
         verify(baseFeeRuleService, times(1)).getByCityAndVehicleType(city, vehicleType);
         verify(airTemperatureRuleService, times(1)).getByTemperature(airTemperature);
         verify(windSpeedRuleService, times(1)).getByWindSpeed(windSpeed);
-        verify(weatherPhenomenonRuleService, times(1)).getByWeatherPhenomenonName(weatherPhenomenonName);
+        verify(weatherPhenomenonRuleService, times(1))
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
 
         verifyNoMoreInteractions(weatherDataService);
         verifyNoMoreInteractions(baseFeeRuleService);
@@ -547,9 +599,14 @@ public class DeliveryFeeServiceTests {
 
         WeatherData weatherData = setupWeatherData(city, weatherPhenomenonName, wmo, airTemperature, windSpeed);
         RegionalBaseFeeRule baseFeeRule = setupBaseFeeRule(city, wmo, vehicleType, regionalBaseFee);
-        ExtraFeeAirTemperatureRule airTemperatureRule = setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
+
+        ExtraFeeAirTemperatureRule airTemperatureRule =
+                setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
+
         ExtraFeeWindSpeedRule windSpeedRule = setupWindSpeedRule(windSpeedRangeStart, windSpeedRangeEnd, windSpeedFee);
-        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule = setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
+
+        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule =
+                setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
 
         when(weatherDataService.getLastDataByCity(city, null)).thenReturn(weatherData);
 
@@ -557,7 +614,8 @@ public class DeliveryFeeServiceTests {
         doReturn(citiesAndVehicleTypes).when(baseFeeRuleService).getAllUniqueCitiesWithVehicleTypes();
         doReturn(airTemperatureRule).when(airTemperatureRuleService).getByTemperature(weatherData.getAirTemperature());
         doReturn(windSpeedRule).when(windSpeedRuleService).getByWindSpeed(windSpeed);
-        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService).getByWeatherPhenomenonName(weatherPhenomenonName);
+        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService)
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
 
         DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
 
@@ -569,7 +627,8 @@ public class DeliveryFeeServiceTests {
         verify(baseFeeRuleService, times(1)).getAllUniqueCitiesWithVehicleTypes();
         verify(airTemperatureRuleService, times(1)).getByTemperature(airTemperature);
         verify(windSpeedRuleService, times(1)).getByWindSpeed(windSpeed);
-        verify(weatherPhenomenonRuleService, times(1)).getByWeatherPhenomenonName(weatherPhenomenonName);
+        verify(weatherPhenomenonRuleService, times(1))
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
 
         verifyNoMoreInteractions(weatherDataService);
         verifyNoMoreInteractions(baseFeeRuleService);
@@ -610,9 +669,14 @@ public class DeliveryFeeServiceTests {
 
         WeatherData weatherData = setupWeatherData(city, weatherPhenomenonName, wmo, airTemperature, windSpeed);
         RegionalBaseFeeRule baseFeeRule = setupBaseFeeRule(city, wmo, vehicleType, regionalBaseFee);
-        ExtraFeeAirTemperatureRule airTemperatureRule = setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
+
+        ExtraFeeAirTemperatureRule airTemperatureRule =
+                setupAirTemperatureRule(airTemperatureRangeStart, airTemperatureRangeEnd, airTemperatureFee);
+
         ExtraFeeWindSpeedRule windSpeedRule = setupWindSpeedRule(windSpeedRangeStart, windSpeedRangeEnd, windSpeedFee);
-        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule = setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
+
+        ExtraFeeWeatherPhenomenonRule weatherPhenomenonRule =
+                setupWeatherPhenomenonRule(weatherPhenomenonName, weatherPhenomenonFee);
 
         when(weatherDataService.getLastDataByCity(city, null)).thenReturn(weatherData);
 
@@ -620,7 +684,8 @@ public class DeliveryFeeServiceTests {
         doReturn(citiesAndVehicleTypes).when(baseFeeRuleService).getAllUniqueCitiesWithVehicleTypes();
         doReturn(airTemperatureRule).when(airTemperatureRuleService).getByTemperature(weatherData.getAirTemperature());
         doReturn(windSpeedRule).when(windSpeedRuleService).getByWindSpeed(windSpeed);
-        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService).getByWeatherPhenomenonName(weatherPhenomenonName);
+        doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService)
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
 
         DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
 
@@ -632,7 +697,8 @@ public class DeliveryFeeServiceTests {
         verify(baseFeeRuleService, times(1)).getAllUniqueCitiesWithVehicleTypes();
         verify(airTemperatureRuleService, times(1)).getByTemperature(airTemperature);
         verify(windSpeedRuleService, times(0)).getByWindSpeed(windSpeed);
-        verify(weatherPhenomenonRuleService, times(1)).getByWeatherPhenomenonName(weatherPhenomenonName);
+        verify(weatherPhenomenonRuleService, times(1))
+                .getByWeatherPhenomenonName(weatherPhenomenonName);
 
         verifyNoMoreInteractions(weatherDataService);
         verifyNoMoreInteractions(baseFeeRuleService);

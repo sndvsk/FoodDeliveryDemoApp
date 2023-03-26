@@ -86,7 +86,8 @@ public class RegionalBaseFeeRuleFromControllerIT {
 
         // Send a POST request to the needed endpoint
         ResponseEntity<RegionalBaseFeeRule> response = restTemplate.exchange(
-                "http://localhost:" + port + String.format("/api/rules/fee/base?city=%s&vehicleType=%s&fee=%s", city, vehicleType, fee),
+                "http://localhost:" + port +
+                        String.format("/api/rules/fee/base?city=%s&vehicleType=%s&fee=%s", city, vehicleType, fee),
                 HttpMethod.POST, new HttpEntity<>(null, headers), RegionalBaseFeeRule.class
         );
 
@@ -174,7 +175,8 @@ public class RegionalBaseFeeRuleFromControllerIT {
         Response response = client.newCall(request).execute();
         assertEquals(response.code(), HttpStatus.OK.value());
 
-        RegionalBaseFeeRule ruleResponse = objectMapper.readValue(Objects.requireNonNull(response.body()).bytes(), RegionalBaseFeeRule.class);
+        RegionalBaseFeeRule ruleResponse =
+                objectMapper.readValue(Objects.requireNonNull(response.body()).bytes(), RegionalBaseFeeRule.class);
 
         assertNotNull(ruleResponse);
         assertNotNull(ruleResponse.getId());

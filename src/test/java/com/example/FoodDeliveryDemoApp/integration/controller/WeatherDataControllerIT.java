@@ -155,7 +155,10 @@ public class WeatherDataControllerIT {
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
         ResponseEntity<WeatherData> response = restTemplate.exchange(
                 "http://localhost:" + port +
-                        String.format("/api/weather?stationName=%s&wmoCode=%s&airTemperature=%s&windSpeed=%s&weatherPhenomenon=%s", stationName, wmoCode, airTemperature, windSpeed, weatherPhenomenon),
+                        String.format("/api/weather" +
+                                "?stationName=%s&wmoCode=%s&airTemperature=%s&windSpeed=%s&weatherPhenomenon=%s",
+                                stationName, wmoCode, airTemperature, windSpeed, weatherPhenomenon),
+
                 HttpMethod.POST, entity, new ParameterizedTypeReference<>() {}
         );
         WeatherData weatherDataResponse = response.getBody();
@@ -259,7 +262,8 @@ public class WeatherDataControllerIT {
         Response response = client.newCall(request).execute();
         assertEquals(response.code(), HttpStatus.OK.value());
 
-        WeatherData weatherDataResponse = objectMapper.readValue(Objects.requireNonNull(response.body()).bytes(), WeatherData.class);
+        WeatherData weatherDataResponse =
+                objectMapper.readValue(Objects.requireNonNull(response.body()).bytes(), WeatherData.class);
 
         assertNotNull(weatherDataResponse);
         assertNotNull(weatherDataResponse.getId());

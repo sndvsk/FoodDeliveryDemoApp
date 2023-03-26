@@ -22,7 +22,8 @@ import java.util.List;
 @SuppressWarnings("DefaultAnnotationParam")
 @RestController
 @RequestMapping("/api/rules")
-@Tag(name = "Rules API", description = "Endpoint for managing delivery fee calculation business rules (base and extra fees)")
+@Tag(name = "Rules API", description = "Endpoint for managing delivery fee calculation business rules " +
+        "(base and extra fees)")
 public class FeeRuleController {
 
     private final RegionalBaseFeeRuleService regionalBaseFeeRuleService;
@@ -78,7 +79,8 @@ ________________________________________________________________________________
             @RequestParam(required = false) Long wmoCode,
             @Parameter(name = "vehicleType", description = "Vehicle type", example = "")
             @RequestParam String vehicleType,
-            @Parameter(name = "fee", description = "Regional base fee for this combination of city and vehicle type", example = "")
+            @Parameter(name = "fee", description = "Regional base fee for this combination of city and vehicle type",
+                    example = "")
             @RequestParam Double fee) throws JAXBException {
 
         RegionalBaseFeeRule response = regionalBaseFeeRuleService.addBaseFeeRule(city, wmoCode, vehicleType, fee);
@@ -126,10 +128,13 @@ ________________________________________________________________________________
             @RequestParam(required = false) Long wmoCode,
             @Parameter(name = "vehicleType", description = "Vehicle type", example = "")
             @RequestParam(required = false) String vehicleType,
-            @Parameter(name = "fee", description = "Regional base fee for this combination of city and vehicle type", example = "")
+            @Parameter(name = "fee", description = "Regional base fee for this combination of city and vehicle type",
+                    example = "")
             @RequestParam(required = false) Double fee) throws JAXBException {
 
-        RegionalBaseFeeRule response = regionalBaseFeeRuleService.patchRegionalBaseFeeRuleById(id, city, wmoCode, vehicleType, fee);
+        RegionalBaseFeeRule response = regionalBaseFeeRuleService.patchRegionalBaseFeeRuleById(
+                id, city, wmoCode,
+                vehicleType, fee);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -181,14 +186,19 @@ ________________________________________________________________________________
     @PostMapping(path="/fee/extra/temperature", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Add air temperature extra fee rule. Example: start: -10.0 -> end: 0.0")
     public ResponseEntity<ExtraFeeAirTemperatureRule> addExtraFeeAirTemperatureRule(
-            @Parameter(name = "startTemperatureRange", description = "Start air temperature of air temperature range", example = "")
+            @Parameter(name = "startTemperatureRange", description = "Start air temperature of air temperature range",
+                    example = "")
             @RequestParam Double startTemperatureRange,
-            @Parameter(name = "endTemperatureRange", description = "End air temperature of air temperature range", example = "")
+            @Parameter(name = "endTemperatureRange", description = "End air temperature of air temperature range",
+                    example = "")
             @RequestParam Double endTemperatureRange,
-            @Parameter(name = "fee", description = "Air temperature extra fee for this air temperature range", example = "")
+            @Parameter(name = "fee", description = "Air temperature extra fee for this air temperature range",
+                    example = "")
             @RequestParam Double fee) {
 
-        ExtraFeeAirTemperatureRule response = airTemperatureRuleService.addExtraFeeAirTemperatureRule(startTemperatureRange, endTemperatureRange, fee);
+        ExtraFeeAirTemperatureRule response =
+                airTemperatureRuleService.addExtraFeeAirTemperatureRule(
+                        startTemperatureRange, endTemperatureRange, fee);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -224,14 +234,18 @@ ________________________________________________________________________________
     public ResponseEntity<ExtraFeeAirTemperatureRule> patchExtraFeeAirTemperatureRuleById(
             @Parameter(name = "id", description = "Id of the rule")
             @PathVariable Long id,
-            @Parameter(name = "startTemperatureRange", description = "Start air temperature of air temperature range", example = "")
+            @Parameter(name = "startTemperatureRange", description = "Start air temperature of air temperature range",
+                    example = "")
             @RequestParam(required = false) Double startTemperatureRange,
-            @Parameter(name = "endTemperatureRange", description = "End air temperature of air temperature range", example = "")
+            @Parameter(name = "endTemperatureRange", description = "End air temperature of air temperature range",
+                    example = "")
             @RequestParam(required = false) Double endTemperatureRange,
-            @Parameter(name = "fee", description = "Air temperature extra fee for this air temperature range", example = "")
+            @Parameter(name = "fee", description = "Air temperature extra fee for this air temperature range",
+                    example = "")
             @RequestParam(required = false) Double fee) {
 
-        ExtraFeeAirTemperatureRule response = airTemperatureRuleService.patchExtraFeeAirTemperatureRuleById(id, startTemperatureRange, endTemperatureRange, fee);
+        ExtraFeeAirTemperatureRule response = airTemperatureRuleService.patchExtraFeeAirTemperatureRuleById(
+                id, startTemperatureRange, endTemperatureRange, fee);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -290,7 +304,8 @@ ________________________________________________________________________________
             @Parameter(name = "fee", description = "Wind speed extra fee for this wind speed range", example = "")
             @RequestParam Double fee) {
 
-        ExtraFeeWindSpeedRule response = windSpeedRuleService.addExtraFeeWindSpeedRule(startWindSpeedRange, endWindSpeedRange, fee);
+        ExtraFeeWindSpeedRule response = windSpeedRuleService.addExtraFeeWindSpeedRule(
+                startWindSpeedRange, endWindSpeedRange, fee);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -333,7 +348,8 @@ ________________________________________________________________________________
             @Parameter(name = "fee", description = "Wind speed extra fee for this wind speed range", example = "")
             @RequestParam(required = false) Double fee) {
 
-        ExtraFeeWindSpeedRule response = windSpeedRuleService.patchExtraFeeWindSpeedRuleById(id, startWindSpeedRange, endWindSpeedRange, fee);
+        ExtraFeeWindSpeedRule response = windSpeedRuleService.patchExtraFeeWindSpeedRuleById(
+                id, startWindSpeedRange, endWindSpeedRange, fee);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -372,7 +388,8 @@ ________________________________________________________________________________
     @Operation(summary = "Get all weather phenomenon extra fee rules")
     public ResponseEntity<List<ExtraFeeWeatherPhenomenonRule>> getAllExtraFeeWeatherPhenomenonRules() {
 
-        List<ExtraFeeWeatherPhenomenonRule> response = weatherPhenomenonRuleService.getAllExtraFeeWeatherPhenomenonRules();
+        List<ExtraFeeWeatherPhenomenonRule> response =
+                weatherPhenomenonRuleService.getAllExtraFeeWeatherPhenomenonRules();
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -387,14 +404,18 @@ ________________________________________________________________________________
      * @return ResponseEntity containing an ExtraFeeWeatherPhenomenonRule object and HTTP status code of OK
      */
     @PostMapping(path = "/fee/extra/phenomenon",produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Add weather phenomenon extra fee rule. (All supported by external weather api weather phenomenon's are already in the database. Consider patching instead of adding new ones)")
+    @Operation(summary = "Add weather phenomenon extra fee rule. " +
+            "(All supported by external weather api weather phenomenon's are already in the database. " +
+            "Consider patching instead of adding new ones)")
     public ResponseEntity<ExtraFeeWeatherPhenomenonRule> addExtraFeeWeatherPhenomenonRule(
             @Parameter(name = "weatherPhenomenonName", description = "Name of weather phenomenon", example = "")
             @RequestParam String weatherPhenomenonName,
-            @Parameter(name = "fee", description = "Weather phenomenon extra fee for this weather phenomenon", example = "")
+            @Parameter(name = "fee", description = "Weather phenomenon extra fee for this weather phenomenon",
+                    example = "")
             @RequestParam Double fee) {
 
-        ExtraFeeWeatherPhenomenonRule response = weatherPhenomenonRuleService.addExtraFeeWeatherPhenomenonRule(weatherPhenomenonName, fee);
+        ExtraFeeWeatherPhenomenonRule response =
+                weatherPhenomenonRuleService.addExtraFeeWeatherPhenomenonRule(weatherPhenomenonName, fee);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
 
@@ -426,10 +447,12 @@ ________________________________________________________________________________
             @PathVariable Long id,
             @Parameter(name = "weatherPhenomenonName", description = "Name of weather phenomenon", example = "")
             @RequestParam(required = false) String weatherPhenomenonName,
-            @Parameter(name = "fee", description = "Weather phenomenon extra fee for this weather phenomenon", example = "")
+            @Parameter(name = "fee", description = "Weather phenomenon extra fee for this weather phenomenon",
+                    example = "")
             @RequestParam(required = false) Double fee) {
 
-        ExtraFeeWeatherPhenomenonRule response = weatherPhenomenonRuleService.patchExtraFeeWeatherPhenomenonRuleById(id, weatherPhenomenonName, fee);
+        ExtraFeeWeatherPhenomenonRule response =
+                weatherPhenomenonRuleService.patchExtraFeeWeatherPhenomenonRuleById(id, weatherPhenomenonName, fee);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

@@ -14,19 +14,22 @@ public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeather
 
     private final ExtraFeeWeatherPhenomenonRuleRepository weatherPhenomenonRepository;
 
-    protected ExtraFeeWeatherPhenomenonRuleServiceImpl(ExtraFeeWeatherPhenomenonRuleRepository weatherPhenomenonRuleRepository) {
+    protected ExtraFeeWeatherPhenomenonRuleServiceImpl(
+            ExtraFeeWeatherPhenomenonRuleRepository weatherPhenomenonRuleRepository) {
         this.weatherPhenomenonRepository = weatherPhenomenonRuleRepository;
     }
 
     /**
-     * Validates if the required inputs are not null and if a rule for the provided weather phenomenon name doesn't already exist.
+     * Validates if the required inputs are not null and if a rule for the provided weather phenomenon
+     * name doesn't already exist.
      *
      * @param weatherPhenomenonName a String representing the weather phenomenon name to be validated.
      * @param fee a Double representing the fee to be validated.
      * @throws CustomBadRequestException if any of the required inputs is null
      * @throws CustomBadRequestException if a rule for the provided weather phenomenon name already exists.
      */
-    private void validateRequiredInputs(String weatherPhenomenonName, Double fee) throws CustomBadRequestException, CustomNotFoundException {
+    private void validateRequiredInputs(String weatherPhenomenonName, Double fee)
+            throws CustomBadRequestException, CustomNotFoundException {
         if (weatherPhenomenonName == null) {
             throw new CustomBadRequestException("Weather phenomenon name must be provided");
         }
@@ -37,13 +40,16 @@ public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeather
 
         boolean rule = doesWeatherPhenomenonRuleExist(weatherPhenomenonName);
         if (rule) {
-            throw new CustomNotFoundException(String.format("Extra fee rule for this: ´%s´ weather phenomenon already exists", weatherPhenomenonName));
+            throw new CustomNotFoundException(
+                    String.format("Extra fee rule for this: ´%s´ weather phenomenon already exists",
+                            weatherPhenomenonName));
         }
 
     }
 
     /**
-     * Validates if the provided weather phenomenon name contains only letters and if the provided fee is positive. Also, checks if a rule for the provided weather phenomenon name and fee doesn't already exist.
+     * Validates if the provided weather phenomenon name contains only letters and if the provided fee is positive.
+     * Also, checks if a rule for the provided weather phenomenon name and fee doesn't already exist.
      *
      * @param weatherPhenomenon a String representing the weather phenomenon name to be validated
      * @param fee a Double representing the fee to be validated
@@ -51,12 +57,17 @@ public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeather
      * @throws CustomBadRequestException if the provided fee is not positive
      * @throws CustomBadRequestException if a rule for the provided weather phenomenon name and fee already exists
      */
-    private void validateInputs(String weatherPhenomenon, Double fee) throws CustomBadRequestException, CustomNotFoundException {
+    private void validateInputs(String weatherPhenomenon, Double fee)
+            throws CustomBadRequestException, CustomNotFoundException {
 
         if (weatherPhenomenon != null) {
-            weatherPhenomenon = weatherPhenomenon.replaceAll("\u00A0", "").replaceAll("\\u00A0", "").replaceAll(" ", "");
+            weatherPhenomenon = weatherPhenomenon
+                    .replaceAll("\u00A0", "")
+                    .replaceAll("\\u00A0", "")
+                    .replaceAll(" ", "");
             if (!weatherPhenomenon.chars().allMatch(Character::isLetter)) {
-                throw new CustomBadRequestException(String.format("Weather phenomenon name: ´%s´ must contain only letters", weatherPhenomenon));
+                throw new CustomBadRequestException(
+                        String.format("Weather phenomenon name: ´%s´ must contain only letters", weatherPhenomenon));
             }
         }
 
@@ -66,7 +77,9 @@ public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeather
 
         boolean rule = doesWeatherPhenomenonRuleWithThisFeeExist(weatherPhenomenon, fee);
         if (rule) {
-            throw new CustomBadRequestException(String.format("Extra fee rule for this: ´%s´ weather phenomenon and fee: ´%s´ already exists", weatherPhenomenon, fee));
+            throw new CustomBadRequestException(
+                    String.format("Extra fee rule for this: ´%s´ weather phenomenon and fee: ´%s´ already exists",
+                            weatherPhenomenon, fee));
         }
 
     }
@@ -78,7 +91,8 @@ public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeather
      * @return boolean indicating if a rule for the provided weather phenomenon name exists in the repository or not
      */
     private boolean doesWeatherPhenomenonRuleExist(String weatherPhenomenonName) {
-        Optional<ExtraFeeWeatherPhenomenonRule> rule = weatherPhenomenonRepository.findByWeatherPhenomenonName(weatherPhenomenonName);
+        Optional<ExtraFeeWeatherPhenomenonRule> rule =
+                weatherPhenomenonRepository.findByWeatherPhenomenonName(weatherPhenomenonName);
         return rule.isPresent();
     }
 
@@ -87,10 +101,12 @@ public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeather
      *
      * @param weatherPhenomenon a String representing the weather phenomenon name to be checked
      * @param fee a Double representing the fee to be checked
-     * @return a boolean indicating if a rule for the provided weather phenomenon name and fee exists in the repository or not
+     * @return a boolean indicating if a rule for the provided weather phenomenon name and fee exists in the
+     * repository or not
      */
     private boolean doesWeatherPhenomenonRuleWithThisFeeExist(String weatherPhenomenon, Double fee) {
-        Optional<ExtraFeeWeatherPhenomenonRule> rule = weatherPhenomenonRepository.findByWeatherPhenomenonNameAndFee(weatherPhenomenon, fee);
+        Optional<ExtraFeeWeatherPhenomenonRule> rule =
+                weatherPhenomenonRepository.findByWeatherPhenomenonNameAndFee(weatherPhenomenon, fee);
         return rule.isPresent();
     }
 
@@ -138,7 +154,8 @@ public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeather
     public ExtraFeeWeatherPhenomenonRule getExtraFeeWeatherPhenomenonRuleById(Long id) throws CustomNotFoundException {
         Optional<ExtraFeeWeatherPhenomenonRule> rule = weatherPhenomenonRepository.findById(id);
         return rule
-                .orElseThrow(() -> new CustomNotFoundException(String.format("Extra fee weather phenomenon rule for this id: ´%s´ does not exist", id)));
+                .orElseThrow(() -> new CustomNotFoundException(
+                        String.format("Extra fee weather phenomenon rule for this id: ´%s´ does not exist", id)));
     }
 
     /**
@@ -150,14 +167,16 @@ public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeather
      * @return the updated ExtraFeeWeatherPhenomenonRule object
      * @throws CustomNotFoundException if no rule with the provided id exists in repository
      */
-    public ExtraFeeWeatherPhenomenonRule patchExtraFeeWeatherPhenomenonRuleById(Long id, String weatherPhenomenonName, Double fee) throws CustomNotFoundException {
+    public ExtraFeeWeatherPhenomenonRule patchExtraFeeWeatherPhenomenonRuleById(
+            Long id, String weatherPhenomenonName, Double fee) throws CustomNotFoundException {
 
         validateInputs(weatherPhenomenonName, fee);
 
         Optional<ExtraFeeWeatherPhenomenonRule> rule = weatherPhenomenonRepository.findById(id);
 
         ExtraFeeWeatherPhenomenonRule patchedRule = rule
-                .orElseThrow(() -> new CustomNotFoundException(String.format("Extra fee weather phenomenon rule for this id: ´%s´ does not exist", id)));
+                .orElseThrow(() -> new CustomNotFoundException(
+                        String.format("Extra fee weather phenomenon rule for this id: ´%s´ does not exist", id)));
 
         if (weatherPhenomenonName != null) {
             patchedRule.weatherPhenomenonName = weatherPhenomenonName;
@@ -181,7 +200,8 @@ public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeather
             weatherPhenomenonRepository.deleteById(id);
             return String.format("Extra fee weather phenomenon rule with id: ´%s´ was deleted", id);
         } else {
-            throw new CustomNotFoundException(String.format("Extra fee weather phenomenon rule for this id: ´%s´ does not exist", id));
+            throw new CustomNotFoundException(
+                    String.format("Extra fee weather phenomenon rule for this id: ´%s´ does not exist", id));
         }
     }
 
@@ -192,10 +212,14 @@ public class ExtraFeeWeatherPhenomenonRuleServiceImpl implements ExtraFeeWeather
      * @return the ExtraFeeWeatherPhenomenonRule object for the given Weather Phenomenon name
      * @throws CustomNotFoundException if no ExtraFeeWeatherPhenomenonRule exists for given weather phenomenon name
      */
-    public ExtraFeeWeatherPhenomenonRule getByWeatherPhenomenonName(String weatherPhenomenon) throws CustomNotFoundException {
-        Optional<ExtraFeeWeatherPhenomenonRule> rule = weatherPhenomenonRepository.findByWeatherPhenomenonName(weatherPhenomenon);
+    public ExtraFeeWeatherPhenomenonRule getByWeatherPhenomenonName(String weatherPhenomenon)
+            throws CustomNotFoundException {
+        Optional<ExtraFeeWeatherPhenomenonRule> rule =
+                weatherPhenomenonRepository.findByWeatherPhenomenonName(weatherPhenomenon);
         return rule.
-                orElseThrow(() -> new CustomNotFoundException(String.format("Extra fee rule for this: ´%s´ weather phenomenon does not exist", weatherPhenomenon)));
+                orElseThrow(() -> new CustomNotFoundException(
+                        String.format("Extra fee rule for this: ´%s´ weather phenomenon does not exist",
+                                weatherPhenomenon)));
     }
 
 }

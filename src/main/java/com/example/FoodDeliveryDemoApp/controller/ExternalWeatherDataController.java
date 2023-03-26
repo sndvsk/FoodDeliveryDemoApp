@@ -26,7 +26,8 @@ import java.util.TreeMap;
 
 @RestController
 @RequestMapping("/api/get-weather-from-eea")
-@Tag(name = "Weather Data from Estonian Environment Agency API", description = "Endpoint for getting weather data from Estonian Environment Agency")
+@Tag(name = "Weather Data from Estonian Environment Agency API",
+        description = "Endpoint for getting weather data from Estonian Environment Agency")
 public class ExternalWeatherDataController {
 
     private final WeatherDataService weatherDataService;
@@ -34,19 +35,21 @@ public class ExternalWeatherDataController {
     private final ExternalWeatherDataService externalWeatherDataService;
 
     @Autowired
-    public ExternalWeatherDataController(WeatherDataService weatherDataService, ExternalWeatherDataService externalWeatherDataService) {
+    public ExternalWeatherDataController(WeatherDataService weatherDataService,
+                                         ExternalWeatherDataService externalWeatherDataService) {
         this.weatherDataService = weatherDataService;
         this.externalWeatherDataService = externalWeatherDataService;
     }
 
     /**
-     * Retrieves, filters and saves the latest weather data from the Estonian Environment Agency for supported cities to database.
+     * Retrieves, filters and saves the latest weather data from the Estonian Environment Agency
+     * for supported cities to database.
      *
      * @return a ResponseEntity containing a list of WeatherData objects representing the latest weather observations
      * @throws JAXBException if there is an error while parsing the weather data from the service
      */
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Save latest weather data from Estonian Environment Agency for Tallinn, Tartu and Pärnu to database")
+    @Operation(summary = "Save latest weather data from Estonian Environment Agency for supported cities to database")
     public ResponseEntity<List<WeatherData>> getAndSaveWeatherObservations() throws JAXBException {
 
         List<WeatherData> lastWeatherData = weatherDataService.getAndSaveWeatherDataFromExternalService();
@@ -57,7 +60,8 @@ public class ExternalWeatherDataController {
     /**
      * Retrieves the latest weather data from the Estonian Environment Agency.
      *
-     * @return a XML String containing a list of WeatherDataDTO.Observations objects representing the latest weather observations
+     * @return a XML String containing a list of WeatherDataDTO.Observations objects representing
+     * the latest weather observations
      */
     @GetMapping(path = "/xml", produces = MediaType.APPLICATION_XML_VALUE)
     @Operation(summary = "Get latest weather data from Estonian Environment Agency")

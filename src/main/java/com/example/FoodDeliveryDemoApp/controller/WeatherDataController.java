@@ -34,7 +34,8 @@ public class WeatherDataController {
     /**
      * Retrieves the latest weather data for all supported cities from external weather API.
      *
-     * @return a ResponseEntity containing a list of WeatherData objects representing the latest weather observations for all cities
+     * @return a ResponseEntity containing a list of WeatherData objects representing the latest weather observations
+     * for all cities
      * @throws JAXBException if there is an error parsing the XML request body
      */
     @GetMapping(path= "/cities", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -50,7 +51,8 @@ public class WeatherDataController {
      * Retrieves the latest weather data for provided cities parameter from database.
      *
      * @param cities a string containing a comma-separated list of city names to retrieve weather data for
-     * @return a ResponseEntity containing a list of WeatherData objects representing the latest weather observations for the requested cities
+     * @return a ResponseEntity containing a list of WeatherData objects representing the latest weather observations
+     * for the requested cities
      */
     @GetMapping(path ="/cities/{cities}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get latest weather data for supported cities")
@@ -102,10 +104,14 @@ public class WeatherDataController {
             @RequestParam Double windSpeed,
             @Parameter(name = "weatherPhenomenon", description = "Weather phenomenon", example = "")
             @RequestParam String weatherPhenomenon,
-            @Parameter(name = "time", description = "Time for when weather data should be added. Showed with a timezone offset of a server", example = "2023-03-22T12:15:00+02:00")
-            @RequestParam(required = false, name = "time") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dateTime) throws CustomNotFoundException, JAXBException {
+            @Parameter(name = "time", description = "Time for when weather data should be added. " +
+                    "Showed with a timezone offset of a server", example = "2023-03-22T12:15:00+02:00")
+            @RequestParam(required = false, name = "time")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dateTime)
+            throws CustomNotFoundException, JAXBException {
 
-        WeatherData weatherData = weatherDataService.addWeatherData(stationName, wmoCode, airTemperature, windSpeed, weatherPhenomenon, dateTime);
+        WeatherData weatherData = weatherDataService.addWeatherData(
+                stationName, wmoCode, airTemperature, windSpeed, weatherPhenomenon, dateTime);
 
         return new ResponseEntity<>(weatherData, HttpStatus.CREATED);
     }
@@ -150,7 +156,8 @@ public class WeatherDataController {
             @Parameter(name = "id", description = "Id of weather data", in = ParameterIn.PATH, example = "" )
             @PathVariable(value = "id") Long weatherId) throws CustomNotFoundException {
 
-        WeatherData weatherData = weatherDataService.patchWeatherDataById(weatherId, airTemperature, windSpeed, weatherPhenomenon);
+        WeatherData weatherData = weatherDataService.patchWeatherDataById(
+                weatherId, airTemperature, windSpeed, weatherPhenomenon);
 
         return new ResponseEntity<>(weatherData, HttpStatus.OK);
     }

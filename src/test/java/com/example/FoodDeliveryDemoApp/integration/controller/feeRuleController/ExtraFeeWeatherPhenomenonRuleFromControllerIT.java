@@ -81,7 +81,10 @@ public class ExtraFeeWeatherPhenomenonRuleFromControllerIT {
 
         // Send a POST request to the needed endpoint
         ResponseEntity<ExtraFeeWeatherPhenomenonRule> response = restTemplate.exchange(
-                "http://localhost:" + port + String.format("/api/rules/fee/extra/phenomenon?weatherPhenomenonName=%s&fee=%s", weatherPhenomenonName, fee),
+                "http://localhost:" + port +
+                        String.format("/api/rules/fee/extra/phenomenon?weatherPhenomenonName=%s&fee=%s",
+                                weatherPhenomenonName, fee),
+
                 HttpMethod.POST, new HttpEntity<>(null, headers), ExtraFeeWeatherPhenomenonRule.class
         );
 
@@ -157,7 +160,9 @@ public class ExtraFeeWeatherPhenomenonRuleFromControllerIT {
         Response response = client.newCall(request).execute();
         assertEquals(response.code(), HttpStatus.OK.value());
 
-        ExtraFeeWeatherPhenomenonRule ruleResponse = objectMapper.readValue(Objects.requireNonNull(response.body()).bytes(), ExtraFeeWeatherPhenomenonRule.class);
+        ExtraFeeWeatherPhenomenonRule ruleResponse =
+                objectMapper.readValue(Objects.requireNonNull(response.body()).bytes(),
+                        ExtraFeeWeatherPhenomenonRule.class);
 
         assertNotNull(ruleResponse);
         assertNotNull(ruleResponse.getId());

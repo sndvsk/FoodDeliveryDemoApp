@@ -51,7 +51,8 @@ public class WeatherDataServiceImpl implements WeatherDataService {
     }
 
     /**
-     * Returns a TreeMap of possible station names and codes retrieved from the external weather data service using fixed naming.
+     * Returns a TreeMap of possible station names and codes retrieved from
+     * the external weather data service using fixed naming.
      *
      * @return a TreeMap of station names and codes
      * @throws JAXBException if an error occurs while retrieving the data
@@ -95,7 +96,8 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      * @throws CustomBadRequestException if any of the required inputs are missing or invalid
      * @throws CustomBadRequestException if the station is not supported by application
      */
-    private void validateRequiredInputs(String stationName, Double airTemperature, Double windSpeed) throws CustomBadRequestException {
+    private void validateRequiredInputs(String stationName, Double airTemperature, Double windSpeed)
+            throws CustomBadRequestException {
 
         if (stationName == null) {
             throw new CustomBadRequestException("Station name is not provided");
@@ -104,7 +106,8 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         Set<String> possibleCities = getStationNamesFromRepository();
 
         if (!possibleCities.contains(stationName.toLowerCase())) {
-            throw new CustomBadRequestException(String.format("Station name: '%s' is not yet supported by this application", stationName));
+            throw new CustomBadRequestException(
+                    String.format("Station name: '%s' is not yet supported by this application", stationName));
         }
 
         if (airTemperature == null) {
@@ -124,14 +127,18 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      */
     private void validateInputs(Double airTemperature, Double windSpeed) throws CustomBadRequestException {
         if (airTemperature < -273.15) {
-            throw new CustomBadRequestException(String.format("Provided air temperature: ´%s´ is lower than absolute zero.", airTemperature));
+            throw new CustomBadRequestException(
+                    String.format("Provided air temperature: ´%s´ is lower than absolute zero.", airTemperature));
         } else if (airTemperature > 100.0) {
-            throw new CustomBadRequestException(String.format("Provided air temperature: ´%s´ is too high for Earth surface.", airTemperature));
+            throw new CustomBadRequestException(
+                    String.format("Provided air temperature: ´%s´ is too high for Earth surface.", airTemperature));
         }
         if (windSpeed < 0.0) {
-            throw new CustomBadRequestException(String.format("Provided wind speed: ´%s´ is lower than zero.", windSpeed));
+            throw new CustomBadRequestException(
+                    String.format("Provided wind speed: ´%s´ is lower than zero.", windSpeed));
         } else if (windSpeed > 150.0) {
-            throw new CustomBadRequestException(String.format("Provided wind speed: ´%s´ is too high for Earth surface.", windSpeed));
+            throw new CustomBadRequestException(
+                    String.format("Provided wind speed: ´%s´ is too high for Earth surface.", windSpeed));
         }
 
     }
@@ -159,7 +166,8 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         if (wmoCode == null || Objects.equals(expectedWmoCode, wmoCode)) {
             return expectedWmoCode;
         } else {
-            throw new CustomBadRequestException(String.format("Provided wmo code: ´%s´ is not the wmo code for ´%s´", wmoCode, stationName));
+            throw new CustomBadRequestException(
+                    String.format("Provided wmo code: ´%s´ is not the wmo code for ´%s´", wmoCode, stationName));
         }
     }
 
@@ -173,11 +181,21 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      * @throws CustomNotFoundException if there is no WeatherData object for or near the provided datetime
      * @throws CustomBadRequestException if the closest WeatherData object to the provided datetime is too far away
      */
-    private WeatherData getClosestWeatherDataFromRepository(String city, Instant dt, OffsetDateTime dateTime) throws CustomNotFoundException, CustomBadRequestException {
-        Optional<WeatherData> previousWeatherData = weatherDataRepository.findPreviousWeatherData(city, dt, PageRequest.of(0, 1)).stream().findFirst();
-        Optional<WeatherData> nextWeatherData = weatherDataRepository.findNextWeatherData(city, dt, PageRequest.of(0, 1)).stream().findFirst();
+    private WeatherData getClosestWeatherDataFromRepository(
+            String city, Instant dt, OffsetDateTime dateTime)
+            throws CustomNotFoundException, CustomBadRequestException {
+
+        Optional<WeatherData> previousWeatherData =
+                weatherDataRepository.findPreviousWeatherData(
+                        city, dt, PageRequest.of(0, 1)).stream().findFirst();
+
+        Optional<WeatherData> nextWeatherData =
+                weatherDataRepository.findNextWeatherData(
+                        city, dt, PageRequest.of(0, 1)).stream().findFirst();
+
         if (previousWeatherData.isEmpty() && nextWeatherData.isEmpty()) {
-            throw new CustomNotFoundException(String.format("Weather data for or near this datetime: ´%s´ does not exist", dateTime));
+            throw new CustomNotFoundException(
+                    String.format("Weather data for or near this datetime: ´%s´ does not exist", dateTime));
         }
 
         if (previousWeatherData.isEmpty()) {
@@ -189,10 +207,14 @@ public class WeatherDataServiceImpl implements WeatherDataService {
             Instant nextTimestamp = nextWeatherData.get().getTimestamp();
 
             if (isDurationTooFar(Duration.between(previousTimestamp, dt))) {
-                throw new CustomBadRequestException(String.format("Weather data with closest datetime to given datetime is too far: %s", Duration.between(previousTimestamp, dt)));
+                throw new CustomBadRequestException(
+                        String.format("Weather data with closest datetime to given datetime is too far: %s",
+                                Duration.between(previousTimestamp, dt)));
             }
             if (isDurationTooFar(Duration.between(nextTimestamp, dt))) {
-                throw new CustomBadRequestException(String.format("Weather data with closest datetime to given datetime is too far: %s", Duration.between(nextTimestamp, dt)));
+                throw new CustomBadRequestException(
+                        String.format("Weather data with closest datetime to given datetime is too far: %s",
+                                Duration.between(nextTimestamp, dt)));
             }
             return Duration.between(previousTimestamp, dt).compareTo(Duration.between(nextTimestamp, dt)) <= 0
                     ? previousWeatherData.get()
@@ -218,9 +240,15 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      * @throws CustomBadRequestException if a WeatherData object for the provided stationName and datetime already exists
      */
     private void validateDateTime(String stationName, OffsetDateTime dateTime) throws CustomBadRequestException {
-        Optional<WeatherData> weatherData = weatherDataRepository.findByStationNameAndTimestamp(stationName, dateTime.toInstant().truncatedTo(ChronoUnit.SECONDS));
+
+        Optional<WeatherData> weatherData =
+                weatherDataRepository.findByStationNameAndTimestamp(
+                        stationName, dateTime.toInstant().truncatedTo(ChronoUnit.SECONDS));
+
         if (weatherData.isPresent()) {
-            throw new CustomBadRequestException(String.format("There is already entry for this station: ´%s´ and datetime: ´%s´", stationName, dateTime));
+            throw new CustomBadRequestException(
+                    String.format("There is already entry for this station: ´%s´ and datetime: ´%s´",
+                            stationName, dateTime));
         }
     }
 
@@ -251,9 +279,12 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      * @param dateTime (optional) the date and time for the weather observation
      * @return the newly created WeatherData object
      * @throws JAXBException if there is an error getting the station names and codes
-     * @throws CustomBadRequestException if any of the inputs are invalid or the wmo code is incorrect for the provided station name
+     * @throws CustomBadRequestException if any of the inputs are invalid or the wmo code is incorrect
+     * for the provided station name
      */
-    public WeatherData addWeatherData(String stationName, Long wmoCode, Double airTemperature, Double windSpeed, String weatherPhenomenon, OffsetDateTime dateTime) throws JAXBException {
+    public WeatherData addWeatherData(
+            String stationName, Long wmoCode, Double airTemperature,
+            Double windSpeed, String weatherPhenomenon, OffsetDateTime dateTime) throws JAXBException {
 
         validateRequiredInputs(stationName, airTemperature, windSpeed);
         validateInputs(airTemperature, windSpeed);
@@ -276,7 +307,8 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         }
 
         if (weatherPhenomenon != null) {
-            ExtraFeeWeatherPhenomenonRule weatherPhenomenonFromRepository = weatherPhenomenonRuleService.getByWeatherPhenomenonName(weatherPhenomenon);
+            ExtraFeeWeatherPhenomenonRule weatherPhenomenonFromRepository =
+                    weatherPhenomenonRuleService.getByWeatherPhenomenonName(weatherPhenomenon);
             String phenomenonName = weatherPhenomenonFromRepository.getWeatherPhenomenonName();
             weatherData.setWeatherPhenomenon(phenomenonName);
         }
@@ -295,7 +327,8 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         Optional<WeatherData> weatherData = weatherDataRepository.findById(weatherId);
 
         return weatherData.
-                orElseThrow(() -> new CustomNotFoundException(String.format("Weather data for this id: ´%s´ does not exist", weatherId)));
+                orElseThrow(() -> new CustomNotFoundException(
+                        String.format("Weather data for this id: ´%s´ does not exist", weatherId)));
 
     }
 
@@ -312,11 +345,15 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      * @throws CustomBadRequestException if the air temperature and/or wind speed are not provided
      */
 
-    public WeatherData patchWeatherDataById(Long weatherId, Double airTemperature, Double windSpeed, String weatherPhenomenon) throws CustomNotFoundException {
+    public WeatherData patchWeatherDataById(
+            Long weatherId, Double airTemperature, Double windSpeed, String weatherPhenomenon)
+            throws CustomNotFoundException {
+
         Optional<WeatherData> weatherData = weatherDataRepository.findById(weatherId);
 
         WeatherData patchedWeatherData = weatherData
-                .orElseThrow(() -> new CustomNotFoundException(String.format("Weather data for this id: ´%s´ does not exist", weatherId)));
+                .orElseThrow(() -> new CustomNotFoundException(
+                        String.format("Weather data for this id: ´%s´ does not exist", weatherId)));
 
         validateInputs(airTemperature, windSpeed);
 
@@ -329,7 +366,9 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         }
 
         if (weatherPhenomenon != null) {
-            ExtraFeeWeatherPhenomenonRule weatherPhenomenonFromRepository = weatherPhenomenonRuleService.getByWeatherPhenomenonName(weatherPhenomenon);
+            ExtraFeeWeatherPhenomenonRule weatherPhenomenonFromRepository =
+                    weatherPhenomenonRuleService.getByWeatherPhenomenonName(weatherPhenomenon);
+
             patchedWeatherData.weatherPhenomenon = weatherPhenomenonFromRepository.getWeatherPhenomenonName();
         }
 
@@ -348,7 +387,8 @@ public class WeatherDataServiceImpl implements WeatherDataService {
             weatherDataRepository.deleteById(weatherId);
             return String.format("Weather data with id: ´%s´ was deleted", weatherId);
         } else
-            throw new CustomNotFoundException(String.format("Weather data for this id: ´%s´ does not exist", weatherId));
+            throw new CustomNotFoundException(
+                    String.format("Weather data for this id: ´%s´ does not exist", weatherId));
     }
 
     /**

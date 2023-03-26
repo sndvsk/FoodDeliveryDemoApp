@@ -28,9 +28,11 @@ public interface WeatherDataRepository extends JpaRepository<WeatherData, Long> 
 
     //List<WeatherData> findByStationNameAndTimestampBetween(String city, Instant start, Instant end);
 
-    @Query("SELECT wd FROM WeatherData wd WHERE wd.stationName = :city AND wd.timestamp >= :dt ORDER BY wd.timestamp ASC")
+    @Query("SELECT wd FROM WeatherData wd WHERE wd.stationName = :city " +
+            "AND wd.timestamp >= :dt ORDER BY wd.timestamp ASC")
     List<WeatherData> findNextWeatherData(@Param("city") String city, @Param("dt") Instant dt, Pageable pageable);
 
-    @Query("SELECT wd FROM WeatherData wd WHERE wd.stationName = :city AND wd.timestamp <= :dt ORDER BY wd.timestamp desc")
+    @Query("SELECT wd FROM WeatherData wd WHERE wd.stationName = :city " +
+            "AND wd.timestamp <= :dt ORDER BY wd.timestamp desc")
     List<WeatherData> findPreviousWeatherData(@Param("city") String city, @Param("dt") Instant dt, Pageable pageable);
 }

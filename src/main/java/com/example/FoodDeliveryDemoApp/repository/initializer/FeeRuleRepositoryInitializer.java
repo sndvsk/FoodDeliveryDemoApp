@@ -26,13 +26,20 @@ public class FeeRuleRepositoryInitializer implements CommandLineRunner {
     private final ExtraFeeWindSpeedRuleRepository windSpeedRepository;
     private final ExtraFeeWeatherPhenomenonRuleRepository weatherPhenomenonRepository;
 
-    public FeeRuleRepositoryInitializer(RegionalBaseFeeRuleRepository baseFeeRuleRepository, ExtraFeeAirTemperatureRuleRepository airTemperatureRepository, ExtraFeeWindSpeedRuleRepository windSpeedRepository, ExtraFeeWeatherPhenomenonRuleRepository weatherPhenomenonRepository) {
+    public FeeRuleRepositoryInitializer(RegionalBaseFeeRuleRepository baseFeeRuleRepository,
+                                        ExtraFeeAirTemperatureRuleRepository airTemperatureRepository,
+                                        ExtraFeeWindSpeedRuleRepository windSpeedRepository,
+                                        ExtraFeeWeatherPhenomenonRuleRepository weatherPhenomenonRepository) {
         this.baseFeeRuleRepository = baseFeeRuleRepository;
         this.airTemperatureRepository = airTemperatureRepository;
         this.windSpeedRepository = windSpeedRepository;
         this.weatherPhenomenonRepository = weatherPhenomenonRepository;
     }
 
+    /**
+     * This method is responsible for initializing the fee rules in the repository if they do not exist.
+     * If a rule already exists, it will not be added again.
+     */
     @Override
     public void run(String... args) {
 
@@ -67,9 +74,12 @@ public class FeeRuleRepositoryInitializer implements CommandLineRunner {
         if (airTemperatureCount == 0) {
             logger.info("No air temperature extra fee rules in the repository. Initializing....");
             List<ExtraFeeAirTemperatureRule> airTemperatureRules = new ArrayList<>();
-            airTemperatureRules.add(new ExtraFeeAirTemperatureRule(-10.1, -273.15, 1.0));
-            airTemperatureRules.add(new ExtraFeeAirTemperatureRule(0.0, -10.0, 0.5));
-            airTemperatureRules.add(new ExtraFeeAirTemperatureRule(0.1, 60.0, 0.0));
+            airTemperatureRules.add(
+                    new ExtraFeeAirTemperatureRule(-10.1, -273.15, 1.0));
+            airTemperatureRules.add(
+                    new ExtraFeeAirTemperatureRule(0.0, -10.0, 0.5));
+            airTemperatureRules.add(
+                    new ExtraFeeAirTemperatureRule(0.1, 60.0, 0.0));
             airTemperatureRepository.saveAll(airTemperatureRules);
             logger.info("Air temperature fee rules are added into the repository.");
         }
@@ -87,33 +97,60 @@ public class FeeRuleRepositoryInitializer implements CommandLineRunner {
         if (weatherPhenomenonCount == 0) {
             logger.info("No weather phenomenon extra fee rules in the repository. Initializing....");
             List<ExtraFeeWeatherPhenomenonRule> weatherPhenomenonRules = new ArrayList<>();
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Clear", 0.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Few clouds", 0.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Variable clouds", 0.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Cloudy with clear spells", 0.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Overcast", 0.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Light snow shower", 1.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Moderate snow shower", 1.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Heavy snow shower", 1.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Light shower", 0.5));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Moderate shower", 0.5));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Heavy shower", 0.5));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Light rain", 0.5));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Moderate rain", 0.5));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Heavy rain", 0.5));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Glaze", -1.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Light sleet", 1.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Moderate sleet", 1.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Light snowfall", 1.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Moderate snowfall", 1.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Heavy snowfall", 1.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Blowing snow", 1.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Drifting snow", 1.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Hail", -1.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Mist", 0.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Fog", 0.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Thunder", -1.0));
-            weatherPhenomenonRules.add(new ExtraFeeWeatherPhenomenonRule("Thunderstorm", -1.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Clear", 0.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Few clouds", 0.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Variable clouds", 0.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Cloudy with clear spells", 0.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Overcast", 0.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Light snow shower", 1.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Moderate snow shower", 1.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Heavy snow shower", 1.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Light shower", 0.5));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Moderate shower", 0.5));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Heavy shower", 0.5));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Light rain", 0.5));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Moderate rain", 0.5));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Heavy rain", 0.5));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Glaze", -1.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Light sleet", 1.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Moderate sleet", 1.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Light snowfall", 1.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Moderate snowfall", 1.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Heavy snowfall", 1.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Blowing snow", 1.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Drifting snow", 1.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Hail", -1.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Mist", 0.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Fog", 0.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Thunder", -1.0));
+            weatherPhenomenonRules.add(
+                    new ExtraFeeWeatherPhenomenonRule("Thunderstorm", -1.0));
             weatherPhenomenonRepository.saveAll(weatherPhenomenonRules);
             logger.info("Weather phenomenon fee rules are added into the repository.");
         }

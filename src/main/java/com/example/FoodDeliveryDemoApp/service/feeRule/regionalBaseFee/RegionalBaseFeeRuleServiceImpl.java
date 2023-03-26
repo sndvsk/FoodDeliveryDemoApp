@@ -18,7 +18,9 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
 
     private final ExternalWeatherDataService externalWeatherDataService;
 
-    public RegionalBaseFeeRuleServiceImpl(RegionalBaseFeeRuleRepository baseFeeRuleRepository, ExternalWeatherDataService externalWeatherDataService) {
+    public RegionalBaseFeeRuleServiceImpl(
+            RegionalBaseFeeRuleRepository baseFeeRuleRepository,
+            ExternalWeatherDataService externalWeatherDataService) {
         this.baseFeeRuleRepository = baseFeeRuleRepository;
         this.externalWeatherDataService = externalWeatherDataService;
     }
@@ -60,7 +62,8 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
      * @param fee the fee to validate
      * @throws CustomBadRequestException if any of the required inputs are invalid
      */
-    private void validateRequiredInputs(String city, Long wmoCode, String vehicleType, Double fee) throws CustomBadRequestException {
+    private void validateRequiredInputs(String city, Long wmoCode, String vehicleType, Double fee)
+            throws CustomBadRequestException {
 
         if (city == null && wmoCode == null) {
             throw new CustomBadRequestException("City or wmo code must be provided");
@@ -84,7 +87,8 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
      * @throws CustomBadRequestException if either the city or wmo code are invalid
      * @throws CustomBadRequestException if city and wmo code are provided but are not matching
      */
-    private String validateCityAndWmoCode(String city, Long wmoCode, TreeMap<String, Long> cityNamesAndCodes) throws CustomBadRequestException {
+    private String validateCityAndWmoCode(String city, Long wmoCode, TreeMap<String, Long> cityNamesAndCodes)
+            throws CustomBadRequestException {
 
         if (city == null && wmoCode == null) {
             return "";
@@ -92,12 +96,14 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
 
         if (wmoCode == null) {
             if (!cityNamesAndCodes.containsKey(city.toLowerCase())) {
-                throw new CustomBadRequestException(String.format("City: '%s' is not supported by external weather API", city));
+                throw new CustomBadRequestException(
+                        String.format("City: '%s' is not supported by external weather API", city));
             }
             return city;
         } else if (city == null) {
             if (!cityNamesAndCodes.containsValue(wmoCode)) {
-                throw new CustomBadRequestException(String.format("Wmo code: '%s' is not supported by external weather API", wmoCode));
+                throw new CustomBadRequestException(
+                        String.format("Wmo code: '%s' is not supported by external weather API", wmoCode));
             }
             return getKeyForValue(cityNamesAndCodes, wmoCode);
         } else {
@@ -105,10 +111,13 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
 
             if (expectedWmoCode == null) {
                 if (!cityNamesAndCodes.containsKey(city) && !cityNamesAndCodes.containsValue(wmoCode)) {
-                    throw new CustomBadRequestException(String.format("City: ´%s´ and wmo code: '%s' are not supported by external weather API", city, wmoCode));
+                    throw new CustomBadRequestException(
+                            String.format("City: ´%s´ and wmo code: '%s' are not supported by external weather API",
+                                    city, wmoCode));
                 }
                 if (!cityNamesAndCodes.containsValue(wmoCode)) {
-                    throw new CustomBadRequestException(String.format("Wmo code: '%s' is not supported by external weather API", city));
+                    throw new CustomBadRequestException(
+                            String.format("Wmo code: '%s' is not supported by external weather API", city));
                 }
             }
 
@@ -116,7 +125,8 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
             if (expectedWmoCode.equals(wmoCode)) {
                 return expectedWmoCode.toString();
             } else {
-                throw new CustomBadRequestException(String.format("Provided wmo code: ´%s´ is not the wmo code for ´%s´", wmoCode, city));
+                throw new CustomBadRequestException(
+                        String.format("Provided wmo code: ´%s´ is not the wmo code for ´%s´", wmoCode, city));
             }
         }
     }
@@ -134,34 +144,43 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
      * @throws CustomBadRequestException if the city is not supported by external weather API
      * @throws CustomBadRequestException if the wmo code is not supported by external weather API
      */
-    private void validateInputs(String city, Long wmoCode, String vehicleType, Double fee, TreeMap<String, Long> cityNamesAndCodes) throws CustomBadRequestException {
+    private void validateInputs(
+            String city, Long wmoCode, String vehicleType, Double fee, TreeMap<String, Long> cityNamesAndCodes)
+            throws CustomBadRequestException {
 
         if (fee != null && fee < 0.0) {
             throw new CustomBadRequestException(String.format("Fee: ´%s´ must be positive", fee));
         }
 
         if (vehicleType != null ) {
-            vehicleType = vehicleType.replaceAll(" ", "").replaceAll("\u00A0", "").replaceAll("\\u00A0", "");
+            vehicleType = vehicleType
+                    .replaceAll(" ", "")
+                    .replaceAll("\u00A0", "")
+                    .replaceAll("\\u00A0", "");
             if (!vehicleType.chars().allMatch(Character::isLetter)) {
-                throw new CustomBadRequestException(String.format("Vehicle type: ´%s´ must contain only letters", vehicleType));
+                throw new CustomBadRequestException(
+                        String.format("Vehicle type: ´%s´ must contain only letters", vehicleType));
             }
         }
 
         if (city != null) {
             city = city.toLowerCase(Locale.ROOT);
             if (!cityNamesAndCodes.containsKey(city.toLowerCase())) {
-                throw new CustomBadRequestException(String.format("City: '%s' is not supported by external weather API", city));
+                throw new CustomBadRequestException(
+                        String.format("City: '%s' is not supported by external weather API", city));
             }
         }
 
         if (wmoCode != null) {
             // many stations with wmo code 0 so this app does not support them
             if (wmoCode == 0) {
-                throw new CustomBadRequestException(String.format("Wmo code: '%s' is not supported by external weather API", city));
+                throw new CustomBadRequestException(
+                        String.format("Wmo code: '%s' is not supported by external weather API", city));
             }
 
             if (!cityNamesAndCodes.containsValue(wmoCode)) {
-                throw new CustomBadRequestException(String.format("Wmo code: '%s' is not supported by external weather API", city));
+                throw new CustomBadRequestException(
+                        String.format("Wmo code: '%s' is not supported by external weather API", city));
             }
         }
 
@@ -179,7 +198,8 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
         if (citiesAndVehicles.containsKey(city)) {
             List<String> vehicleTypes = citiesAndVehicles.get(city);
             if (vehicleTypes.contains(vehicleType)) {
-                throw new CustomBadRequestException(String.format("The city '%s' already has the vehicle type '%s'", city, vehicleType));
+                throw new CustomBadRequestException(
+                        String.format("The city '%s' already has the vehicle type '%s'", city, vehicleType));
             }
         }
     }
@@ -194,7 +214,9 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
     private void validateNewCity(String newCity, String oldCity) throws CustomBadRequestException {
         Set<String> check = getAllUniqueCities();
         if (!check.contains(newCity.toLowerCase(Locale.ROOT))) {
-            throw new CustomBadRequestException(String.format("You dont have rules for: ´%s´. Consider creating new rule instead of patching ´%s´", newCity, oldCity));
+            throw new CustomBadRequestException(
+                    String.format("You dont have rules for: ´%s´. Consider creating new rule instead of patching ´%s´",
+                            newCity, oldCity));
         }
     }
 
@@ -223,7 +245,8 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
      * @return a RegionalBaseFeeRule object
      * @throws JAXBException if there is an error parsing the XML request body
      */
-    public RegionalBaseFeeRule addBaseFeeRule(String city, Long wmoCode, String vehicleType, Double fee) throws JAXBException {
+    public RegionalBaseFeeRule addBaseFeeRule(String city, Long wmoCode, String vehicleType, Double fee)
+            throws JAXBException {
 
         validateRequiredInputs(city, wmoCode, vehicleType, fee);
 
@@ -268,7 +291,8 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
     public RegionalBaseFeeRule getRegionalBaseFeeRuleById(Long id) {
         Optional<RegionalBaseFeeRule> rule = baseFeeRuleRepository.findById(id);
         return rule
-                .orElseThrow(() -> new CustomNotFoundException(String.format("Regional base fee rule for this id: ´%s´ does not exist", id)));
+                .orElseThrow(() -> new CustomNotFoundException(
+                        String.format("Regional base fee rule for this id: ´%s´ does not exist", id)));
     }
 
     /**
@@ -283,7 +307,9 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
      * @throws JAXBException if there is an error parsing the XML request body
      * @throws CustomNotFoundException if no rule exists with the provided id
      */
-    public RegionalBaseFeeRule patchRegionalBaseFeeRuleById(Long id, String city, Long wmoCode, String vehicleType, Double fee) throws JAXBException, CustomNotFoundException {
+    public RegionalBaseFeeRule patchRegionalBaseFeeRuleById(
+            Long id, String city, Long wmoCode, String vehicleType, Double fee)
+            throws JAXBException, CustomNotFoundException {
         TreeMap<String, Long> cityNamesAndCodes = getCityNamesAndCodes();
 
         validateCityAndWmoCode(city, wmoCode, cityNamesAndCodes);
@@ -292,7 +318,8 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
         Optional<RegionalBaseFeeRule> rule = baseFeeRuleRepository.findById(id);
 
         RegionalBaseFeeRule patchedRule = rule
-                .orElseThrow(() -> new CustomNotFoundException(String.format("Regional base fee rule for this id: ´%s´ does not exist", id)));
+                .orElseThrow(() -> new CustomNotFoundException(
+                        String.format("Regional base fee rule for this id: ´%s´ does not exist", id)));
 
         if (city != null) {
             city = city.toLowerCase(Locale.ROOT);
@@ -331,7 +358,8 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
             baseFeeRuleRepository.deleteById(id);
             return String.format("Regional base fee rule with id: ´%s´ was deleted", id);
         } else
-            throw new CustomNotFoundException(String.format("Regional base fee rule for this id: ´%s´ does not exist", id));
+            throw new CustomNotFoundException(
+                    String.format("Regional base fee rule for this id: ´%s´ does not exist", id));
     }
 
     /**
@@ -371,10 +399,13 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
      * @return the regional base fee rule that matches the given city and vehicle type
      * @throws CustomNotFoundException if the rule for the given city and vehicle type does not exist
      */
-    public RegionalBaseFeeRule getByCityAndVehicleType(String city, String vehicleType) throws CustomNotFoundException{
+    public RegionalBaseFeeRule getByCityAndVehicleType(String city, String vehicleType) throws CustomNotFoundException {
         Optional<RegionalBaseFeeRule> rule = baseFeeRuleRepository.findByCityAndVehicleType(city, vehicleType);
         return rule
-                .orElseThrow(() -> new CustomNotFoundException(String.format("Regional base fee rule for this city: ´%s´ and vehicle type: ´%s´ does not exist", city, vehicleType)));
+                .orElseThrow(() -> new CustomNotFoundException(
+                        String.format(
+                                "Regional base fee rule for this city: ´%s´ and vehicle type: ´%s´ does not exist",
+                                city, vehicleType)));
     }
 
 }

@@ -51,7 +51,8 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
     /**
      * Retrieves a TreeMap containing all existing vehicle types for each city from the base fee rule service.
      *
-     * @return a TreeMap where each key is a city name and the corresponding value is a list of vehicle types available in that city
+     * @return a TreeMap where each key is a city name and the corresponding value is a
+     * list of vehicle types available in that city
      */
     private TreeMap<String, List<String>> getExistingVehicleTypesForCities() {
         return baseFeeRuleService.getAllUniqueCitiesWithVehicleTypes();
@@ -62,14 +63,17 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      *
      * @param city the name of the city to check
      * @param vehicleType the type of the vehicle to check
-     * @throws CustomBadRequestException if the city does not support the vehicle type, or if the city argument is invalid or not supported
+     * @throws CustomBadRequestException if the city does not support the vehicle type,
+     * or if the city argument is invalid or not supported
      */
     private void checkExistingVehicleTypesForCity(String city, String vehicleType) throws CustomBadRequestException {
         TreeMap<String, List<String>> citiesAndVehicles = getExistingVehicleTypesForCities();
         if (citiesAndVehicles.containsKey(city)) {
             List<String> vehicleTypes = citiesAndVehicles.get(city);
             if (!vehicleTypes.contains(vehicleType)) {
-                throw new CustomBadRequestException(String.format("This city: ´%s´ does not currently support this vehicle type: ´%s´", city, vehicleType));
+                throw new CustomBadRequestException(
+                        String.format("This city: ´%s´ does not currently support this vehicle type: ´%s´",
+                                city, vehicleType));
             }
         } else {
             throw new CustomBadRequestException(String.format("City: ´%s´ argument is invalid or not supported.", city));
@@ -103,7 +107,8 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      *
      * @param city the city for which to calculate the delivery fee
      * @param vehicleType the type of vehicle used for delivery
-     * @param dateTime (optional) the date and time for which to calculate the delivery fee. If null, the current date and time will be used
+     * @param dateTime (optional) the date and time for which to calculate the delivery fee.
+     *                 If null, the current date and time will be used
      * @return the delivery fee for the given city, vehicle type, and datetime if provided
      */
     private Double calculateDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime) {
@@ -115,7 +120,8 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
     }
 
     /**
-     * Calculates the weather condition fee for a given city and vehicle type. It takes into account the air temperature, wind speed and weather phenomenon.
+     * Calculates the weather condition fee for a given city and vehicle type.
+     * It takes into account the air temperature, wind speed and weather phenomenon.
      *
      * @param city the city for which to calculate the delivery fee
      * @param vehicleType the type of vehicle used for delivery
@@ -128,27 +134,29 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
         return fee;
     }
 
+    // A map that maps each vehicle type to its corresponding fee calculation function
+    final Map<String, Function<WeatherData, Double>> vehicleTypeToFeeFunction = Map.of(
+            "car", weatherData1 -> 0.0,
+            "scooter", weatherData1 -> calculateAirTemperatureFee(weatherData1.getAirTemperature())
+                    + calculateWeatherPhenomenonFee(weatherData1.getWeatherPhenomenon()),
+            "bike", weatherData1 -> calculateAirTemperatureFee(weatherData1.getAirTemperature())
+                    + calculateWindSpeedFee(weatherData1.getWindSpeed())
+                    + calculateWeatherPhenomenonFee(weatherData1.getWeatherPhenomenon())
+    );
+
     /**
-     * Calculates the weather condition fee for a given city and vehicle type at a specific datetime. It takes into account the air temperature, wind speed and weather phenomenon.
+     * Calculates the weather condition fee for a given city and vehicle type at a specific datetime
+     * It takes into account the air temperature, wind speed and weather phenomenon.
      *
      * @param city the city for which to calculate the delivery fee
      * @param vehicleType the type of vehicle used for delivery
-     * @param dateTime (optional) the date and time for which to calculate the delivery fee. If null, the current date and time will be used
+     * @param dateTime (optional) the date and time for which to calculate the delivery fee.
+     *                 If null, the current date and time will be used
      * @return the weather condition fee for the specified city, vehicle type, and datetime
      */
     private Double calculateWeatherConditionFee(String city, String vehicleType, OffsetDateTime dateTime) {
 
         WeatherData weatherData = weatherDataService.getLastDataByCity(city, dateTime);
-
-        // A map that maps each vehicle type to its corresponding fee calculation function
-        Map<String, Function<WeatherData, Double>> vehicleTypeToFeeFunction = Map.of(
-                "car", weatherData1 -> 0.0,
-                "scooter", weatherData1 -> calculateAirTemperatureFee(weatherData1.getAirTemperature())
-                        + calculateWeatherPhenomenonFee(weatherData1.getWeatherPhenomenon()),
-                "bike", weatherData1 -> calculateAirTemperatureFee(weatherData1.getAirTemperature())
-                        + calculateWindSpeedFee(weatherData1.getWindSpeed())
-                        + calculateWeatherPhenomenonFee(weatherData1.getWeatherPhenomenon())
-        );
 
         Function<WeatherData, Double> feeFunction = vehicleTypeToFeeFunction.get(vehicleType);
 
@@ -165,7 +173,9 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
         ExtraFeeAirTemperatureRule rule = airTemperatureRuleService.getByTemperature(airTemperature);
         Double fee = rule.getFee();
         if (fee < 0) {
-            throw new CustomBadRequestException(String.format("Usage of selected vehicle type is forbidden: air temperature ´%s´ is too low", airTemperature));
+            throw new CustomBadRequestException(
+                    String.format("Usage of selected vehicle type is forbidden: air temperature ´%s´ is too low",
+                            airTemperature));
         }
         return fee;
     }
@@ -181,7 +191,9 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
         ExtraFeeWindSpeedRule rule = windSpeedRuleService.getByWindSpeed(windSpeed);
         Double fee = rule.getFee();
         if (fee < 0) {
-            throw new CustomBadRequestException(String.format("Usage of selected vehicle type is forbidden: wind speed ´%s´ is too high", windSpeed));
+            throw new CustomBadRequestException(
+                    String.format("Usage of selected vehicle type is forbidden: wind speed ´%s´ is too high",
+                            windSpeed));
         }
         return fee;
     }
@@ -197,7 +209,9 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
         ExtraFeeWeatherPhenomenonRule rule = weatherPhenomenonRuleService.getByWeatherPhenomenonName(weatherPhenomenon);
         Double fee = rule.getFee();
         if (fee < 0) {
-            throw new CustomBadRequestException(String.format("Usage of selected vehicle type is forbidden: weather phenomenon ´%s´ is dangerous", weatherPhenomenon));
+            throw new CustomBadRequestException(
+                    String.format("Usage of selected vehicle type is forbidden: weather phenomenon ´%s´ is dangerous",
+                            weatherPhenomenon));
         }
         return fee;
     }
@@ -208,10 +222,12 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * @param city the city for which to calculate the delivery fee
      * @param vehicleType the type of vehicle used for delivery
      * @param deliveryFeePrice the calculated delivery fee
-     * @param dateTime (optional) the date and time for which to calculate the delivery fee. If null, the current date and time will be used
+     * @param dateTime (optional) the date and time for which to calculate the delivery fee.
+     *                 If null, the current date and time will be used
      * @return a new DeliveryFee object with the specified parameters
      */
-    private DeliveryFee createNewDeliveryFee(String city, String vehicleType, double deliveryFeePrice, OffsetDateTime dateTime) {
+    private DeliveryFee createNewDeliveryFee(String city, String vehicleType,
+                                             double deliveryFeePrice, OffsetDateTime dateTime) {
 
         DeliveryFee deliveryFee = new DeliveryFee();
         deliveryFee.setCity(city);
@@ -271,7 +287,8 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
     }
 
     /**
-     * Overload of the {@link #calculateAndSaveDeliveryFee(String, String, OffsetDateTime)}method with a default {@code dateTime}.
+     * Overload of the {@link #calculateAndSaveDeliveryFee(String, String, OffsetDateTime)}method with a
+     * default {@code dateTime}.
      */
     public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType) throws CustomBadRequestException {
         return calculateAndSaveDeliveryFee(city, vehicleType, null);
@@ -287,7 +304,8 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * @return a DeliveryFee object with the delivery fee calculation result
      * @throws CustomBadRequestException if there is an error in the input validation or the fee calculation
      */
-    public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime) throws CustomBadRequestException {
+    public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime)
+            throws CustomBadRequestException {
         validateRequiredInputs(city, vehicleType);
 
         city = city.trim().toLowerCase(Locale.ROOT);

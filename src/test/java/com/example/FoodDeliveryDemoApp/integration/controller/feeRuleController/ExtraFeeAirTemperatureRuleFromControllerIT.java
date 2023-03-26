@@ -86,7 +86,11 @@ public class ExtraFeeAirTemperatureRuleFromControllerIT {
 
         // Send a POST request to the needed endpoint
         ResponseEntity<ExtraFeeAirTemperatureRule> response = restTemplate.exchange(
-                "http://localhost:" + port + String.format("/api/rules/fee/extra/temperature?startTemperatureRange=%s&endTemperatureRange=%s&fee=%s", startRange, endRange, fee),
+                "http://localhost:" + port +
+                        String.format("/api/rules/fee/extra/" +
+                                "temperature?startTemperatureRange=%s&endTemperatureRange=%s&fee=%s",
+                                startRange, endRange, fee),
+
                 HttpMethod.POST, new HttpEntity<>(null, headers), ExtraFeeAirTemperatureRule.class
         );
 
@@ -168,7 +172,9 @@ public class ExtraFeeAirTemperatureRuleFromControllerIT {
         Response response = client.newCall(request).execute();
         assertEquals(response.code(), HttpStatus.OK.value());
 
-        ExtraFeeAirTemperatureRule ruleResponse = objectMapper.readValue(Objects.requireNonNull(response.body()).bytes(), ExtraFeeAirTemperatureRule.class);
+        ExtraFeeAirTemperatureRule ruleResponse =
+                objectMapper.readValue(Objects.requireNonNull(response.body()).bytes(),
+                        ExtraFeeAirTemperatureRule.class);
 
         assertNotNull(ruleResponse);
         assertNotNull(ruleResponse.getId());

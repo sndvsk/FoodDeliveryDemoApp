@@ -7,11 +7,13 @@ This project is a technical task.
 ## Prerequisites
 
 * [Java 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
+  
   ```sh
   https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html
   ```
 
 * [Maven](https://maven.apache.org/download.cgi)
+  
   ```sh
   https://maven.apache.org/download.cgi
   ```
@@ -51,44 +53,56 @@ Swagger UI is powered by SpringDoc OpenAPI (v2.0.4) [springdoc-openapi v2.0.4](h
 Postman can also be used, as well as CURL etc. \
 Most of the validation supports exception handling for empty parameters.
 
-## Tests and how to run them from maven
+## Tests
 
 There are unit tests and integration tests. Each of them use different environment(database).
 
-By default, while building the project only unit tests run automatically.
+By default, while building the project using ```mvn clean package``` only unit tests run automatically.
 If you want to run the integration tests, refer to the instruction below.
 
 ### How to run from maven
 
 * Integration tests
 
-1. Build the project using maven
-   ```sh
-   mvn clean package
-   ```
-   
-2. Run integration tests
+  - Run integration tests separately
     ```sh
-   mvn test -Dtest=**IT.java
-   ```
-   
+    mvn test -Dtest=**IT.java
+    ```
+  - Run as verify
+    ```sh
+    mvn clean verify
+    ```
+  - Run as install
+    ```sh
+    mvn clean install
+    ```
+    
+    
 - Unit tests 
   
   - Build the project using maven (unit tests run automatically)
-       ```sh
-       mvn clean package
-       ```
+     ```sh
+     mvn clean package
+     ```
     
   - To run only the application unit tests just type the following command:
-    ```shell
+    ```sh
     mvn test
     ```
     
-  - To skip unit tests via command line during compilation just add the parameter `-DskipTests=true`:
-    ```shell
-    mvn clean package -DskipTests=true 
+  - To skip unit tests via command line during compilation just add the parameter `-P no-tests`:
+    ```sh
+    mvn clean package -P no-unit-tests
     ```
   
+
+P.S. There are sometimes some problems with WeatherDataControllerIT integration tests.
+
+If it didn't pass after first try, run it as provided below and test should pass.
+  ```sh
+   mvn test -Dtest=WeatherDataControllerIT.java
+   ```
+
 ### Coverage
 
 1. All methods in controllers are covered by tests.
@@ -118,4 +132,4 @@ There are some more additions in my solution that were not listed in the task.
 ## TODOS
 
 1. _>90%_ test coverage in services.
-2. Make integration test environment better. (RepositoryInitializer, DatabaseCleanupTestExecutionListener)
+2. Make integration test environment better. (RepositoryInitializer, DatabaseCleanupTestExecutionListener, @DataJpaTest)

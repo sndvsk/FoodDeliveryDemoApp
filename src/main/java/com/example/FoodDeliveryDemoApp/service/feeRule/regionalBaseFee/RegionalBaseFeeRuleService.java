@@ -15,7 +15,8 @@ public interface RegionalBaseFeeRuleService {
 
     RegionalBaseFeeRule getRegionalBaseFeeRuleById(Long id);
 
-    RegionalBaseFeeRule patchRegionalBaseFeeRuleById(Long id, String city, Long wmoCode, String vehicleType, Double fee) throws JAXBException;
+    RegionalBaseFeeRule patchRegionalBaseFeeRuleById(
+            Long id, String city, Long wmoCode, String vehicleType, Double fee) throws JAXBException;
 
     String deleteRegionalBaseFeeRuleById(Long id);
 

@@ -11,10 +11,16 @@ public class CustomWebConfigurer implements WebMvcConfigurer {
 
     private final InterceptLog logInterceptor;
 
+
     public CustomWebConfigurer(InterceptLog logInterceptor) {
         this.logInterceptor = logInterceptor;
     }
 
+    /**
+     * Adds the logInterceptor to the given InterceptorRegistry.
+     *
+     * @param registry the InterceptorRegistry to which the logInterceptor will be added
+     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(logInterceptor);

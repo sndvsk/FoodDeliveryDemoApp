@@ -28,7 +28,8 @@ public class DeliveryFeeController {
     }
 
     /**
-     * Calculates and saves a delivery fee based on the specified city and vehicle type, and optionally the specified date and time into database.
+     * Calculates and saves a delivery fee based on the specified city and vehicle type,
+     * and optionally the specified date and time into database.
      *
      * @param city the city to calculate the delivery fee for
      * @param vehicleType the type of vehicle to use for the delivery
@@ -43,8 +44,11 @@ public class DeliveryFeeController {
             @RequestParam String city,
             @Parameter(name = "vehicleType", description = "Vehicle type for delivery", example = "Car")
             @RequestParam String vehicleType,
-            @Parameter(name = "datetime", description = "Time for when delivery fee should be calculated. Showed with a timezone offset of a server", example = "2023-03-22T12:15:00+02:00")
-            @RequestParam(required = false, name = "datetime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dateTime) throws CustomBadRequestException {
+            @Parameter(name = "datetime", description = "Time for when delivery fee should be calculated. " +
+                    "Showed with a timezone offset of a server", example = "2023-03-22T12:15:00+02:00")
+            @RequestParam(required = false, name = "datetime")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dateTime)
+            throws CustomBadRequestException {
 
         DeliveryFee responseDeliveryFee = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, dateTime);
 

@@ -17,6 +17,7 @@ public interface DeliveryFeeService {
     @SuppressWarnings("UnusedReturnValue")
     DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType) throws CustomBadRequestException;
 
-    DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime) throws CustomBadRequestException;
+    DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime)
+            throws CustomBadRequestException;
 
 }

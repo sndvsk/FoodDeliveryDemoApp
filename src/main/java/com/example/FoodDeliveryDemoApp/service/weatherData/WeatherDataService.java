@@ -13,7 +13,9 @@ public interface WeatherDataService {
 
     List<WeatherData> getAllWeatherData();
 
-    WeatherData addWeatherData(String stationName, Long wmoCode, Double airTemperature, Double windSpeed, String weatherPhenomenon, OffsetDateTime dateTime) throws JAXBException;
+    WeatherData addWeatherData(
+            String stationName, Long wmoCode, Double airTemperature,
+            Double windSpeed, String weatherPhenomenon, OffsetDateTime dateTime) throws JAXBException;
 
     WeatherData getWeatherDataById(Long weatherId);
 
