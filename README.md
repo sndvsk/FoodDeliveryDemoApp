@@ -1,8 +1,11 @@
-# FoodDeliveryDemoApp
+# FoodDeliveryDemoApp (API)
 
 ## About this project
 
-This project is a technical task.
+This project is a technical task. \
+The objective of the task is to develop a sub-functionality(API) of the food delivery application, which
+calculates the delivery fee for food couriers based on regional base fee, vehicle type, and weather
+conditions (extra fees).
 
 ## Prerequisites
 
@@ -39,7 +42,7 @@ This project is a technical task.
 6. Use [Swagger UI](http://localhost:8080/swagger-ui/index.html) to test the endpoints.
 
 P.S. Scheduled task gets data right after start of the application and then every hour at 15 minutes.
-If you want to get latest data when you want use __/get-weather-from-eea__ endpoint.
+If you want to get latest data when you want - use __/get-weather-from-eea__ endpoint and use POST method.
 
 
 ## How to use
