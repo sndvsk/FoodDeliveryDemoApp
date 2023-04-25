@@ -2,7 +2,7 @@ package com.example.FoodDeliveryDemoApp.controller;
 
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataService;
-import com.example.FoodDeliveryDemoApp.model.WeatherData;
+import com.example.FoodDeliveryDemoApp.domain.WeatherData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;

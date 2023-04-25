@@ -1,6 +1,6 @@
 package com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.airTemperatureRule;
 
-import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeAirTemperatureRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.extraFee.ExtraFeeAirTemperatureRule;
 
 import java.util.List;
 

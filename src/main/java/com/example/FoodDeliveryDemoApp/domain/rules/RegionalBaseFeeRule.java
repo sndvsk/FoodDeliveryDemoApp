@@ -1,4 +1,4 @@
-package com.example.FoodDeliveryDemoApp.model.rules;
+package com.example.FoodDeliveryDemoApp.domain.rules;
 
 import jakarta.persistence.*;
 

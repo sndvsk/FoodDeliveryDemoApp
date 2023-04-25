@@ -2,12 +2,12 @@ package com.example.FoodDeliveryDemoApp.service.deliveryFee;
 
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
-import com.example.FoodDeliveryDemoApp.model.DeliveryFee;
-import com.example.FoodDeliveryDemoApp.model.WeatherData;
-import com.example.FoodDeliveryDemoApp.model.rules.RegionalBaseFeeRule;
-import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeAirTemperatureRule;
-import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWeatherPhenomenonRule;
-import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWindSpeedRule;
+import com.example.FoodDeliveryDemoApp.domain.DeliveryFee;
+import com.example.FoodDeliveryDemoApp.domain.WeatherData;
+import com.example.FoodDeliveryDemoApp.domain.rules.RegionalBaseFeeRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.extraFee.ExtraFeeAirTemperatureRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.extraFee.ExtraFeeWeatherPhenomenonRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.extraFee.ExtraFeeWindSpeedRule;
 import com.example.FoodDeliveryDemoApp.repository.DeliveryFeeRepository;
 import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.airTemperatureRule.ExtraFeeAirTemperatureRuleService;
 import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.weatherPhenomenonRule.ExtraFeeWeatherPhenomenonRuleService;

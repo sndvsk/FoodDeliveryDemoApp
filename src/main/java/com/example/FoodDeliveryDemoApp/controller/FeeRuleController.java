@@ -1,9 +1,9 @@
 package com.example.FoodDeliveryDemoApp.controller;
 
-import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeAirTemperatureRule;
-import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWeatherPhenomenonRule;
-import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWindSpeedRule;
-import com.example.FoodDeliveryDemoApp.model.rules.RegionalBaseFeeRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.extraFee.ExtraFeeAirTemperatureRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.extraFee.ExtraFeeWeatherPhenomenonRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.extraFee.ExtraFeeWindSpeedRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.RegionalBaseFeeRule;
 import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.airTemperatureRule.ExtraFeeAirTemperatureRuleService;
 import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.weatherPhenomenonRule.ExtraFeeWeatherPhenomenonRuleService;
 import com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.windSpeedRule.ExtraFeeWindSpeedRuleService;

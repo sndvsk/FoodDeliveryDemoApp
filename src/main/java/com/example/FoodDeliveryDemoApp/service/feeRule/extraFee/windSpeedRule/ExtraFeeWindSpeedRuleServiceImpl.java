@@ -2,7 +2,7 @@ package com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.windSpeedRule;
 
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
-import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWindSpeedRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.extraFee.ExtraFeeWindSpeedRule;
 import com.example.FoodDeliveryDemoApp.repository.rules.ExtraFeeWindSpeedRuleRepository;
 import org.springframework.stereotype.Component;
 

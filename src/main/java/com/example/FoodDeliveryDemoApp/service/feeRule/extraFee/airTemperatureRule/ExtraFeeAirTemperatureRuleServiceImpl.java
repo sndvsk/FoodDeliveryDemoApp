@@ -2,7 +2,7 @@ package com.example.FoodDeliveryDemoApp.service.feeRule.extraFee.airTemperatureR
 
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
-import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeAirTemperatureRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.extraFee.ExtraFeeAirTemperatureRule;
 import com.example.FoodDeliveryDemoApp.repository.rules.ExtraFeeAirTemperatureRuleRepository;
 import org.springframework.stereotype.Component;
 

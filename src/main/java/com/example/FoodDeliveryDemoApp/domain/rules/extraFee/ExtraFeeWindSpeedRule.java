@@ -1,6 +1,6 @@
-package com.example.FoodDeliveryDemoApp.model.rules.extraFee;
+package com.example.FoodDeliveryDemoApp.domain.rules.extraFee;
 
-import com.example.FoodDeliveryDemoApp.model.rules.FeeRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.FeeRule;
 import jakarta.persistence.*;
 
 @Entity

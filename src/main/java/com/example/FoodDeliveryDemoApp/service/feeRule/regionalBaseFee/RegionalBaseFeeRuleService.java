@@ -1,6 +1,6 @@
 package com.example.FoodDeliveryDemoApp.service.feeRule.regionalBaseFee;
 
-import com.example.FoodDeliveryDemoApp.model.rules.RegionalBaseFeeRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.RegionalBaseFeeRule;
 import jakarta.xml.bind.JAXBException;
 
 import java.util.List;

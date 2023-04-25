@@ -1,6 +1,6 @@
 package com.example.FoodDeliveryDemoApp.repository;
 
-import com.example.FoodDeliveryDemoApp.model.DeliveryFee;
+import com.example.FoodDeliveryDemoApp.domain.DeliveryFee;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

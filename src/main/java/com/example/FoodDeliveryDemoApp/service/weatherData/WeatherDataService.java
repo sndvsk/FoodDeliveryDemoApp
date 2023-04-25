@@ -1,7 +1,7 @@
 package com.example.FoodDeliveryDemoApp.service.weatherData;
 
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
-import com.example.FoodDeliveryDemoApp.model.WeatherData;
+import com.example.FoodDeliveryDemoApp.domain.WeatherData;
 import jakarta.xml.bind.JAXBException;
 
 import java.time.OffsetDateTime;

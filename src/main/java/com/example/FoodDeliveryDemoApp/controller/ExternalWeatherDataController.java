@@ -3,7 +3,7 @@ package com.example.FoodDeliveryDemoApp.controller;
 import com.example.FoodDeliveryDemoApp.dto.WeatherDataDTO;
 import com.example.FoodDeliveryDemoApp.service.externalWeatherData.ExternalWeatherDataService;
 import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataService;
-import com.example.FoodDeliveryDemoApp.model.WeatherData;
+import com.example.FoodDeliveryDemoApp.domain.WeatherData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;

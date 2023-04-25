@@ -3,7 +3,7 @@ package com.example.FoodDeliveryDemoApp.service.deliveryFee;
 
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
-import com.example.FoodDeliveryDemoApp.model.DeliveryFee;
+import com.example.FoodDeliveryDemoApp.domain.DeliveryFee;
 
 import java.time.OffsetDateTime;
 import java.util.List;

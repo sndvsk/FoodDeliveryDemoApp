@@ -1,6 +1,6 @@
 package com.example.FoodDeliveryDemoApp.repository;
 
-import com.example.FoodDeliveryDemoApp.model.WeatherData;
+import com.example.FoodDeliveryDemoApp.domain.WeatherData;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

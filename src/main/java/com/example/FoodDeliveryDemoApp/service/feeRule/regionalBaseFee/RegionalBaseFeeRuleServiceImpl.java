@@ -2,7 +2,7 @@ package com.example.FoodDeliveryDemoApp.service.feeRule.regionalBaseFee;
 
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
-import com.example.FoodDeliveryDemoApp.model.rules.RegionalBaseFeeRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.RegionalBaseFeeRule;
 import com.example.FoodDeliveryDemoApp.repository.rules.RegionalBaseFeeRuleRepository;
 import com.example.FoodDeliveryDemoApp.service.externalWeatherData.ExternalWeatherDataService;
 import jakarta.xml.bind.JAXBException;

@@ -1,11 +1,11 @@
 package com.example.FoodDeliveryDemoApp.service.logger;
 
-import com.example.FoodDeliveryDemoApp.model.DeliveryFee;
-import com.example.FoodDeliveryDemoApp.model.WeatherData;
-import com.example.FoodDeliveryDemoApp.model.rules.RegionalBaseFeeRule;
-import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeAirTemperatureRule;
-import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWeatherPhenomenonRule;
-import com.example.FoodDeliveryDemoApp.model.rules.extraFee.ExtraFeeWindSpeedRule;
+import com.example.FoodDeliveryDemoApp.domain.DeliveryFee;
+import com.example.FoodDeliveryDemoApp.domain.WeatherData;
+import com.example.FoodDeliveryDemoApp.domain.rules.RegionalBaseFeeRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.extraFee.ExtraFeeAirTemperatureRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.extraFee.ExtraFeeWeatherPhenomenonRule;
+import com.example.FoodDeliveryDemoApp.domain.rules.extraFee.ExtraFeeWindSpeedRule;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;

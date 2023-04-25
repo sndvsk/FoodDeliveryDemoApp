@@ -1,10 +1,9 @@
 package com.example.FoodDeliveryDemoApp.integration.controller;
 
-import com.example.FoodDeliveryDemoApp.model.DeliveryFee;
+import com.example.FoodDeliveryDemoApp.domain.DeliveryFee;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
 import org.springframework.boot.test.web.client.TestRestTemplate;
