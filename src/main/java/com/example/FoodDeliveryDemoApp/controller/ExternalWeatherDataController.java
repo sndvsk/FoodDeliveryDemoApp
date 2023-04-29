@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/get-weather-from-eea")
@@ -87,9 +87,9 @@ public class ExternalWeatherDataController {
      */
     @GetMapping(path = "/stations", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all station names and its wmo codes from Estonian Environment Agency")
-    public ResponseEntity<TreeMap<String, Long>> getPossibleStationNamesFromServiceXML() throws JAXBException {
+    public ResponseEntity<Map<String, Long>> getPossibleStationNamesFromServiceXML() throws JAXBException {
 
-        TreeMap<String, Long> response = externalWeatherDataService.getPossibleStationNamesAndCodes();
+        Map<String, Long> response = externalWeatherDataService.getPossibleStationNamesAndCodes();
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

@@ -1,5 +1,11 @@
 # FoodDeliveryDemoApp (API)
 
+## UPD
+
+H2 database was replaced with PostgreSQL database, so if you want to use the app you need to make 2 databases yourself.
+fd_db and fd_db_test \
+I will add the dockerfile, so it will create automatically, but later.
+
 ## About this project
 
 This project is a technical task. \

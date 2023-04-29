@@ -31,7 +31,7 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
      * @return a TreeMap containing city names and their corresponding wmo codes
      * @throws JAXBException if there is an error while unmarshalling XML from the external service
      */
-    private TreeMap<String, Long> getCityNamesAndCodes() throws JAXBException {
+    private Map<String, Long> getCityNamesAndCodes() throws JAXBException {
         return externalWeatherDataService.getPossibleStationNamesAndCodesFixedNaming();
     }
 
@@ -43,7 +43,7 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
      * @return the key corresponding to the given value in the TreeMap
      * @throws CustomBadRequestException if the value is not found in the TreeMap
      */
-    private String getKeyForValue(TreeMap<String, Long> map, Long value) {
+    private String getKeyForValue(Map<String, Long> map, Long value) {
         for (Map.Entry<String, Long> entry : map.entrySet()) {
             if (entry.getValue().equals(value)) {
                 return entry.getKey();
@@ -87,7 +87,7 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
      * @throws CustomBadRequestException if either the city or wmo code are invalid
      * @throws CustomBadRequestException if city and wmo code are provided but are not matching
      */
-    private String validateCityAndWmoCode(String city, Long wmoCode, TreeMap<String, Long> cityNamesAndCodes)
+    private String validateCityAndWmoCode(String city, Long wmoCode, Map<String, Long> cityNamesAndCodes)
             throws CustomBadRequestException {
 
         if (city == null && wmoCode == null) {
@@ -145,7 +145,7 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
      * @throws CustomBadRequestException if the wmo code is not supported by external weather API
      */
     private void validateInputs(
-            String city, Long wmoCode, String vehicleType, Double fee, TreeMap<String, Long> cityNamesAndCodes)
+            String city, Long wmoCode, String vehicleType, Double fee, Map<String, Long> cityNamesAndCodes)
             throws CustomBadRequestException {
 
         if (fee != null && fee < 0.0) {
@@ -194,7 +194,7 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
      * @throws CustomBadRequestException if the city already has the same type of vehicle
      */
     private void checkExistingVehicleTypesForCity(String city, String vehicleType) throws CustomBadRequestException {
-        TreeMap<String, List<String>> citiesAndVehicles = getAllUniqueCitiesWithVehicleTypes();
+        Map<String, List<String>> citiesAndVehicles = getAllUniqueCitiesWithVehicleTypes();
         if (citiesAndVehicles.containsKey(city)) {
             List<String> vehicleTypes = citiesAndVehicles.get(city);
             if (vehicleTypes.contains(vehicleType)) {
@@ -250,7 +250,7 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
 
         validateRequiredInputs(city, wmoCode, vehicleType, fee);
 
-        TreeMap<String, Long> cityNamesAndCodes = getCityNamesAndCodes();
+        Map<String, Long> cityNamesAndCodes = getCityNamesAndCodes();
 
         String cityOrWmoCode = validateCityAndWmoCode(city, wmoCode, cityNamesAndCodes);
 
@@ -311,7 +311,7 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
     public RegionalBaseFeeRule patchRegionalBaseFeeRuleById(
             Long id, String city, Long wmoCode, String vehicleType, Double fee)
             throws JAXBException, CustomNotFoundException {
-        TreeMap<String, Long> cityNamesAndCodes = getCityNamesAndCodes();
+        Map<String, Long> cityNamesAndCodes = getCityNamesAndCodes();
 
         validateCityAndWmoCode(city, wmoCode, cityNamesAndCodes);
         validateInputs(city, wmoCode, vehicleType, fee, cityNamesAndCodes);
@@ -368,7 +368,7 @@ public class RegionalBaseFeeRuleServiceImpl implements RegionalBaseFeeRuleServic
      *
      * @return a TreeMap containing unique cities as keys and lists of vehicle types as values
      */
-    public TreeMap<String, List<String>> getAllUniqueCitiesWithVehicleTypes() {
+    public Map<String, List<String>> getAllUniqueCitiesWithVehicleTypes() {
         List<RegionalBaseFeeRule> rules = baseFeeRuleRepository.findAll();
 
         TreeMap<String, List<String>> citiesAndVehicleTypes = new TreeMap<>();

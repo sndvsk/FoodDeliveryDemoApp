@@ -54,7 +54,7 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * @return a TreeMap where each key is a city name and the corresponding value is a
      * list of vehicle types available in that city
      */
-    private TreeMap<String, List<String>> getExistingVehicleTypesForCities() {
+    private Map<String, List<String>> getExistingVehicleTypesForCities() {
         return baseFeeRuleService.getAllUniqueCitiesWithVehicleTypes();
     }
 
@@ -67,7 +67,7 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * or if the city argument is invalid or not supported
      */
     private void checkExistingVehicleTypesForCity(String city, String vehicleType) throws CustomBadRequestException {
-        TreeMap<String, List<String>> citiesAndVehicles = getExistingVehicleTypesForCities();
+        Map<String, List<String>> citiesAndVehicles = getExistingVehicleTypesForCities();
         if (citiesAndVehicles.containsKey(city)) {
             List<String> vehicleTypes = citiesAndVehicles.get(city);
             if (!vehicleTypes.contains(vehicleType)) {

@@ -46,7 +46,7 @@ public class DeliveryFeeControllerIT {
     }
 
     @Test
-    @Sql("/init-data.sql")
+    //@Sql("/init-data.sql")
     @Order(1)
     public void testCalculateDeliveryFee() throws InterruptedException {
         // Arrange

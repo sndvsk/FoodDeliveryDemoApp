@@ -4,8 +4,10 @@ import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import com.example.FoodDeliveryDemoApp.domain.WeatherData;
 import jakarta.xml.bind.JAXBException;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface WeatherDataService {
 
@@ -28,5 +30,7 @@ public interface WeatherDataService {
     List<WeatherData> getWeatherDataFromExternalService() throws JAXBException;
 
     List<WeatherData> getAndSaveWeatherDataFromExternalService() throws JAXBException;
+
+    Instant getLastSaveTimestamp();
 
 }

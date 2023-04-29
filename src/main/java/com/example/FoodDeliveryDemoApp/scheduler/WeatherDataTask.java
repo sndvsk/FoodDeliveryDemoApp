@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.time.Instant;
+
 @Component
 public class WeatherDataTask {
 
@@ -27,8 +30,25 @@ public class WeatherDataTask {
     @PostConstruct
     private void onStartup() throws JAXBException {
         logger.info("Startup. Saving new weather data from external service into repository.");
-        saveWeatherDataFromService();
-        logger.info("New weather data is saved into repository.");
+
+        int minutesSinceLastInsert = 30;
+
+        Instant lastSavedTime = Instant.now().minus(Duration.ofMinutes(
+                minutesSinceLastInsert
+        ));
+
+        Instant lastSavedTimeFromService = getLastSavedTimeFromService();
+
+        // Check if new data has been saved in the last N minutes
+        if (lastSavedTimeFromService == null) {
+            saveWeatherDataFromService();
+            logger.info("New weather data is saved into repository.");
+        } else if (lastSavedTime.isBefore(lastSavedTimeFromService)) {
+            logger.info("Weather data has been saved into repository in the last {} minutes.", minutesSinceLastInsert);
+        } else {
+            saveWeatherDataFromService();
+            logger.info("New weather data is saved into repository.");
+        }
     }
 
     /**
@@ -50,6 +70,10 @@ public class WeatherDataTask {
      */
     private void saveWeatherDataFromService() throws JAXBException {
         weatherDataService.getAndSaveWeatherDataFromExternalService();
+    }
+
+    private Instant getLastSavedTimeFromService() {
+        return weatherDataService.getLastSaveTimestamp();
     }
 
 }

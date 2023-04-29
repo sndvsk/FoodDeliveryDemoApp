@@ -46,7 +46,7 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      *
      * @return a TreeMap of fixed naming values
      */
-    private TreeMap<String, String> getFixedNaming() {
+    private Map<String, String> getFixedNaming() {
         return externalWeatherDataService.fixedNaming();
     }
 
@@ -57,7 +57,7 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      * @return a TreeMap of station names and codes
      * @throws JAXBException if an error occurs while retrieving the data
      */
-    private TreeMap<String, Long> getStationNamesAndCodes() throws JAXBException {
+    private Map<String, Long> getStationNamesAndCodes() throws JAXBException {
         return externalWeatherDataService.getPossibleStationNamesAndCodesFixedNaming();
     }
 
@@ -154,7 +154,7 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      */
     private Long validateWmoCode(String stationName, Long wmoCode) throws JAXBException, CustomBadRequestException {
 
-        TreeMap<String, Long> possibleCities = getStationNamesAndCodes();
+        Map<String, Long> possibleCities = getStationNamesAndCodes();
 
         Long expectedWmoCode = possibleCities.entrySet()
                 .stream()
@@ -435,7 +435,7 @@ public class WeatherDataServiceImpl implements WeatherDataService {
 
         Set<String> neededStations = getStationNamesFromRepository();
 
-        TreeMap<String, String> fixedNaming = getFixedNaming();
+        Map<String, String> fixedNaming = getFixedNaming();
 
         return observations.getStations().stream()
                 .filter(station -> neededStations.contains(fixedNaming.get(station.getName())))
@@ -451,7 +451,7 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      */
     private List<WeatherData> convertStationsToWeatherData(List<WeatherDataDTO.Station> stations) {
 
-        TreeMap<String, String> fixedNaming = getFixedNaming();
+        Map<String, String> fixedNaming = getFixedNaming();
 
         return stations.stream()
                 .map(station -> {
@@ -477,6 +477,9 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      * @return a list of WeatherData objects representing the last data entry for all cities
      */
     private List<WeatherData> getLastWeatherDataForAllCitiesFromRepository() {
+        if (weatherDataRepository.count() == 0) {
+            throw new CustomNotFoundException("No available weather data");
+        }
         Instant lastEntryTimestamp = weatherDataRepository.findTopByOrderByIdDesc().getTimestamp();
         return weatherDataRepository.findByTimestamp(lastEntryTimestamp);
     }
@@ -556,6 +559,14 @@ public class WeatherDataServiceImpl implements WeatherDataService {
         List<WeatherData> weatherData = getWeatherDataFromExternalService();
         saveWeatherData(weatherData);
         return weatherData;
+    }
+
+    public Instant getLastSaveTimestamp() {
+        if (weatherDataRepository.count() == 0) {
+            return null;
+        } else {
+            return weatherDataRepository.findTopByOrderByIdDesc().getTimestamp();
+        }
     }
 
 }

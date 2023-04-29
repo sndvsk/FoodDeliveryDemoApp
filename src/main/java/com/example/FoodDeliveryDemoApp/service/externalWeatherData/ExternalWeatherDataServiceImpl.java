@@ -15,6 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.io.StringReader;
+import java.util.Map;
 import java.util.TreeMap;
 
 @Service
@@ -76,11 +77,11 @@ public class ExternalWeatherDataServiceImpl implements ExternalWeatherDataServic
         }
     }
 
-    public TreeMap<String, Long> getPossibleStationNamesAndCodes() throws JAXBException {
+    public Map<String, Long> getPossibleStationNamesAndCodes() throws JAXBException {
         WeatherDataDTO.Observations observations = getObservations();
 
         // TreeMap is better because you do not need to sort it and there can't be any duplicates
-        TreeMap<String, Long> stationNamesAndCodes = new TreeMap<>();
+        Map<String, Long> stationNamesAndCodes = new TreeMap<>();
         for (WeatherDataDTO.Station station : observations.getStations()) {
             stationNamesAndCodes.put(station.getName(), station.getWmocode());
         }
@@ -88,11 +89,11 @@ public class ExternalWeatherDataServiceImpl implements ExternalWeatherDataServic
         return stationNamesAndCodes;
     }
 
-    public TreeMap<String, Long> getPossibleStationNamesAndCodesFixedNaming() throws JAXBException {
+    public Map<String, Long> getPossibleStationNamesAndCodesFixedNaming() throws JAXBException {
         WeatherDataDTO.Observations observations = getObservations();
 
         // TreeMap is better because you do not need to sort it and there can't be any duplicates
-        TreeMap<String, Long> stationNamesAndCodes = new TreeMap<>();
+        Map<String, Long> stationNamesAndCodes = new TreeMap<>();
         for (WeatherDataDTO.Station station : observations.getStations()) {
             // check if the station name exists in the fixedNaming map
             if (fixedNaming().containsKey(station.getName())) {
@@ -113,10 +114,10 @@ public class ExternalWeatherDataServiceImpl implements ExternalWeatherDataServic
      *
      * Each key represents the original name, while the value represents
      * the new fixed name.
-     * @return a TreeMap<String, String> object containing the fixed naming mapping.
+     * @return a Map<String, String> object containing the fixed naming mapping.
      */
-    public final TreeMap<String, String> fixedNaming() {
-        TreeMap<String, String> nameMapping = new TreeMap<>();
+    public final Map<String, String> fixedNaming() {
+        Map<String, String> nameMapping = new TreeMap<>();
         nameMapping.put("Aesoo", "aesoo");
         nameMapping.put("Ahja", "ahja");
         nameMapping.put("Alajõe", "alajõe");

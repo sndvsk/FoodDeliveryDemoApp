@@ -4,6 +4,7 @@ import com.example.FoodDeliveryDemoApp.domain.rules.RegionalBaseFeeRule;
 import jakarta.xml.bind.JAXBException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -20,7 +21,7 @@ public interface RegionalBaseFeeRuleService {
 
     String deleteRegionalBaseFeeRuleById(Long id);
 
-    TreeMap<String, List<String>> getAllUniqueCitiesWithVehicleTypes();
+    Map<String, List<String>> getAllUniqueCitiesWithVehicleTypes();
 
     Set<String> getAllUniqueCities();
 
