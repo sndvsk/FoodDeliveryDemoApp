@@ -1,11 +1,5 @@
 # FoodDeliveryDemoApp (API)
 
-## UPD
-
-H2 database was replaced with PostgreSQL database, so if you want to use the app you need to make 2 databases yourself.
-fd_db and fd_db_test \
-I will add the dockerfile, so it will create automatically, but later.
-
 ## About this project
 
 This project is a technical task. \
@@ -48,7 +42,7 @@ conditions (extra fees).
    
 4. Run the project
    ```sh
-   java -jar ./target/FoodDeliveryDemoApp-1.0-SNAPSHOT.jar
+   java -jar ./target/foodDeliveryDemoApp-1.0-SNAPSHOT.jar
    ```
    
 5. Now you can use the project.
