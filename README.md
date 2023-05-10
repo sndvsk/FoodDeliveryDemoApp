@@ -27,7 +27,15 @@ conditions (extra fees).
   https://maven.apache.org/download.cgi
   ```
 
+* [Docker](https://www.docker.com/products/docker-desktop/)
+
+  ```sh
+  https://www.docker.com/products/docker-desktop/
+  ```
+
 ## Build
+
+### Build and run using Maven
 
 1. Download .zip or clone project from GitHub.
 
@@ -49,6 +57,22 @@ conditions (extra fees).
 
 P.S. Scheduled task gets data right after start of the application and then every hour at 15 minutes.
 If you want to get latest data when you want - use __/get-weather-from-eea__ endpoint and use POST method.
+
+### Build using Maven and run using Docker
+
+1. Download .zip or clone project from GitHub.
+
+2. Unzip and/or go to project location in __terminal__.
+
+3. Build the project using maven
+   ```sh
+   mvn clean package
+   ```
+
+4. Run the project
+   ```sh
+   docker compose up
+   ```
 
 
 ## How to use

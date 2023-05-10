@@ -1,6 +1,6 @@
 package com.example.FoodDeliveryDemoApp.scheduler;
 
-import com.example.FoodDeliveryDemoApp.service.weatherData.WeatherDataService;
+import com.example.FoodDeliveryDemoApp.component.weatherItems.weatherData.service.WeatherDataService;
 import jakarta.annotation.PostConstruct;
 import jakarta.xml.bind.JAXBException;
 import org.slf4j.Logger;

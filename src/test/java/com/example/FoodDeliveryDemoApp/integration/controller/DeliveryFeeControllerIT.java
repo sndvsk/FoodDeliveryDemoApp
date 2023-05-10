@@ -1,6 +1,6 @@
 package com.example.FoodDeliveryDemoApp.integration.controller;
 
-import com.example.FoodDeliveryDemoApp.domain.DeliveryFee;
+import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.domain.DeliveryFee;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,6 @@ import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.OffsetDateTime;

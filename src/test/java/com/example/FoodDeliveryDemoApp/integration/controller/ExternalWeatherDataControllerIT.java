@@ -1,6 +1,6 @@
 package com.example.FoodDeliveryDemoApp.integration.controller;
 
-import com.example.FoodDeliveryDemoApp.domain.WeatherData;
+import com.example.FoodDeliveryDemoApp.component.weatherItems.weatherData.domain.WeatherData;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
