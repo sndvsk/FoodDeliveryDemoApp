@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/get-weather-from-eea")
+@RequestMapping("/api/v1/get-weather-from-eea")
 @Tag(name = "Weather Data from Estonian Environment Agency API",
         description = "Endpoint for getting weather data from Estonian Environment Agency")
 public class ExternalWeatherDataController {
