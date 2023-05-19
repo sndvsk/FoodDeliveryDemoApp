@@ -67,6 +67,13 @@ If you want to get latest data when you want - use __/get-weather-from-eea__ end
    ```sh
    docker compose up
    ```
+   
+N.B!
+Use code below, if project was updated!
+   ```sh
+   docker-compose up --build
+   ```
+
 
 
 ## How to use
