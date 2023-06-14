@@ -1,50 +1,33 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.owner.domain;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
-import com.example.FoodDeliveryDemoApp.component.userItems.Roles;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
 import com.example.FoodDeliveryDemoApp.security.token.Token;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.time.Instant;
 import java.util.List;
 
 @SuperBuilder
+@Getter
+@Setter
 @NoArgsConstructor
-//@RequiredArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "users_owners")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Owner extends User {
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private List<Restaurant> restaurants;
 
-    @OneToOne(mappedBy = "owner")
-    private Token token;
+    @OneToMany(mappedBy = "owner")
+    private List<Token> tokens;
 
-/*    public Owner(Long id, String username, String password, String email, Roles role, Instant createdAt, Instant updatedAt, List<Restaurant> restaurants) {
-        super(id, username, password, email, role, createdAt, updatedAt);
-        this.restaurants = restaurants;
-    }
+    @Column(name = "approved")
+    private boolean approved;
 
-    public Owner(List<Restaurant> restaurants) {
-        this.restaurants = restaurants;
-    }
-
-    public Owner() {
-    }*/
-
-    public List<Restaurant> getRestaurants() {
-        return restaurants;
-    }
-
-    public void setRestaurants(List<Restaurant> restaurants) {
-        this.restaurants = restaurants;
-    }
 }

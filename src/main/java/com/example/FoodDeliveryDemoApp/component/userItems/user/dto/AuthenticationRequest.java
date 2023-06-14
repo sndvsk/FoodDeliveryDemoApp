@@ -1,4 +1,4 @@
-package com.example.FoodDeliveryDemoApp.security.auth.dto;
+package com.example.FoodDeliveryDemoApp.component.userItems.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AuthenticationRequest {
 
-    private String email;
+    private String username;
     String password;
 
 }

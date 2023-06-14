@@ -1,6 +1,6 @@
-package com.example.FoodDeliveryDemoApp.security.auth.dto;
+package com.example.FoodDeliveryDemoApp.component.userItems.user.dto;
 
-import com.example.FoodDeliveryDemoApp.component.userItems.Roles;
+import com.example.FoodDeliveryDemoApp.component.userItems.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,10 +13,10 @@ import lombok.NoArgsConstructor;
 public class RegisterRequest {
 
     private String firstname;
-    private String username;
     private String lastname;
+    private String username;
     private String email;
     private String password;
-    private Roles role;
+    private Role role;
 
 }

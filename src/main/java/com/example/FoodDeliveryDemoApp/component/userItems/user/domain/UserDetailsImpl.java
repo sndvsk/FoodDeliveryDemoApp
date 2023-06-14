@@ -16,10 +16,10 @@ public class UserDetailsImpl implements UserDetails {
 
     @Serial
     private static final long serialVersionUID = 1L;
-    private Long id;
-    String username;
-    String password;
-    Collection<? extends GrantedAuthority> authorities;
+    Long id;
+    private String username;
+    private String password;
+    private Collection<? extends GrantedAuthority> authorities;
 
     private final Map<String, Object> claims = new HashMap<>();
 

@@ -1,16 +1,16 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.admin.controller;
 
-import com.example.FoodDeliveryDemoApp.component.userItems.admin.domain.Admin;
 import com.example.FoodDeliveryDemoApp.component.userItems.admin.service.AdminService;
-import org.springframework.http.HttpStatus;
+import com.example.FoodDeliveryDemoApp.component.userItems.owner.domain.Owner;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v2/admins")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class AdminController {
 
     private final AdminService adminService;
@@ -19,12 +19,22 @@ public class AdminController {
         this.adminService = adminService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<Admin> registerAdmin(@RequestBody Admin admin) {
+    @PostMapping("/approve-owner/{ownerId}")
+    public ResponseEntity<Void> approveOwner(@PathVariable Long ownerId) {
+        adminService.approveOwner(ownerId);
+        return ResponseEntity.ok().build();
+    }
 
-        Admin savedAdmin = adminService.registerAdmin(admin);
+    @PostMapping("/reject-owner/{ownerId}")
+    public ResponseEntity<Void> rejectOwner(@PathVariable Long ownerId) {
+        adminService.rejectOwner(ownerId);
+        return ResponseEntity.ok().build();
+    }
 
-        return new ResponseEntity<>(savedAdmin, HttpStatus.CREATED);
+    @GetMapping("/owners/approved-false")
+    public ResponseEntity<List<Owner>> getOwnersWithApprovalStatusFalse() {
+        List<Owner> owners = adminService.getOwnersWithApprovalStatus(false);
+        return ResponseEntity.ok(owners);
     }
 
 }

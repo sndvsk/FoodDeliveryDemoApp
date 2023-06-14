@@ -1,4 +1,4 @@
-package com.example.FoodDeliveryDemoApp.security.auth.dto;
+package com.example.FoodDeliveryDemoApp.component.userItems.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,11 @@ public class AuthenticationResponse {
 
     @JsonProperty("access_token")
     private String accessToken;
+
     @JsonProperty("refresh_token")
     private String refreshToken;
+
+    @JsonProperty("error")
+    private String error;
 
 }
