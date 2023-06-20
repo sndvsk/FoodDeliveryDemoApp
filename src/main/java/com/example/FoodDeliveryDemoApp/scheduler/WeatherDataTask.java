@@ -8,13 +8,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.lang.invoke.MethodHandles;
 import java.time.Duration;
 import java.time.Instant;
 
 @Component
 public class WeatherDataTask {
 
-    private static final Logger logger = LoggerFactory.getLogger(WeatherDataTask.class);
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final WeatherDataService weatherDataService;
 

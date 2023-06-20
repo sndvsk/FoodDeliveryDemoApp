@@ -14,4 +14,8 @@ public class CustomAccessDeniedException extends AccessDeniedException {
     public CustomAccessDeniedException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public String getMessage() {
+        return super.getMessage();
+    }
 }

@@ -2,6 +2,10 @@ package com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.ser
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.repository.RestaurantRepository;
+import com.example.FoodDeliveryDemoApp.component.address.domain.Address;
+import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTO;
+import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTOMapper;
+import com.example.FoodDeliveryDemoApp.component.address.repository.AddressRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.domain.Owner;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.repository.OwnerRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.service.OwnerService;
@@ -16,11 +20,13 @@ public class RestaurantServiceImpl implements RestaurantService {
     private final OwnerService ownerService;
     private final RestaurantRepository restaurantRepository;
     private final OwnerRepository ownerRepository;
+    private final AddressRepository addressRepository;
 
-    public RestaurantServiceImpl(OwnerService ownerService, RestaurantRepository restaurantRepository, OwnerRepository ownerRepository) {
+    public RestaurantServiceImpl(OwnerService ownerService, RestaurantRepository restaurantRepository, OwnerRepository ownerRepository, AddressRepository addressRepository) {
         this.ownerService = ownerService;
         this.restaurantRepository = restaurantRepository;
         this.ownerRepository = ownerRepository;
+        this.addressRepository = addressRepository;
     }
 
     private void validateInputs() {
@@ -51,25 +57,37 @@ public class RestaurantServiceImpl implements RestaurantService {
         return restaurants;
     }
 
-    public Restaurant createRestaurant(String name, String desc, String theme, String address,
-                                       String phone, String image) {
-        Long ownerId = ownerService.getCurrentAccount();
-        return createRestaurant(ownerId, name, desc, theme, address, phone, image);
+    public Restaurant createRestaurant(String username, String name, String desc, String theme,
+                                       String phone, String image, AddressDTO address) {
+        Long ownerId = ownerService.getIdByUsername(username);
+        return createRestaurant(ownerId, name, desc, theme, phone, image, address);
     }
 
 
-    public Restaurant createRestaurant(Long ownerId, String name, String desc, String theme, String address,
-                                       String phone, String image) {
+    public Restaurant createRestaurant(Long ownerId, String name, String desc, String theme,
+                                       String phone, String image, AddressDTO addressGiven) {
         Owner owner = ownerRepository.findById(ownerId)
                 .orElseThrow(() -> new CustomNotFoundException("Owner not found with id " + ownerId));
-        Restaurant restaurant = new Restaurant(name, desc, theme, address, phone, image, owner);
+
+        // Create the restaurant first without the address
+        Restaurant restaurant = new Restaurant(name, desc, theme, phone, image, owner);
+
+        // Use the newly created restaurant to create the address
+        Address address = AddressDTOMapper.toEntity(addressGiven, restaurant);
+        addressRepository.save(address);
+
+        // Then, set the address to the restaurant
+        restaurant.setAddress(address);
         return restaurantRepository.save(restaurant);
     }
 
-    public Restaurant updateRestaurant(Long restaurantId, String name, String desc, String theme, String address,
-                                       String phone, String image) {
+
+    public Restaurant updateRestaurant(Long restaurantId, String name, String desc, String theme,
+                                       String phone, String image, AddressDTO addressDTO) {
         Long ownerId = ownerService.getCurrentAccount();
         return restaurantRepository.findById(restaurantId).map(restaurant -> {
+            Address oldAddress = restaurant.getAddress();
+
             if (name != null) {
                 restaurant.setName(name);
             }
@@ -79,8 +97,10 @@ public class RestaurantServiceImpl implements RestaurantService {
             if (theme != null) {
                 restaurant.setTheme(theme);
             }
-            if (address != null) {
-                restaurant.setAddress(address);
+            if (addressDTO != null) {
+                Address newAddress = AddressDTOMapper.toEntity(addressDTO, restaurant);
+                addressRepository.save(newAddress);
+                restaurant.setAddress(newAddress);
             }
             if (phone != null) {
                 restaurant.setPhone(phone);
@@ -88,7 +108,14 @@ public class RestaurantServiceImpl implements RestaurantService {
             if (image != null) {
                 restaurant.setImage(image);
             }
-            return restaurantRepository.save(restaurant);
+
+            Restaurant updatedRestaurant = restaurantRepository.save(restaurant);
+
+            if (oldAddress != null) {
+                addressRepository.delete(oldAddress);
+            }
+
+            return updatedRestaurant;
         }).orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));
     }
 

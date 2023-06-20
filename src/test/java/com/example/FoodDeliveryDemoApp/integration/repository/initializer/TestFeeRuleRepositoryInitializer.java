@@ -20,6 +20,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ import java.util.List;
 public class TestFeeRuleRepositoryInitializer implements
         ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestFeeRuleRepositoryInitializer.class);
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private RegionalBaseFeeRuleRepository baseFeeRuleRepository;
     private ExtraFeeAirTemperatureRuleRepository airTemperatureRepository;

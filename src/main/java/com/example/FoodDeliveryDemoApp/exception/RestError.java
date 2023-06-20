@@ -9,7 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RestError {
 
-    private String errorCode;
+    private int errorCode;
     private String errorMessage;
 
 }

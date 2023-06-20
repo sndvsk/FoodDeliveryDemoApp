@@ -6,14 +6,14 @@ import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.RegisterRequ
 import com.example.FoodDeliveryDemoApp.security.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin
 @RestController
 @RequestMapping("/api/v2/auth")
 public class AuthenticationController {
@@ -31,14 +31,15 @@ public class AuthenticationController {
 
     @PostMapping("/register-admin")
     public ResponseEntity<AuthenticationResponse> registerAdmin(@RequestBody RegisterRequest request,
-                                                           Authentication authentication) throws AccessDeniedException {
+                                                           Authentication authentication) {
         return ResponseEntity.ok(service.registerByAdmin(request, authentication));
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(service.authenticate(request));
+        AuthenticationResponse response = service.authenticate(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/refresh-token")

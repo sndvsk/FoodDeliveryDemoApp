@@ -1,8 +1,5 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.user.domain;
 
-import com.example.FoodDeliveryDemoApp.component.userItems.admin.domain.Admin;
-import com.example.FoodDeliveryDemoApp.component.userItems.customer.domain.Customer;
-import com.example.FoodDeliveryDemoApp.component.userItems.owner.domain.Owner;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,6 +17,7 @@ public class UserDetailsImpl implements UserDetails {
     private String username;
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
+    //private String userId;  // new field for userId
 
     private final Map<String, Object> claims = new HashMap<>();
 
@@ -43,15 +41,17 @@ public class UserDetailsImpl implements UserDetails {
                 user.getUsername(),
                 user.getPassword(),
                 authorities);
+                //user.getId().toString()); // pass user Id as string
 
-        if (user instanceof Owner owner) {
+/*        if (user instanceof Owner owner) {
             userDetails.getClaims().put("restaurants", owner.getRestaurants());
+            //userDetails.getClaims().put("approved", owner.getOwner().isApproved());
         } else if (user instanceof Admin admin) {
             userDetails.getClaims().put("level", admin.getLevel());
         } else if (user instanceof Customer customer) {
             userDetails.getClaims().put("orders", customer.getOrders());
             userDetails.getClaims().put("addresses", customer.getAddresses());
-        }
+        }*/
 
         return userDetails;
     }

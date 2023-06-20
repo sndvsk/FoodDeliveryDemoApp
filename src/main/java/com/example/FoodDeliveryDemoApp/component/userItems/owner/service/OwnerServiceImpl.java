@@ -1,50 +1,87 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.owner.service;
 
-import com.example.FoodDeliveryDemoApp.component.userItems.admin.domain.Admin;
-import com.example.FoodDeliveryDemoApp.component.userItems.owner.domain.Owner;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.repository.OwnerRepository;
-import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.RegisterRequest;
-import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
+import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
+import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.time.Instant;
-import java.util.Optional;
 
 @Component
 public class OwnerServiceImpl implements OwnerService {
 
     private final OwnerRepository ownerRepository;
+    private final UserRepository userRepository;
 
-    private final PasswordEncoder passwordEncoder;
-
-    public OwnerServiceImpl(OwnerRepository ownerRepository, PasswordEncoder passwordEncoder) {
+    public OwnerServiceImpl(OwnerRepository ownerRepository, UserRepository userRepository) {
         this.ownerRepository = ownerRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.userRepository = userRepository;
     }
 
     public Long getCurrentAccount() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
             String username = ((UserDetails)principal).getUsername();
-            Owner owner = ownerRepository.findByUsername(username)
-                    .orElseThrow(() -> new CustomBadRequestException("No such 'OWNER' user " + username));
-            if (owner != null) {
-                return owner.getId();
+            User user = getOwnerByUsername(username);
+            if (user != null) {
+                return user.getId();
             }
             throw new UsernameNotFoundException("Owner not found with username: " + username);
         }
         throw new IllegalArgumentException("Invalid principal type");
     }
 
-    public Owner registerOwner(RegisterRequest request) {
+    public User getOwnerByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomNotFoundException("No user with such username: " + username));
+    }
+
+    public Long getIdByUsername(String username) {
+        User owner = userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomNotFoundException("No user with such username: " + username));
+        return owner.getId();
+    }
+
+/*    public Owner updateUserInformation(String username, UserDetailsDTO updatedOwner) {
+        // Retrieve existing customer
+        Owner existingOwner = getOwnerByUsername(username);
+        String existingEmail = existingOwner.getEmail();
+        String existingUsername = existingOwner.getUsername();
+
+        // Update only the non-null fields
+        Optional.ofNullable(updatedOwner.getFirstname()).ifPresent(existingOwner::setFirstname);
+        Optional.ofNullable(updatedOwner.getLastname()).ifPresent(existingOwner::setLastname);
+        Optional.ofNullable(updatedOwner.getEmail()).ifPresent(newEmail -> {
+            if(emailExists(newEmail) && !newEmail.equals(existingEmail)) {
+                throw new CustomBadRequestException(String.format("Email: %s is already in use", newEmail));
+            }
+            existingOwner.setEmail(newEmail);
+        });
+        Optional.ofNullable(updatedOwner.getUsername()).ifPresent(newUsername -> {
+            if(usernameExists(newUsername) && !newUsername.equals(existingUsername)) {
+                throw new CustomBadRequestException(String.format("Username: %s is already taken", newUsername));
+            }
+            existingOwner.setUsername(newUsername);
+        });
+        Optional.ofNullable(updatedOwner.getPassword()).ifPresent(
+                password -> existingOwner.setPassword(passwordEncoder.encode(password)));
+        existingOwner.setUpdatedAt(Instant.now());
+
+        // Save and return updated customer
+        return ownerRepository.save(existingOwner);
+    }
+
+    public boolean usernameExists(String username) {
+        return ownerRepository.existsByUsername(username);
+    }
+
+    public boolean emailExists(String email) {
+        return ownerRepository.existsByEmail(email);
+    }*/
+
+/*    public Owner registerOwner(RegisterRequest request) {
         if (ownerRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Username already exists");
@@ -65,12 +102,6 @@ public class OwnerServiceImpl implements OwnerService {
         Owner savedOwner = ownerRepository.save(owner);
 
         return savedOwner;
-    }
-
-
-    public Optional<Owner> getOwnerByUsername(String username) {
-        return ownerRepository.findByUsername(username);
-                //.orElseThrow(() -> new CustomNotFoundException("No user with such username: " + username));
-    }
+    }*/
 
 }

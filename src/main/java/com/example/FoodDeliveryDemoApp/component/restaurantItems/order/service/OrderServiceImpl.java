@@ -8,6 +8,7 @@ import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.doma
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.repository.RestaurantRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.customer.domain.Customer;
 import com.example.FoodDeliveryDemoApp.component.userItems.customer.repository.CustomerRepository;
+import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.stereotype.Component;
 
@@ -22,15 +23,17 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ItemRepository itemRepository;
     private final CustomerRepository customerRepository;
+    private final UserRepository userRepository;
     private final RestaurantRepository restaurantRepository;
 
     public OrderServiceImpl(OrderRepository orderRepository,
                             ItemRepository itemRepository,
                             CustomerRepository customerRepository,
-                            RestaurantRepository restaurantRepository) {
+                            UserRepository userRepository, RestaurantRepository restaurantRepository) {
         this.orderRepository = orderRepository;
         this.itemRepository = itemRepository;
         this.customerRepository = customerRepository;
+        this.userRepository = userRepository;
         this.restaurantRepository = restaurantRepository;
     }
 
@@ -55,11 +58,12 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new CustomNotFoundException("Order not found with id " + id));
     }
 
-    public List<Order> getOrdersByCustomerId(Long customerId) {
-        return customerRepository.findById(customerId)
+    public List<Order> getOrdersByCustomerId(Long userId) {
+        return customerRepository.findByUserId(userId)
                 .map(Customer::getOrders)
-                .orElseThrow(() -> new CustomNotFoundException("Customer not found with id " + customerId));
+                .orElseThrow(() -> new CustomNotFoundException("User not found with id " + userId));
     }
+
 
     public List<Order> getOrdersByRestaurantId(Long restaurantId) {
         return restaurantRepository.findById(restaurantId)

@@ -6,6 +6,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.lang.invoke.MethodHandles;
+
 // TODO
 // add AWS, Terraform, Kubernetes, Jenkins
 // and maybe Jira or Confluence integration
@@ -14,7 +16,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 public class FoodDeliveryDemoAppApplication {
 
-	private static final Logger logger = LoggerFactory.getLogger(FoodDeliveryDemoAppApplication.class);
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public static void main(String[] args) {
 		SpringApplication.run(FoodDeliveryDemoAppApplication.class, args);

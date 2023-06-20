@@ -8,6 +8,7 @@ import com.example.FoodDeliveryDemoApp.component.userItems.customer.repository.C
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.domain.Owner;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.repository.OwnerRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
+import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
 import com.example.FoodDeliveryDemoApp.exception.CustomAccessDeniedException;
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
@@ -22,6 +23,8 @@ import com.example.FoodDeliveryDemoApp.security.token.TokenRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,11 +32,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
+import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -42,28 +47,36 @@ import java.util.stream.Collectors;
 @Component
 public class AuthenticationService {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     private final AdminRepository adminRepository;
     private final OwnerRepository ownerRepository;
     private final CustomerRepository customerRepository;
+    private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationService(AdminRepository adminRepository, OwnerRepository ownerRepository,
-                                 CustomerRepository customerRepository, TokenRepository tokenRepository,
-                                 PasswordEncoder passwordEncoder, JwtService jwtService,
+    public AuthenticationService(AdminRepository adminRepository,
+                                 OwnerRepository ownerRepository,
+                                 CustomerRepository customerRepository,
+                                 UserRepository userRepository,
+                                 TokenRepository tokenRepository,
+                                 PasswordEncoder passwordEncoder,
+                                 JwtService jwtService,
                                  AuthenticationManager authenticationManager) {
         this.adminRepository = adminRepository;
         this.ownerRepository = ownerRepository;
         this.customerRepository = customerRepository;
+        this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
     }
 
-    private Optional<? extends User> findByEmail(String email) {
+/*    private Optional<? extends User> findByEmail(String email) {
         var admin = adminRepository.findByEmail(email);
         if (admin.isPresent()) {
             return admin;
@@ -99,6 +112,14 @@ public class AuthenticationService {
         }
 
         return Optional.empty();
+    }*/
+
+    private Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     public AuthenticationResponse register(RegisterRequest request) {
@@ -150,11 +171,10 @@ public class AuthenticationService {
                 if (!userHasAdminRole()) {
                     throw new CustomAccessDeniedException("Regular users cannot create admins");
                 }
-                return createAdmin(request);
+                return buildUser(request);
             case OWNER:
-                return createOwner(request);
             case CUSTOMER:
-                return createCustomer(request);
+                return buildUser(request);
             default:
                 throw new CustomBadRequestException("Invalid role: " + request.getRole());
         }
@@ -166,7 +186,19 @@ public class AuthenticationService {
                 .anyMatch(authority -> authority.getAuthority().equals(Role.ADMIN.name()));
     }
 
-    private Admin createAdmin(RegisterRequest request) {
+    private User buildUser(RegisterRequest request) {
+        return User.builder()
+                .username(request.getUsername())
+                .firstname(request.getFirstname())
+                .lastname(request.getLastname())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(request.getRole())
+                .createdAt(Instant.now())
+                .build();
+    }
+
+/*    private Admin createAdmin(RegisterRequest request) {
         return Admin.builder()
                 .username(request.getUsername())
                 .firstname(request.getFirstname())
@@ -201,18 +233,54 @@ public class AuthenticationService {
                 .role(request.getRole())
                 .createdAt(Instant.now())
                 .build();
-    }
+    }*/
 
-    private User saveUser(User user) {
+/*    private User saveUser(User user) {
         if(user instanceof Admin) {
+            logger.info("User type:" + user.getRole().name() +
+                    " is registered with username " + user.getUsername() + ".");
             return adminRepository.save((Admin) user);
         } else if(user instanceof Owner) {
+            logger.info("User type:" + user.getRole().name() +
+                    " is registered with username " + user.getUsername() + ".");
             return ownerRepository.save((Owner) user);
         } else if(user instanceof Customer) {
+            logger.info("User type:" + user.getRole().name() +
+                    " is registered with username " + user.getUsername() + ".");
             return customerRepository.save((Customer) user);
         }
 
         throw new CustomBadRequestException("User type not supported: " + user.getClass().getSimpleName());
+    }*/
+
+    private User saveUser(User user) {
+        logger.info("User type: " + user.getRole().name() + " is registered with username " + user.getUsername() + ".");
+
+        switch (user.getRole()) {
+            case ADMIN -> {
+                Admin admin = Admin.builder()
+                        .level(3L)
+                        .user(user)
+                        .build();
+                adminRepository.save(admin);
+            }
+            case OWNER -> {
+                Owner owner = Owner.builder()
+                        .approved(false)
+                        .user(user)
+                        .build();
+                ownerRepository.save(owner);
+            }
+            case CUSTOMER -> {
+                Customer customer = Customer.builder()
+                        .user(user)
+                        .build();
+                customerRepository.save(customer);
+            }
+            default -> throw new CustomBadRequestException("Invalid role: " + user.getRole());
+        }
+
+        return userRepository.save(user);
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -224,11 +292,13 @@ public class AuthenticationService {
                             request.getPassword()
                     )
             );
+            logger.info("User: ´" + request.getUsername() + "´ logged in.");
         } catch (AuthenticationException e) {
-            // Log the exception and return an appropriate response
-            System.out.println("Error: " + e.getLocalizedMessage());
-            // Return from function or throw a new exception, so that the code won't proceed with a null 'authentication'
-            throw new CustomUnauthorizedException("Invalid email or password");
+            if (getUserByUsername(request.getUsername()) != null) {
+                throw new CustomUnauthorizedException("Invalid password");
+            }
+
+            throw new CustomUnauthorizedException("Invalid username or password");
         }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -244,8 +314,15 @@ public class AuthenticationService {
                 .build();
     }
 
+    @Transactional
+    public User getUserByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("No such user with username: " + username));
+        return user;
+    }
 
-    private void saveUserToken(User user, String jwtToken) {
+
+/*    private void saveUserToken(User user, String jwtToken) {
         var token = Token.builder()
                 .token(jwtToken)
                 .tokenType(TokenType.BEARER)
@@ -270,9 +347,21 @@ public class AuthenticationService {
         }
 
         tokenRepository.save(token);
+    }*/
+
+    private void saveUserToken(User user, String jwtToken) {
+        var token = Token.builder()
+                .token(jwtToken)
+                .tokenType(TokenType.BEARER)
+                .expired(false)
+                .revoked(false)
+                .user(user)
+                .build();
+
+        tokenRepository.save(token);
     }
 
-    private void revokeAllUserTokens(User user) {
+/*    private void revokeAllUserTokens(User user) {
         List<Token> validUserTokens;
 
         if (user instanceof Admin) {
@@ -294,6 +383,20 @@ public class AuthenticationService {
         });
 
         tokenRepository.saveAll(validUserTokens);
+    }*/
+
+    private void revokeAllUserTokens(User user) {
+        var validUserTokens = tokenRepository.findAllValidTokensByUser(user.getId());
+
+        if (validUserTokens.isEmpty())
+            return;
+
+        validUserTokens.forEach(token -> {
+            token.setExpired(true);
+            token.setRevoked(true);
+        });
+
+        tokenRepository.saveAll(validUserTokens);
     }
 
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -304,7 +407,7 @@ public class AuthenticationService {
             return;
         }
         refreshToken = authHeader.substring(7);
-        userName = jwtService.extractUsername(refreshToken);
+        userName = jwtService.extractUsernameFromClaims(refreshToken);
         if (userName != null) {
             var user = this.findByUsername(userName)
                     .orElseThrow(() -> new CustomNotFoundException("No user with such username: " + userName));

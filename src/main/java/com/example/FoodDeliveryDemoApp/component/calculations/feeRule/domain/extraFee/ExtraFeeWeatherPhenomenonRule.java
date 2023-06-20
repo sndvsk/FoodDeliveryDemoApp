@@ -2,7 +2,13 @@ package com.example.FoodDeliveryDemoApp.component.calculations.feeRule.domain.ex
 
 import com.example.FoodDeliveryDemoApp.component.calculations.feeRule.domain.FeeRule;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "extra_fee_rules_weather_phenomenon")
 public class ExtraFeeWeatherPhenomenonRule implements FeeRule {
@@ -21,26 +27,6 @@ public class ExtraFeeWeatherPhenomenonRule implements FeeRule {
     public ExtraFeeWeatherPhenomenonRule(String weatherPhenomenonName, Double fee) {
         this.weatherPhenomenonName = weatherPhenomenonName;
         this.fee = fee;
-    }
-
-    public ExtraFeeWeatherPhenomenonRule() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    @SuppressWarnings("unused")
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getWeatherPhenomenonName() {
-        return weatherPhenomenonName;
-    }
-
-    public void setWeatherPhenomenonName(String weatherPhenomenonName) {
-        this.weatherPhenomenonName = weatherPhenomenonName;
     }
 
     public Double getFee() {

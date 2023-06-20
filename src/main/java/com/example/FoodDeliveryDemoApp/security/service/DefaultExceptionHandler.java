@@ -17,14 +17,14 @@ public class DefaultExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     @ResponseBody
     public ResponseEntity<RestError> handleAuthenticationException(AuthenticationException ex) {
-        RestError re = new RestError(HttpStatus.UNAUTHORIZED.toString(), "Authentication failed at controller advice");
+        RestError re = new RestError(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(re);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseBody
     public ResponseEntity<RestError> handleAccessDeniedException(AccessDeniedException ex) {
-        RestError re = new RestError(HttpStatus.FORBIDDEN.toString(), "Access denied at controller advice");
+        RestError re = new RestError(HttpStatus.FORBIDDEN.value(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(re);
     }
 

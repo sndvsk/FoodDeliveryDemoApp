@@ -1,11 +1,11 @@
-package com.example.FoodDeliveryDemoApp.component.userItems.customer.domain;
+package com.example.FoodDeliveryDemoApp.component.address.domain;
 
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
+import com.example.FoodDeliveryDemoApp.component.userItems.customer.domain.Customer;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+@Builder
 @Getter
 @Setter
 @AllArgsConstructor
@@ -13,6 +13,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "addresses")
 public class Address {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -39,8 +40,12 @@ public class Address {
     @Column(name = "apt_number")
     private String aptNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
+    @OneToOne
+    @JoinColumn(name = "customer_id", referencedColumnName = "user_id")
     private Customer customer;
+
+    @OneToOne
+    @JoinColumn(name = "restaurant_id", referencedColumnName = "id")
+    private Restaurant restaurant;
 
 }

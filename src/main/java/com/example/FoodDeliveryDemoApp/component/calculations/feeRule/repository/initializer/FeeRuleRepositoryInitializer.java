@@ -13,13 +13,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class FeeRuleRepositoryInitializer implements CommandLineRunner {
 
-    private static final Logger logger = LoggerFactory.getLogger(FeeRuleRepositoryInitializer.class);
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final RegionalBaseFeeRuleRepository baseFeeRuleRepository;
     private final ExtraFeeAirTemperatureRuleRepository airTemperatureRepository;

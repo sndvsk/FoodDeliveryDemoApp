@@ -1,17 +1,17 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.controller;
 
+import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTO;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RestController;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.service.RestaurantService;
-import com.example.FoodDeliveryDemoApp.component.userItems.owner.service.OwnerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/v2/restaurants")
 public class RestaurantController {
@@ -39,52 +39,53 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurantList, HttpStatus.OK);
     }
 
-    @PostMapping
-    @PreAuthorize("hasRole('OWNER')")
+    @PostMapping("/create")
+    @PreAuthorize("hasAuthority('OWNER')")
     public ResponseEntity<?> createRestaurantByOwner(
+            @RequestParam(required = false) String username,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String desc,
             @RequestParam(required = false) String theme,
-            @RequestParam(required = false) String address,
             @RequestParam(required = false) String phone,
-            @RequestParam(required = false) String image) {
+            @RequestParam(required = false) String image,
+            @RequestParam(required = false) AddressDTO address) {
         // Assuming the owner is authenticated and their id is available.
-        Restaurant restaurant = restaurantService.createRestaurant(name, desc, theme, address, phone, image);
+        Restaurant restaurant = restaurantService.createRestaurant(username, name, desc, theme, phone, image, address);
         return new ResponseEntity<>(restaurant, HttpStatus.CREATED);
     }
 
     @PostMapping("/admin/{ownerId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> createRestaurantByAdmin(
             @PathVariable Long ownerId,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String desc,
             @RequestParam(required = false) String theme,
-            @RequestParam(required = false) String address,
             @RequestParam(required = false) String phone,
-            @RequestParam(required = false) String image) {
-        Restaurant restaurant = restaurantService.createRestaurant(ownerId, name, desc, theme, address, phone, image);
+            @RequestParam(required = false) String image,
+            @RequestParam(required = false) AddressDTO address) {
+        Restaurant restaurant = restaurantService.createRestaurant(ownerId, name, desc, theme, phone, image, address);
         return new ResponseEntity<>(restaurant, HttpStatus.CREATED);
     }
 
     @PatchMapping("/{restaurantId}")
-    @PreAuthorize("hasRole('OWNER') or hasRole('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('OWNER','ADMIN')")
     public ResponseEntity<?> updateRestaurant(
             @PathVariable Long restaurantId,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String desc,
             @RequestParam(required = false) String theme,
-            @RequestParam(required = false) String address,
             @RequestParam(required = false) String phone,
-            @RequestParam(required = false) String image) {
+            @RequestParam(required = false) String image,
+            @RequestParam(required = false) AddressDTO address) {
         Restaurant restaurant = restaurantService.updateRestaurant(
                 restaurantId, name, desc, theme,
-                address, phone, image);
+                phone, image, address);
         return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
     @DeleteMapping("/{restaurantId}")
-    @PreAuthorize("hasRole('OWNER') or hasRole('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('OWNER','ADMIN')")
     public ResponseEntity<?> deleteRestaurant(@PathVariable Long restaurantId) {
         String response = restaurantService.deleteRestaurant(restaurantId);
         return new ResponseEntity<>(response, HttpStatus.OK);

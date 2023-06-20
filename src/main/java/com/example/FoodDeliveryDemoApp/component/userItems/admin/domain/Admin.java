@@ -1,17 +1,12 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.admin.domain;
 
 import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
-import com.example.FoodDeliveryDemoApp.security.token.Token;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.util.List;
 
 @SuperBuilder
 @Getter
@@ -20,13 +15,20 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "users_admins")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Admin extends User {
+//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+public class Admin {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
 
     @Column(name = "level")
     private Long level;
 
-    @OneToMany(mappedBy = "admin", fetch = FetchType.LAZY)
-    private List<Token> tokens;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "user_id")
+    private User user;
 
 }

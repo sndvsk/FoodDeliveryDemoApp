@@ -18,6 +18,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @SuppressWarnings("DefaultAnnotationParam")
+@CrossOrigin
 @RestController
 @RequestMapping("/api/v1/weather")
 @Tag(name = "Weather Data API", description = "Endpoint for getting weather data from database")

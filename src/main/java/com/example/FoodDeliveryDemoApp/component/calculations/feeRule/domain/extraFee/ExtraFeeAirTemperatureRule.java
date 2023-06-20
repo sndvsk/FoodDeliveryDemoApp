@@ -2,7 +2,13 @@ package com.example.FoodDeliveryDemoApp.component.calculations.feeRule.domain.ex
 
 import com.example.FoodDeliveryDemoApp.component.calculations.feeRule.domain.FeeRule;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "extra_fee_rules_temperature")
 public class ExtraFeeAirTemperatureRule implements FeeRule {
@@ -25,35 +31,6 @@ public class ExtraFeeAirTemperatureRule implements FeeRule {
         this.startAirTemperatureRange = startAirTemperatureRange;
         this.endAirTemperatureRange = endAirTemperatureRange;
         this.fee = fee;
-    }
-
-    public ExtraFeeAirTemperatureRule() {
-
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    @SuppressWarnings("unused")
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Double getStartAirTemperatureRange() {
-        return startAirTemperatureRange;
-    }
-
-    public void setStartAirTemperatureRange(Double startAirTemperatureRange) {
-        this.startAirTemperatureRange = startAirTemperatureRange;
-    }
-
-    public Double getEndAirTemperatureRange() {
-        return endAirTemperatureRange;
-    }
-
-    public void setEndAirTemperatureRange(Double endAirTemperatureRange) {
-        this.endAirTemperatureRange = endAirTemperatureRange;
     }
 
     public Double getFee() {

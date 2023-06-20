@@ -19,4 +19,8 @@ public class RegisterRequest {
     private String password;
     private Role role;
 
+    public Role getRole() {
+        return Role.valueOf(role.name().toUpperCase());
+    }
+
 }

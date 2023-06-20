@@ -7,10 +7,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/v2/menus")
 public class MenuController {
@@ -55,6 +57,7 @@ public class MenuController {
 
     @PostMapping(path = "/restaurant/{restaurantId}/menu/{menuId}/item/{itemId}")
     @Operation(summary = "")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
     public ResponseEntity<?> addItemToMenu(
             @Parameter(name = "menuId", description = "Menu id", example = "")
             @PathVariable(value = "menuId") Long menuId,
@@ -68,6 +71,7 @@ public class MenuController {
 
     @PostMapping(path = "/restaurant/{restaurantId}")
     @Operation(summary = "")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
     public ResponseEntity<?> addMenuToRestaurant(
             @Parameter(name = "menuId", description = "Menu id", example = "")
             @RequestParam Long menuId,
@@ -81,6 +85,7 @@ public class MenuController {
 
     @PatchMapping(path = "/restaurant/{restaurantId}/menu/{menuId}")
     @Operation(summary = "")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
     public ResponseEntity<?> patchMenuInRestaurant(
             @Parameter(name = "menuId", description = "Menu id", example = "")
             @PathVariable Long menuId,
@@ -96,6 +101,7 @@ public class MenuController {
 
     @DeleteMapping(path = "/restaurant/{restaurantId}/menu/{menuId}")
     @Operation(summary = "")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
     public ResponseEntity<?> deleteMenuFromRestaurant(
             @Parameter(name = "menuId", description = "Menu id", example = "")
             @PathVariable Long menuId,

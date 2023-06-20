@@ -6,10 +6,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/v2/items")
 public class ItemController {
@@ -40,6 +42,7 @@ public class ItemController {
 
     @PostMapping(path = "/")
     @Operation(summary = "")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
     public ResponseEntity<?> addItemToRestaurantMenu(
             @Parameter(name = "itemName", description = "Item name", example = "")
             @RequestParam String itemName,
@@ -63,6 +66,7 @@ public class ItemController {
 
     @PatchMapping(path = "/{itemId}")
     @Operation(summary = "")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
     public ResponseEntity<?> patchItemInRestaurantMenu(
             @Parameter(name = "itemId", description = "Item id", example = "")
             @PathVariable Long itemId,
@@ -87,6 +91,7 @@ public class ItemController {
 
     @DeleteMapping(path = "/{itemId}")
     @Operation(summary = "")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
     public ResponseEntity<?> deleteItemFromRestaurantMenu(
             @Parameter(name = "itemId", description = "Item id", example = "")
             @PathVariable Long itemId) {

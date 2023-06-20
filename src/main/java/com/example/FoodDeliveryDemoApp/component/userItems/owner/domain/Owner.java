@@ -2,9 +2,6 @@ package com.example.FoodDeliveryDemoApp.component.userItems.owner.domain;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
-import com.example.FoodDeliveryDemoApp.security.token.Token;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -18,16 +15,23 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "users_owners")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Owner extends User {
+//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+public class Owner {
 
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.MERGE)
     private List<Restaurant> restaurants;
-
-    @OneToMany(mappedBy = "owner")
-    private List<Token> tokens;
 
     @Column(name = "approved")
     private boolean approved;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "user_id")
+    private User user;
 
 }

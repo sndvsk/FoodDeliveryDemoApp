@@ -1,16 +1,14 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.owner.service;
 
-import com.example.FoodDeliveryDemoApp.component.userItems.owner.domain.Owner;
-import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.RegisterRequest;
-
-import java.util.Optional;
-
 public interface OwnerService {
 
     Long getCurrentAccount();
 
-    Owner registerOwner(RegisterRequest request);
+    //Owner updateUserInformation(String username, UserDetailsDTO owner);
 
-    Optional<Owner> getOwnerByUsername(String username);
+    //Owner registerOwner(RegisterRequest request);
 
+    //Owner getOwnerByUsername(String username);
+
+    Long getIdByUsername(String username);
 }

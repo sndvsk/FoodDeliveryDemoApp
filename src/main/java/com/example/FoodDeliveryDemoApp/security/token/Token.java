@@ -1,8 +1,6 @@
 package com.example.FoodDeliveryDemoApp.security.token;
 
-import com.example.FoodDeliveryDemoApp.component.userItems.admin.domain.Admin;
-import com.example.FoodDeliveryDemoApp.component.userItems.customer.domain.Customer;
-import com.example.FoodDeliveryDemoApp.component.userItems.owner.domain.Owner;
+import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -36,19 +34,9 @@ public class Token {
     public boolean expired;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id")
+    @JoinColumn(name = "user_id")
     @ToString.Exclude
-    public Admin admin;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id")
-    @ToString.Exclude
-    public Owner owner;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id")
-    @ToString.Exclude
-    public Customer customer;
+    public User user;
 
     @Override
     public boolean equals(Object o) {
