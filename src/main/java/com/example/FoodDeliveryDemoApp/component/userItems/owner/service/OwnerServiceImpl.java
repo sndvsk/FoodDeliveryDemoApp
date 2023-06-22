@@ -1,8 +1,5 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.owner.service;
 
-import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.service.ItemService;
-import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.service.MenuService;
-import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.service.RestaurantService;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.repository.OwnerRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;

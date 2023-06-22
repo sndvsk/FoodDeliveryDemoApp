@@ -1,6 +1,5 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.order.service;
 
-import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.Order;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto.OrderDTO;
 
 import java.util.List;

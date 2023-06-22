@@ -9,8 +9,6 @@ import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserR
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 public class CustomerServiceImpl implements CustomerService {
 
