@@ -37,10 +37,10 @@ public class User extends UserDetailsImpl {
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
-    @Column(name = "firstname", nullable = false, unique = false)
+    @Column(name = "firstname", nullable = false)
     private String firstname;
 
-    @Column(name = "lastname", nullable = false, unique = false)
+    @Column(name = "lastname", nullable = false)
     private String lastname;
 
     @Column(name = "password", nullable = false)
@@ -48,6 +48,9 @@ public class User extends UserDetailsImpl {
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
+
+    @Column(name = "telephone", nullable = false)
+    private String telephone;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")

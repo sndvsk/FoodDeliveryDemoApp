@@ -1,8 +1,12 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.order.service;
 
+import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.service.DeliveryFeeService;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Item;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.repository.ItemRepository;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.Order;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.OrderStatus;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto.OrderDTO;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto.OrderDTOMapper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.repository.OrderRepository;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.repository.RestaurantRepository;
@@ -12,6 +16,10 @@ import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserR
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -25,16 +33,18 @@ public class OrderServiceImpl implements OrderService {
     private final CustomerRepository customerRepository;
     private final UserRepository userRepository;
     private final RestaurantRepository restaurantRepository;
+    private final DeliveryFeeService deliveryFeeService;
 
     public OrderServiceImpl(OrderRepository orderRepository,
                             ItemRepository itemRepository,
                             CustomerRepository customerRepository,
-                            UserRepository userRepository, RestaurantRepository restaurantRepository) {
+                            UserRepository userRepository, RestaurantRepository restaurantRepository, DeliveryFeeService deliveryFeeService) {
         this.orderRepository = orderRepository;
         this.itemRepository = itemRepository;
         this.customerRepository = customerRepository;
         this.userRepository = userRepository;
         this.restaurantRepository = restaurantRepository;
+        this.deliveryFeeService = deliveryFeeService;
     }
 
     private void validateInputs() {
@@ -45,33 +55,36 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
-    public List<Order> getAllOrders() {
+    public List<OrderDTO> getAllOrders() {
         List<Order> listOfOrders = orderRepository.findAll();
         if (listOfOrders.isEmpty()) {
             throw new CustomNotFoundException("No orders in the database.");
         }
-        return listOfOrders;
+        return OrderDTOMapper.toDtoList(listOfOrders);
     }
 
-    public Order getOrderById(Long id) {
-        return orderRepository.findById(id)
+    public OrderDTO getOrderById(Long id) {
+        Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new CustomNotFoundException("Order not found with id " + id));
+        return OrderDTOMapper.toDto(order);
     }
 
-    public List<Order> getOrdersByCustomerId(Long userId) {
-        return customerRepository.findByUserId(userId)
+    public List<OrderDTO> getOrdersByCustomerId(Long userId) {
+        List<Order> orders = customerRepository.findByUserId(userId)
                 .map(Customer::getOrders)
                 .orElseThrow(() -> new CustomNotFoundException("User not found with id " + userId));
+        return OrderDTOMapper.toDtoList(orders);
     }
 
 
-    public List<Order> getOrdersByRestaurantId(Long restaurantId) {
-        return restaurantRepository.findById(restaurantId)
+    public List<OrderDTO> getOrdersByRestaurantId(Long restaurantId) {
+        List<Order> orders = restaurantRepository.findById(restaurantId)
                 .map(Restaurant::getOrders)
                 .orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));
+        return OrderDTOMapper.toDtoList(orders);
     }
 
-    public Order createOrder(Long customerId, Long restaurantId) {
+    public OrderDTO createOrder(Long customerId, Long restaurantId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomNotFoundException("Customer not found with id " + customerId));
 
@@ -79,10 +92,13 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));
 
         Order order = new Order(customer, restaurant);
-        return orderRepository.save(order);
+        order.setStatus(OrderStatus.CREATED);
+        orderRepository.save(order);
+
+        return OrderDTOMapper.toDto(order);
     }
 
-    public Order updateOrder(Long id, String items) {
+    public OrderDTO updateOrder(Long id, String city, String vehicleType, String items) {
         return orderRepository.findById(id).map(order -> {
             // Assuming the items string is a comma-separated list of item ids
             List<Long> itemIds = Arrays.stream(items.split(","))
@@ -94,8 +110,20 @@ public class OrderServiceImpl implements OrderService {
 
             // Update the items in the order
             order.setItems(fetchedItems);
+            order.setOrderDate(Instant.now());
 
-            return orderRepository.save(order);
+            Double itemPrice = order.getItemPrice();
+            Double deliveryFee = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType,
+                    OffsetDateTime.ofInstant(order.getOrderDate(), ZoneId.systemDefault())).getDeliveryFee();
+            Double totalPrice = itemPrice + deliveryFee;
+
+            order.setItemPrice(itemPrice);
+            order.setDeliveryFee(deliveryFee);
+            order.setTotalPrice(totalPrice);
+            order.setStatus(OrderStatus.SUBMITTED);
+            orderRepository.save(order);
+
+            return OrderDTOMapper.toDto(order);
         }).orElseThrow(() -> new CustomNotFoundException("Order not found with id " + id));
     }
 

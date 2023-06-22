@@ -8,6 +8,7 @@ import okhttp3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -17,6 +18,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -32,9 +34,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(locations = "classpath:application-integration.properties")
+@TestPropertySource(locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-@Profile("test")
+@ActiveProfiles("test")
 public class RegionalBaseFeeRuleFromControllerIT {
 
     @Autowired
@@ -42,6 +44,11 @@ public class RegionalBaseFeeRuleFromControllerIT {
 
     @LocalServerPort
     private int port;
+
+    @Value("${host.url.test}")
+    private String hostUrl;
+
+    private final String apiUrl = "/api/v1/rules/fee/base";
 
     private final HttpHeaders headers = new HttpHeaders();
 
@@ -56,7 +63,7 @@ public class RegionalBaseFeeRuleFromControllerIT {
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
         ResponseEntity<List<RegionalBaseFeeRule>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/rules/fee/base",
+                hostUrl + port + apiUrl,
                 HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
         );
         List<RegionalBaseFeeRule> ruleList = response.getBody();
@@ -86,8 +93,8 @@ public class RegionalBaseFeeRuleFromControllerIT {
 
         // Send a POST request to the needed endpoint
         ResponseEntity<RegionalBaseFeeRule> response = restTemplate.exchange(
-                "http://localhost:" + port +
-                        String.format("/api/rules/fee/base?city=%s&vehicleType=%s&fee=%s", city, vehicleType, fee),
+                hostUrl + port + apiUrl + "?" +
+                        String.format("city=%s&vehicleType=%s&fee=%s", city, vehicleType, fee),
                 HttpMethod.POST, new HttpEntity<>(null, headers), RegionalBaseFeeRule.class
         );
 
@@ -125,7 +132,7 @@ public class RegionalBaseFeeRuleFromControllerIT {
 
         // Send a GET request to the needed endpoint
         ResponseEntity<RegionalBaseFeeRule> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/rules/fee/base/" + id,
+                hostUrl + port + apiUrl + "/" + id,
                 HttpMethod.GET, new HttpEntity<>(null, headers), RegionalBaseFeeRule.class);
 
         // Assert that the API returns the created rule with a status of OK
@@ -159,7 +166,7 @@ public class RegionalBaseFeeRuleFromControllerIT {
 
         OkHttpClient client = new OkHttpClient();
 
-        HttpUrl url = HttpUrl.parse("http://localhost:" + port + "/api/rules/fee/base/" + id);
+        HttpUrl url = HttpUrl.parse(hostUrl + port + apiUrl + "/" + id);
         assertNotNull(url);
 
         HttpUrl.Builder urlBuilder = url.newBuilder();
@@ -195,7 +202,7 @@ public class RegionalBaseFeeRuleFromControllerIT {
     public void testDeleteRegionalBaseFeeRuleById(Long id) {
         // Send a GET request to the needed endpoint
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/rules/fee/base/" + id,
+                hostUrl + port + apiUrl + "/" + id,
                 HttpMethod.DELETE, new HttpEntity<>(null, headers), String.class);
 
         // Assert that the API returns the created rule with a status of OK

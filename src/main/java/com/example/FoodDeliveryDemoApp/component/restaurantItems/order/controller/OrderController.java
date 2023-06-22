@@ -1,6 +1,7 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.order.controller;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.Order;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto.OrderDTO;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,57 +23,69 @@ public class OrderController {
 
     @GetMapping(path = "/all")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<?> getAllOrders() {
-        List<Order> orders = orderService.getAllOrders();
+    public ResponseEntity<List<OrderDTO>> getAllOrders() {
+        List<OrderDTO> orders = orderService.getAllOrders();
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<?> getOrderById(
+    public ResponseEntity<OrderDTO> getOrderById(
             @PathVariable Long id) {
-        Order order = orderService.getOrderById(id);
+        OrderDTO order = orderService.getOrderById(id);
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 
     @GetMapping(path = "/customer/{customerId}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<?> getOrdersByCustomer(
+    public ResponseEntity<List<OrderDTO>> getOrdersByCustomer(
             @PathVariable Long customerId) {
-        List<Order> order = orderService.getOrdersByCustomerId(customerId);
+        List<OrderDTO> order = orderService.getOrdersByCustomerId(customerId);
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 
     @GetMapping(path = "/{restaurantId}")
     @PreAuthorize("hasAnyAuthority('OWNER','ADMIN')")
-    public ResponseEntity<?> getOrdersByRestaurant(
+    public ResponseEntity<List<OrderDTO>> getOrdersByRestaurant(
             @PathVariable Long restaurantId) {
-        List<Order> order = orderService.getOrdersByRestaurantId(restaurantId);
+        List<OrderDTO> order = orderService.getOrdersByRestaurantId(restaurantId);
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 
     // fixme
     @PostMapping(path = "/restaurant/{restaurantId}/customer/{customerId}")
-    @PreAuthorize("hasAnyAuthority('OWNER','ADMIN','CUSTOMER')")
-    public ResponseEntity<?> createOrder(
+    @PreAuthorize("hasAnyAuthority('ADMIN','CUSTOMER')")
+    public ResponseEntity<OrderDTO> createOrder(
             @PathVariable Long customerId,
             @PathVariable Long restaurantId) {
-        Order createdOrder = orderService.createOrder(customerId, restaurantId);
+        OrderDTO createdOrder = orderService.createOrder(customerId, restaurantId);
         return new ResponseEntity<>(createdOrder, HttpStatus.CREATED);
     }
 
-    // fixme
+/*    // fixme
+    @PostMapping(path = "/restaurant/{restaurantId}/customer/{customerId}/item/{itemId}")
+    public ResponseEntity<OrderDTO> addItemToOrder(
+            @PathVariable Long customerId,
+            @PathVariable Long restaurantId,
+            @PathVariable Long itemId) {
+        OrderDTO updated = orderService.addItemToOrder(customerId, restaurantId, itemId);
+        return new ResponseEntity<>(updated, HttpStatus.OK);
+    }*/
+
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<?> updateOrder(
-            @PathVariable Long id, @RequestParam String items) {
-        Order updated = orderService.updateOrder(id, items);
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'CUSTOMER')")
+    public ResponseEntity<OrderDTO> updateOrder(
+            @PathVariable Long id,
+            @RequestParam String city,
+            @RequestParam String vehicleType,
+            @RequestParam String items) {
+        OrderDTO updated = orderService.updateOrder(id, city, vehicleType, items);
         return new ResponseEntity<>(updated, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<?> deleteOrder(
+    public ResponseEntity<String> deleteOrder(
             @PathVariable Long id) {
         String response = orderService.deleteOrder(id);
         return new ResponseEntity<>(response, HttpStatus.OK);

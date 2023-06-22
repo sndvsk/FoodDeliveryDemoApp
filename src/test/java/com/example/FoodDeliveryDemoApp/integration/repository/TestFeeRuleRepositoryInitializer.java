@@ -1,3 +1,4 @@
+/*
 package com.example.FoodDeliveryDemoApp.integration.repository.initializer;
 
 import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.domain.DeliveryFee;
@@ -19,6 +20,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
@@ -27,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@Profile("test")
+@ActiveProfiles("test")
 public class TestFeeRuleRepositoryInitializer implements
         ApplicationContextInitializer<ConfigurableApplicationContext> {
 
@@ -167,3 +169,4 @@ public class TestFeeRuleRepositoryInitializer implements
     }
 }
 
+*/

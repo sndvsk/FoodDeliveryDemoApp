@@ -1,27 +1,23 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.item.service;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Item;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.dto.ItemDTO;
 
 import java.util.List;
 
 public interface ItemService {
 
-    List<Item> getAllItems();
+    List<ItemDTO> getAllItems();
 
-    List<Item> getItemsFromMenu(Long menuId);
+    List<ItemDTO> getItemsFromMenu(Long menuId);
 
-    Item addItem(String itemName, String itemDesc, Double itemPrice, String itemImage,
-                       String itemIngredients, String itemAllergens
-            //, Long menuId
-    );
+    ItemDTO getItem(Long itemId);
 
-    Item patchItem(Long itemId, String itemName, String itemDesc, Double itemPrice, String itemImage,
-                         String itemIngredients, String itemAllergens
-            //, Long menuId
-    );
+    ItemDTO addItem(Long restaurantId, String itemName, String itemDesc, Double itemPrice, String itemImage,
+                       String itemIngredients, String itemAllergens);
 
-    String deleteItem(Long itemId
-                              //,Long restaurantId
-    );
+    ItemDTO patchItem(Long itemId, String itemName, String itemDesc, Double itemPrice, String itemImage,
+                         String itemIngredients, String itemAllergens);
 
+    String deleteItem(Long itemId);
 }

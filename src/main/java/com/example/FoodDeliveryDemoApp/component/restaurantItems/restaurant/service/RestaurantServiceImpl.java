@@ -1,6 +1,9 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.service;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.RestaurantTheme;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.dto.RestaurantDTO;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.dto.RestaurantDTOMapper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.repository.RestaurantRepository;
 import com.example.FoodDeliveryDemoApp.component.address.domain.Address;
 import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTO;
@@ -13,6 +16,7 @@ import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class RestaurantServiceImpl implements RestaurantService {
@@ -37,34 +41,36 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     }
 
-    public List<Restaurant> getAllRestaurants() {
+    public List<RestaurantDTO> getAllRestaurants() {
         List<Restaurant> restaurants = restaurantRepository.findAll();
         if (restaurants.isEmpty())
             throw new CustomNotFoundException("No restaurants in the database.");
-        return restaurants;
+        return RestaurantDTOMapper.toDtoList(restaurants);
     }
 
-    public List<Restaurant> getRestaurantsByOwnerId(Long ownerId) {
-        return ownerRepository.findById(ownerId)
+    public List<RestaurantDTO> getRestaurantsByOwnerId(Long ownerId) {
+        List<Restaurant> restaurants = ownerRepository.findById(ownerId)
                 .map(Owner::getRestaurants)
-                .orElseThrow(() ->new CustomNotFoundException("Owner not found with id " + ownerId));
+                .orElseThrow(() -> new CustomNotFoundException("Owner not found with id " + ownerId));
+
+        return RestaurantDTOMapper.toDtoList(restaurants);
     }
 
-    public List<Restaurant> getRestaurantsByTheme(String theme) {
+    public List<RestaurantDTO> getRestaurantsByTheme(String theme) {
         List<Restaurant> restaurants = restaurantRepository.findByTheme(theme);
         if (restaurants.isEmpty())
             throw new CustomNotFoundException("Restaurant not found with theme " + theme);
-        return restaurants;
+        return RestaurantDTOMapper.toDtoList(restaurants);
     }
 
-    public Restaurant createRestaurant(String username, String name, String desc, String theme,
+/*    public Restaurant createRestaurant(String username, String name, String desc, String theme,
                                        String phone, String image, AddressDTO address) {
         Long ownerId = ownerService.getIdByUsername(username);
         return createRestaurant(ownerId, name, desc, theme, phone, image, address);
-    }
+    }*/
 
 
-    public Restaurant createRestaurant(Long ownerId, String name, String desc, String theme,
+    public RestaurantDTO createRestaurant(Long ownerId, String name, String desc, RestaurantTheme theme,
                                        String phone, String image, AddressDTO addressGiven) {
         Owner owner = ownerRepository.findById(ownerId)
                 .orElseThrow(() -> new CustomNotFoundException("Owner not found with id " + ownerId));
@@ -78,35 +84,26 @@ public class RestaurantServiceImpl implements RestaurantService {
 
         // Then, set the address to the restaurant
         restaurant.setAddress(address);
-        return restaurantRepository.save(restaurant);
+        Restaurant created = restaurantRepository.save(restaurant);
+        return RestaurantDTOMapper.toDto(created);
     }
 
 
-    public Restaurant updateRestaurant(Long restaurantId, String name, String desc, String theme,
-                                       String phone, String image, AddressDTO addressDTO) {
-        Long ownerId = ownerService.getCurrentAccount();
+    public RestaurantDTO updateRestaurant(Long ownerId, Long restaurantId, String name, String desc, RestaurantTheme theme,
+                                          String phone, String image, AddressDTO addressDTO) {
         return restaurantRepository.findById(restaurantId).map(restaurant -> {
             Address oldAddress = restaurant.getAddress();
 
-            if (name != null) {
-                restaurant.setName(name);
-            }
-            if (desc != null) {
-                restaurant.setDescription(desc);
-            }
-            if (theme != null) {
-                restaurant.setTheme(theme);
-            }
+            Optional.ofNullable(name).ifPresent(restaurant::setName);
+            Optional.ofNullable(desc).ifPresent(restaurant::setDescription);
+            Optional.ofNullable(theme).ifPresent(restaurant::setTheme);
+            Optional.ofNullable(phone).ifPresent(restaurant::setPhone);
+            Optional.ofNullable(image).ifPresent(restaurant::setImage);
+
             if (addressDTO != null) {
                 Address newAddress = AddressDTOMapper.toEntity(addressDTO, restaurant);
                 addressRepository.save(newAddress);
                 restaurant.setAddress(newAddress);
-            }
-            if (phone != null) {
-                restaurant.setPhone(phone);
-            }
-            if (image != null) {
-                restaurant.setImage(image);
             }
 
             Restaurant updatedRestaurant = restaurantRepository.save(restaurant);
@@ -115,9 +112,10 @@ public class RestaurantServiceImpl implements RestaurantService {
                 addressRepository.delete(oldAddress);
             }
 
-            return updatedRestaurant;
+            return RestaurantDTOMapper.toDto(updatedRestaurant);
         }).orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));
     }
+
 
     public String deleteRestaurant(Long restaurantId) {
         return restaurantRepository.findById(restaurantId)

@@ -1,7 +1,7 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.user.service;
 
-import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.UserDetailsDTO;
-import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.UserDetailsDTOMapper;
+import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.UserDTO;
+import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.UserDTOMapper;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
 import com.example.FoodDeliveryDemoApp.component.address.repository.AddressRepository;
@@ -28,7 +28,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDetailsDTO updateUserInformation(String username, UserDetailsDTO updatedUser) {
+    public UserDTO updateUserInformation(String username, UserDTO updatedUser) {
         User existingUser = getUserByUsername(username);
         String existingEmail = existingUser.getEmail();
         String existingUsername = existingUser.getUsername();
@@ -56,11 +56,11 @@ public class UserService {
             updateUserUsername(existingUsername, updatedUser.getUsername());
         }
 
-        return UserDetailsDTOMapper.toDto(saveUser(existingUser));
+        return UserDTOMapper.toDto(saveUser(existingUser));
     }
 
-    public UserDetailsDTO getUserInformation(String username) {
-        return UserDetailsDTOMapper.toDto(getUserByUsername(username));
+    public UserDTO getUserInformation(String username) {
+        return UserDTOMapper.toDto(getUserByUsername(username));
     }
 
     @Transactional

@@ -6,6 +6,7 @@ import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
 import com.example.FoodDeliveryDemoApp.component.userItems.admin.repository.AdminRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Optional;
 
+@Profile("!test")
 @Component
 public class AdminByDefaultService {
 
@@ -45,6 +47,7 @@ public class AdminByDefaultService {
                     .firstname("Default")
                     .lastname("Admin")
                     .email("admin@example.com")
+                    .telephone("+37258374907")
                     .password(passwordEncoder.encode("root"))
                     .role(Role.ADMIN)
                     .createdAt(Instant.now())

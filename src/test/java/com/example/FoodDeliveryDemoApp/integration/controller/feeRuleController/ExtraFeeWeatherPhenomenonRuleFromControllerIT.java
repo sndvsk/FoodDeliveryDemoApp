@@ -8,15 +8,16 @@ import okhttp3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -32,9 +33,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(locations = "classpath:application-integration.properties")
+@TestPropertySource(locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-@Profile("test")
+@ActiveProfiles("test")
 public class ExtraFeeWeatherPhenomenonRuleFromControllerIT {
 
     @Autowired
@@ -42,6 +43,11 @@ public class ExtraFeeWeatherPhenomenonRuleFromControllerIT {
 
     @LocalServerPort
     private int port;
+
+    @Value("${host.url.test}")
+    private String hostUrl;
+
+    private final String apiUrl = "/api/v1/rules/fee/extra/phenomenon";
 
     private final HttpHeaders headers = new HttpHeaders();
 
@@ -56,7 +62,7 @@ public class ExtraFeeWeatherPhenomenonRuleFromControllerIT {
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
         ResponseEntity<List<ExtraFeeWeatherPhenomenonRule>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/rules/fee/extra/phenomenon",
+                hostUrl + port + apiUrl,
                 HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
         );
         List<ExtraFeeWeatherPhenomenonRule> ruleList = response.getBody();
@@ -81,8 +87,8 @@ public class ExtraFeeWeatherPhenomenonRuleFromControllerIT {
 
         // Send a POST request to the needed endpoint
         ResponseEntity<ExtraFeeWeatherPhenomenonRule> response = restTemplate.exchange(
-                "http://localhost:" + port +
-                        String.format("/api/rules/fee/extra/phenomenon?weatherPhenomenonName=%s&fee=%s",
+                hostUrl + port + apiUrl + "?" +
+                        String.format("weatherPhenomenonName=%s&fee=%s",
                                 weatherPhenomenonName, fee),
 
                 HttpMethod.POST, new HttpEntity<>(null, headers), ExtraFeeWeatherPhenomenonRule.class
@@ -116,7 +122,7 @@ public class ExtraFeeWeatherPhenomenonRuleFromControllerIT {
 
         // Send a GET request to the needed endpoint
         ResponseEntity<ExtraFeeWeatherPhenomenonRule> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/rules/fee/extra/phenomenon/" + id,
+                hostUrl + port + apiUrl + "/" + id,
                 HttpMethod.GET, new HttpEntity<>(null, headers), ExtraFeeWeatherPhenomenonRule.class);
 
         // Assert that the API returns the created rule with a status of OK
@@ -144,7 +150,7 @@ public class ExtraFeeWeatherPhenomenonRuleFromControllerIT {
 
         OkHttpClient client = new OkHttpClient();
 
-        HttpUrl url = HttpUrl.parse("http://localhost:" + port + "/api/rules/fee/extra/phenomenon/" + id);
+        HttpUrl url = HttpUrl.parse(hostUrl + port + apiUrl + "/" + id);
         assertNotNull(url);
 
         HttpUrl.Builder urlBuilder = url.newBuilder();
@@ -177,7 +183,7 @@ public class ExtraFeeWeatherPhenomenonRuleFromControllerIT {
     public void testDeleteExtraFeeWeatherPhenomenonRuleById(Long id) {
         // Send a GET request to the needed endpoint
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/rules/fee/extra/phenomenon/" + id,
+                hostUrl + port + apiUrl + "/" + id,
                 HttpMethod.DELETE, new HttpEntity<>(null, headers), String.class);
 
         // Assert that the API returns the created rule with a status of OK

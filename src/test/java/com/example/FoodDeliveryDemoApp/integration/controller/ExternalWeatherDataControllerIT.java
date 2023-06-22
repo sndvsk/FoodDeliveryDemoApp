@@ -4,6 +4,7 @@ import com.example.FoodDeliveryDemoApp.component.weatherItems.weatherData.domain
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -25,9 +27,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(locations = "classpath:application-integration.properties")
+@TestPropertySource(locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-@Profile("test")
+@ActiveProfiles("test")
 public class ExternalWeatherDataControllerIT {
 
     @Autowired
@@ -35,6 +37,11 @@ public class ExternalWeatherDataControllerIT {
 
     @LocalServerPort
     private int port;
+
+    @Value("${host.url.test}")
+    private String hostUrl;
+
+    private final String apiUrl = "/api/v1/get-weather-from-eea";
 
     final HttpHeaders headers = new HttpHeaders();
 
@@ -44,7 +51,7 @@ public class ExternalWeatherDataControllerIT {
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
         ResponseEntity<List<WeatherData>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/get-weather-from-eea",
+                hostUrl + port + apiUrl,
                 HttpMethod.POST, entity, new ParameterizedTypeReference<>() {
                 }
         );
@@ -73,7 +80,7 @@ public class ExternalWeatherDataControllerIT {
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/get-weather-from-eea/xml",
+                hostUrl + port + apiUrl + "/xml",
                 HttpMethod.GET, entity, String.class
         );
 
@@ -90,7 +97,7 @@ public class ExternalWeatherDataControllerIT {
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
         ResponseEntity<TreeMap<String, Long>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/get-weather-from-eea/stations",
+                hostUrl + port + apiUrl + "/stations",
                 HttpMethod.GET, entity, new ParameterizedTypeReference<>() {
                 }
         );

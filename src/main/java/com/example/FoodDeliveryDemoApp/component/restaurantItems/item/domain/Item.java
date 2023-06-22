@@ -2,10 +2,17 @@ package com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.domain.Menu;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.Order;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "items")
 public class Item {
@@ -37,6 +44,13 @@ public class Item {
     @JoinColumn(name = "menu_id")
     private Menu menu;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id")
+    private Restaurant restaurant;
+
+    @ManyToMany(mappedBy = "items")
+    private List<Order> orders;
+
     public Item(Long id, String name, String description, Double price, String image, String ingredients, String allergens, Menu menu) {
         this.id = id;
         this.name = name;
@@ -48,14 +62,14 @@ public class Item {
         this.menu = menu;
     }
 
-    public Item(String name, String description, Double price, String image, String ingredients, String allergens, Menu menu) {
+    public Item(String name, String description, Double price, String image, String ingredients, String allergens, Restaurant restaurant) {
         this.name = name;
         this.description = description;
         this.price = price;
         this.image = image;
         this.ingredients = ingredients;
         this.allergens = allergens;
-        this.menu = menu;
+        this.restaurant = restaurant;
     }
 
     public Item(String name, String description, Double price, String image, String ingredients, String allergens) {
@@ -67,85 +81,4 @@ public class Item {
         this.allergens = allergens;
     }
 
-    public Item() {
-
-    }
-
-    @ManyToMany(mappedBy = "items")
-    private List<Order> orders;
-
-    // Other fields, getters and setters...
-
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getIngredients() {
-        return ingredients;
-    }
-
-    public void setIngredients(String ingredients) {
-        this.ingredients = ingredients;
-    }
-
-    public String getAllergens() {
-        return allergens;
-    }
-
-    public void setAllergens(String allergens) {
-        this.allergens = allergens;
-    }
-
-    public Menu getMenu() {
-        return menu;
-    }
-
-    public void setMenu(Menu menu) {
-        this.menu = menu;
-    }
-
-    public List<Order> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(List<Order> orders) {
-        this.orders = orders;
-    }
 }

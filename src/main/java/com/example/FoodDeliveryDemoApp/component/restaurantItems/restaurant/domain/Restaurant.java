@@ -1,5 +1,6 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain;
 
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Item;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.domain.Menu;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.Order;
 import com.example.FoodDeliveryDemoApp.component.address.domain.Address;
@@ -28,8 +29,9 @@ public class Restaurant {
     @Column(name = "desc")
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "theme")
-    private String theme;
+    private RestaurantTheme theme;
 
     @Column(name = "phone")
     private String phone;
@@ -48,9 +50,12 @@ public class Restaurant {
     private List<Menu> menus = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Item> items = new ArrayList<>();
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Order> orders = new ArrayList<>();
 
-    public Restaurant(Long id, String name, String description, String theme,
+    public Restaurant(Long id, String name, String description, RestaurantTheme theme,
                       String phone, String image, Owner owner,
                       List<Menu> menus, List<Order> orders, Address address) {
         this.id = id;
@@ -65,7 +70,7 @@ public class Restaurant {
         this.address = address;
     }
 
-    public Restaurant(String name, String description, String theme,
+    public Restaurant(String name, String description, RestaurantTheme theme,
                       String phone, String image, Owner owner, Address address) {
         this.name = name;
         this.description = description;
@@ -76,7 +81,7 @@ public class Restaurant {
         this.address = address;
     }
 
-    public Restaurant(String name, String description, String theme, String phone, String image, Address address) {
+    public Restaurant(String name, String description, RestaurantTheme theme, String phone, String image, Address address) {
         this.name = name;
         this.description = description;
         this.theme = theme;
@@ -85,7 +90,7 @@ public class Restaurant {
         this.address = address;
     }
 
-    public Restaurant(String name, String description, String theme, String phone, String image, Owner owner) {
+    public Restaurant(String name, String description, RestaurantTheme theme, String phone, String image, Owner owner) {
         this.name = name;
         this.description = description;
         this.theme = theme;

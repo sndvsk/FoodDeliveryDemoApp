@@ -4,11 +4,19 @@ import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Ite
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 import com.example.FoodDeliveryDemoApp.component.userItems.customer.domain.Customer;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -29,11 +37,18 @@ public class Order {
     @Column(name = "datetime")
     private Instant orderDate;
 
+    @Column(name = "item_price")
+    private Double itemPrice;
+
+    @Column(name = "delivery_fee")
+    private Double deliveryFee;
+
     @Column(name = "total_price")
     private Double totalPrice;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status;
+    private OrderStatus status;
 
     @ManyToMany
     @JoinTable(
@@ -48,7 +63,7 @@ public class Order {
                  Restaurant restaurant,
                  Instant orderDate,
                  Double totalPrice,
-                 String status) {
+                 OrderStatus status) {
         this.id = id;
         this.customer = customer;
         this.restaurant = restaurant;
@@ -57,7 +72,7 @@ public class Order {
         this.status = status;
     }
 
-    public Order(Customer customer, Restaurant restaurant, Instant orderDate, Double totalPrice, String status) {
+    public Order(Customer customer, Restaurant restaurant, Instant orderDate, Double totalPrice, OrderStatus status) {
         this.customer = customer;
         this.restaurant = restaurant;
         this.orderDate = orderDate;
@@ -70,42 +85,7 @@ public class Order {
         this.restaurant = restaurant;
     }
 
-    public Order() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
-
-    public Restaurant getRestaurant() {
-        return restaurant;
-    }
-
-    public void setRestaurant(Restaurant restaurant) {
-        this.restaurant = restaurant;
-    }
-
-    public Instant getOrderDate() {
-        return orderDate;
-    }
-
-    public void setOrderDate(Instant orderDate) {
-        this.orderDate = orderDate;
-    }
-
-    public Double getTotalPrice() {
+    public Double getItemPrice() {
         Double price = 0.0;
         for (Item item: items) {
             price += item.getPrice();
@@ -113,32 +93,12 @@ public class Order {
         return price;
     }
 
-    public void setTotalPrice(Double totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public List<Item> getItems() {
-        return items;
-    }
-
-    public void setItems(List<Item> items) {
-        this.items = items;
-    }
-
-    public void addItem(Item item) {
+/*    public void addItem(Item item) {
         items.add(item);
     }
 
     public void removeItem(Item item) {
         items.remove(item);
-    }
+    }*/
 
 }

@@ -21,13 +21,13 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
     private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final TokenRepository tokenRepository;
 
-    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService, UserDetailsServiceImpl userDetailsServiceImpl, TokenRepository tokenRepository) {
+    public JwtAuthenticationFilter(JwtService jwtService,
+                                   UserDetailsServiceImpl userDetailsServiceImpl,
+                                   TokenRepository tokenRepository) {
         this.jwtService = jwtService;
-        this.userDetailsService = userDetailsService;
         this.userDetailsServiceImpl = userDetailsServiceImpl;
         this.tokenRepository = tokenRepository;
     }

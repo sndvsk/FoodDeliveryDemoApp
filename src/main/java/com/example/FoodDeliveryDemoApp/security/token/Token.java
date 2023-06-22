@@ -19,8 +19,9 @@ import java.util.Objects;
 public class Token {
 
     @Id
-    @GeneratedValue
-    public Integer id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tokens_id_seq")
+    @SequenceGenerator(name = "tokens_id_seq", sequenceName = "tokens_id_seq", allocationSize = 1)
+    public Long id;
 
     @Column(unique = true)
     public String token;

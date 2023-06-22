@@ -1,6 +1,6 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.user.controller;
 
-import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.UserDetailsDTO;
+import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.UserDTO;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,20 +18,20 @@ public class UserController {
     }
 
     @GetMapping("/{username}")
-    public ResponseEntity<UserDetailsDTO> getUser(
+    public ResponseEntity<UserDTO> getUser(
             @PathVariable String username) {
 
-        UserDetailsDTO customer = userService.getUserInformation(username);
+        UserDTO customer = userService.getUserInformation(username);
 
         return new ResponseEntity<>(customer, HttpStatus.OK);
     }
 
     @PatchMapping("/update/{username}")
-    public ResponseEntity<UserDetailsDTO> updateUser(
+    public ResponseEntity<UserDTO> updateUser(
             @PathVariable String username,
-            @RequestBody UserDetailsDTO customer) {
+            @RequestBody UserDTO customer) {
 
-        UserDetailsDTO savedCustomer = userService.updateUserInformation(username, customer);
+        UserDTO savedCustomer = userService.updateUserInformation(username, customer);
 
         return new ResponseEntity<>(savedCustomer, HttpStatus.OK);
     }

@@ -1,23 +1,27 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.service;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Item;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.dto.ItemDTO;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.domain.Menu;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.dto.MenuDTO;
 
 import java.util.List;
 
 public interface MenuService {
 
-    List<Menu> getAllMenus();
+    List<MenuDTO> getAllMenus();
 
-    Menu getMenuById(Long menuId);
+    MenuDTO getMenuById(Long menuId);
 
-    List<Menu> getMenusOfRestaurant(Long restaurantId);
+    List<MenuDTO> getMenusOfRestaurant(Long restaurantId);
 
-    Item addItemToMenu(Long itemId, Long menuId, Long restaurantId);
+    MenuDTO addMenu(Long ownedId, String menuName);
 
-    Menu addMenuToRestaurant(Long menuId, Long restaurantId);
+    ItemDTO addItemToMenu(Long itemId, Long menuId, Long restaurantId);
 
-    Menu patchMenuInRestaurant(Long menuId, String menuName, Long restaurantId);
+    MenuDTO addMenuToRestaurant(Long menuId, Long restaurantId);
+
+    MenuDTO patchMenuInRestaurant(Long menuId, String menuName, Long restaurantId);
 
     String deleteMenuFromRestaurant(Long menuId, Long restaurantId);
 }

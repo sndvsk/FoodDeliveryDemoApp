@@ -1,6 +1,5 @@
 package com.example.FoodDeliveryDemoApp.component.userItems;
 
-import com.example.FoodDeliveryDemoApp.component.userItems.user.Permission;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

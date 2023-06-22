@@ -1,5 +1,6 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.owner.domain;
 
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.domain.Menu;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
 import jakarta.persistence.*;
@@ -24,13 +25,15 @@ public class Owner {
     private Long id;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.MERGE)
+    private List<Menu> menus;
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.MERGE)
     private List<Restaurant> restaurants;
 
     @Column(name = "approved")
     private boolean approved;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @MapsId
     @JoinColumn(name = "user_id")
     private User user;
 

@@ -1,4 +1,4 @@
-package com.example.FoodDeliveryDemoApp.component.userItems.user;
+package com.example.FoodDeliveryDemoApp.component.userItems;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
