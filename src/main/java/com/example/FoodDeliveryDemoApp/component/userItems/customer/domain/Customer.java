@@ -34,7 +34,6 @@ public class Customer {
     private Address address;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @MapsId
     @JoinColumn(name = "user_id")
     private User user;
 

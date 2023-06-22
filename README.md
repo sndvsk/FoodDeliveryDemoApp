@@ -128,14 +128,6 @@ If you want to run the integration tests, refer to the instruction below.
     ```sh
     mvn clean package -P no-unit-tests
     ```
-  
-
-P.S. There are sometimes some problems with WeatherDataControllerIT integration tests.
-
-If it didn't pass after first try, run it as provided below and test should pass.
-  ```sh
-   mvn test -Dtest=WeatherDataControllerIT.java
-   ```
 
 ### Coverage
 
