@@ -2,7 +2,6 @@ package com.example.FoodDeliveryDemoApp.component.userItems.user.dto;
 
 import com.example.FoodDeliveryDemoApp.component.userItems.Role;
 
-import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,7 +32,6 @@ public class RegisterRequest {
     @JsonProperty("telephone")
     private String telephone;
 
-    //@JsonEnumDefaultValue
     @JsonProperty("role")
     private Role role;
 
