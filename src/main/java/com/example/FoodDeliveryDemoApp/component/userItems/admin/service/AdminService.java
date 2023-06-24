@@ -8,9 +8,9 @@ public interface AdminService {
 
     //Admin getAdminByUsername(String username);
 
-    void approveOwner(Long ownerId);
+    String approveOwner(Long ownerId);
 
-    void rejectOwner(Long ownerId);
+    String rejectOwner(Long ownerId);
 
     List<Owner> getOwnersWithApprovalStatus(boolean approved);
 

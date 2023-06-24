@@ -67,17 +67,19 @@ public class AdminServiceImpl implements AdminService {
                 .orElseThrow(() -> new CustomNotFoundException("No user with such username: " + username));
     }*/
 
-    public void approveOwner(Long ownerId) {
+    public String approveOwner(Long ownerId) {
         Owner owner = getOwnerById(ownerId);
         owner.setApproved(true);
         // Save the updated owner entity
         ownerRepository.save(owner);
+        return String.format("Owner with username: ´%s´, id: ´%s´ is approved.", owner.getUser().getUsername(), owner.getId());
     }
 
-    public void rejectOwner(Long ownerId) {
+    public String rejectOwner(Long ownerId) {
         Owner owner = getOwnerById(ownerId);
         // Delete the owner entity
-        ownerRepository.delete(owner);
+        //ownerRepository.delete(owner);
+        return String.format("Owner with username: ´%s´, id: ´%s´ is rejected.", owner.getUser().getUsername(), owner.getId());
     }
 
     private Owner getOwnerById(Long ownerId) {

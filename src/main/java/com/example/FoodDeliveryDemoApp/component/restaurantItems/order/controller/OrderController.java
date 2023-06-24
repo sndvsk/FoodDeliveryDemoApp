@@ -46,12 +46,22 @@ public class OrderController {
     @GetMapping(path = "/{restaurantId}")
     @PreAuthorize("hasAnyAuthority('OWNER','ADMIN')")
     public ResponseEntity<List<OrderDTO>> getOrdersByRestaurant(
-            @PathVariable Long restaurantId) {
-        List<OrderDTO> order = orderService.getOrdersByRestaurantId(restaurantId);
+            @PathVariable Long restaurantId,
+            @RequestParam Long ownerId) {
+        List<OrderDTO> order = orderService.getOrdersByRestaurantId(restaurantId, ownerId);
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 
-    // fixme
+    @GetMapping(path = "/{restaurantId}/customer/{customerId}")
+    @PreAuthorize("hasAnyAuthority('OWNER','ADMIN')")
+    public ResponseEntity<List<OrderDTO>> getOrdersByRestaurantAndCustomer(
+            @PathVariable Long restaurantId,
+            @RequestParam Long ownerId,
+            @PathVariable Long customerId) {
+        List<OrderDTO> order = orderService.getOrdersByRestaurantIdAndCustomerId(restaurantId, ownerId, customerId);
+        return new ResponseEntity<>(order, HttpStatus.OK);
+    }
+
     @PostMapping(path = "/restaurant/{restaurantId}/customer/{customerId}")
     @PreAuthorize("hasAnyAuthority('ADMIN','CUSTOMER')")
     public ResponseEntity<OrderDTO> createOrder(
@@ -61,24 +71,15 @@ public class OrderController {
         return new ResponseEntity<>(createdOrder, HttpStatus.CREATED);
     }
 
-/*    // fixme
-    @PostMapping(path = "/restaurant/{restaurantId}/customer/{customerId}/item/{itemId}")
-    public ResponseEntity<OrderDTO> addItemToOrder(
-            @PathVariable Long customerId,
-            @PathVariable Long restaurantId,
-            @PathVariable Long itemId) {
-        OrderDTO updated = orderService.addItemToOrder(customerId, restaurantId, itemId);
-        return new ResponseEntity<>(updated, HttpStatus.OK);
-    }*/
-
     @PatchMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'CUSTOMER')")
     public ResponseEntity<OrderDTO> updateOrder(
             @PathVariable Long id,
             @RequestParam String city,
             @RequestParam String vehicleType,
-            @RequestParam String items) {
-        OrderDTO updated = orderService.updateOrder(id, city, vehicleType, items);
+            @RequestParam String items,
+            @RequestParam Long customerId) {
+        OrderDTO updated = orderService.updateOrder(id, city, vehicleType, items, customerId);
         return new ResponseEntity<>(updated, HttpStatus.OK);
     }
 

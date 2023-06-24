@@ -15,11 +15,15 @@ public interface MenuService {
 
     MenuDTO addMenu(Long ownedId, String menuName);
 
-    ItemDTO addItemToMenu(Long itemId, Long menuId, Long restaurantId);
+    ItemDTO addItemToMenu(Long itemId, Long menuId, Long restaurantId, Long ownerId);
 
-    MenuDTO addMenuToRestaurant(Long menuId, Long restaurantId);
+    MenuDTO addMenuToRestaurant(Long menuId, Long restaurantId, Long ownerId);
 
-    MenuDTO patchMenuInRestaurant(Long menuId, String menuName, Long restaurantId);
+    MenuDTO makeMenuVisible(Long menuId, Long ownerId);
 
-    String deleteMenuFromRestaurant(Long menuId, Long restaurantId);
+    MenuDTO patchMenuInRestaurant(Long menuId, String menuName, Long restaurantId, Long ownerId);
+
+    String deleteMenuFromRestaurant(Long menuId, Long restaurantId, Long ownerId);
+
+    String deleteMenu(Long menuId, Long ownerId);
 }

@@ -43,7 +43,7 @@ public class ItemController {
     @GetMapping(path = "/{itemId}")
     @Operation(summary = "Get item")
     public ResponseEntity<ItemDTO> getItem(
-            @Parameter(name = "itemId", description = "Restaurant menu id", example = "1")
+            @Parameter(name = "itemId", description = "Item id", example = "1")
             @PathVariable(value = "itemId") Long itemId) {
 
         ItemDTO items = itemService.getItem(itemId);
@@ -55,48 +55,45 @@ public class ItemController {
     @Operation(summary = "Add item (only admin and owner)")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
     public ResponseEntity<ItemDTO> addItem(
-            @Parameter(name = "restaurantId", description = "Restaurant id", example = "1")
             @PathVariable Long restaurantId,
-            @Parameter(name = "itemName", description = "Item name", example = "Vodka")
-            @RequestParam String itemName,
-            @Parameter(name = "itemDesc", description = "Item description", example = "Spirit")
-            @RequestParam String itemDesc,
-            @Parameter(name = "itemPrice", description = "Item price", example = "10")
-            @RequestParam Double itemPrice,
-            @Parameter(name = "itemImage", description = "Item image", example = "")
-            @RequestParam String itemImage,
-            @Parameter(name = "itemIngredients", description = "Item ingredients", example = "vodka")
-            @RequestParam String itemIngredients,
-            @Parameter(name = "itemAllergens", description = "Item allergens", example = "alcohol")
-            @RequestParam String itemAllergens) {
+            @RequestParam Long ownerId,
+            @RequestBody ItemDTO itemDto) {
 
-        ItemDTO item = itemService.addItem(restaurantId, itemName, itemDesc, itemPrice, itemImage,
-                itemIngredients, itemAllergens);
+        ItemDTO item = itemService.addItem(
+                restaurantId,
+                ownerId,
+                itemDto.getName(),
+                itemDto.getDescription(),
+                itemDto.getPrice(),
+                itemDto.getImage(),
+                String.join(",", itemDto.getIngredients()),
+                String.join(",", itemDto.getAllergens())
+        );
 
         return new ResponseEntity<>(item, HttpStatus.CREATED);
     }
 
-    @PatchMapping(path = "/{itemId}")
+    @PatchMapping(path = "/patch/restaurant/{restaurantId}/{itemId}")
     @Operation(summary = "Patch item (only admin and owner)")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
     public ResponseEntity<ItemDTO> patchItem(
             @Parameter(name = "itemId", description = "Item id", example = "1")
             @PathVariable Long itemId,
-            @Parameter(name = "itemName", description = "Item name", example = "Vodka")
-            @RequestParam(required = false) String itemName,
-            @Parameter(name = "itemDesc", description = "Item description", example = "Spirit")
-            @RequestParam(required = false) String itemDesc,
-            @Parameter(name = "itemPrice", description = "Item price", example = "15")
-            @RequestParam(required = false) Double itemPrice,
-            @Parameter(name = "itemImage", description = "Item image", example = "")
-            @RequestParam(required = false) String itemImage,
-            @Parameter(name = "itemIngredients", description = "Item ingredients", example = "vodka")
-            @RequestParam(required = false) String itemIngredients,
-            @Parameter(name = "itemAllergens", description = "Item allergens", example = "alcohol")
-            @RequestParam(required = false) String itemAllergens) {
+            @PathVariable Long restaurantId,
+            @RequestParam Long ownerId,
+            @RequestBody ItemDTO itemDto) {
 
-        ItemDTO item = itemService.patchItem(itemId, itemName, itemDesc, itemPrice, itemImage,
-                itemIngredients, itemAllergens);
+        ItemDTO item = itemService.patchItem(
+                itemId,
+                restaurantId,
+                ownerId,
+                itemDto.getName(),
+                itemDto.getDescription(),
+                itemDto.getPrice(),
+                itemDto.getImage(),
+                String.join(",", itemDto.getIngredients()),
+                String.join(",", itemDto.getAllergens())
+        );
 
         return new ResponseEntity<>(item, HttpStatus.OK);
     }
@@ -106,9 +103,11 @@ public class ItemController {
     @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
     public ResponseEntity<String> deleteItem(
             @Parameter(name = "itemId", description = "Item id", example = "1")
-            @PathVariable Long itemId) {
+            @PathVariable Long itemId,
+            @Parameter(name = "ownerId", description = "Owner id", example = "1")
+            @RequestParam Long ownerId) {
 
-        String response = itemService.deleteItem(itemId);
+        String response = itemService.deleteItem(itemId, ownerId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

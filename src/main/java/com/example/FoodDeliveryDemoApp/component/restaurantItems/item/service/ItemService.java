@@ -12,11 +12,12 @@ public interface ItemService {
 
     ItemDTO getItem(Long itemId);
 
-    ItemDTO addItem(Long restaurantId, String itemName, String itemDesc, Double itemPrice, String itemImage,
-                       String itemIngredients, String itemAllergens);
+    ItemDTO addItem(Long restaurantId, Long ownerId,
+                    String itemName, String itemDesc, Double itemPrice, String itemImage,
+                    String itemIngredients, String itemAllergens);
 
-    ItemDTO patchItem(Long itemId, String itemName, String itemDesc, Double itemPrice, String itemImage,
+    ItemDTO patchItem(Long itemId, Long restaurantId, Long ownerId, String itemName, String itemDesc, Double itemPrice, String itemImage,
                          String itemIngredients, String itemAllergens);
 
-    String deleteItem(Long itemId);
+    String deleteItem(Long itemId, Long ownerId);
 }

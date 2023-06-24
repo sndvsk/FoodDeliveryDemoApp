@@ -42,53 +42,49 @@ public class RestaurantController {
     }
 
     @PostMapping("/create/{ownerId}")
-    @PreAuthorize("hasAuthority('OWNER')")
-    public ResponseEntity<RestaurantDTO> createRestaurantByOwner(
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
+    public ResponseEntity<RestaurantDTO> createRestaurant(
             @PathVariable Long ownerId,
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String desc,
-            @RequestParam(required = false) RestaurantTheme theme,
-            @RequestParam(required = false) String phone,
-            @RequestParam(required = false) String image,
-            @RequestParam(required = false) AddressDTO address) {
-        RestaurantDTO restaurant = restaurantService.createRestaurant(ownerId, name, desc, theme, phone, image, address);
+            @RequestBody RestaurantDTO restaurantDto,
+            @RequestParam AddressDTO address) {
+        RestaurantDTO restaurant = restaurantService.createRestaurant(
+                ownerId,
+                restaurantDto.getName(),
+                restaurantDto.getDescription(),
+                RestaurantTheme.valueOf(restaurantDto.getTheme()),
+                restaurantDto.getPhone(),
+                restaurantDto.getImage(),
+                address
+        );
         return new ResponseEntity<>(restaurant, HttpStatus.CREATED);
     }
 
-    @PostMapping("/create-admin/{ownerId}")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<RestaurantDTO> createRestaurantByAdmin(
-            @PathVariable Long ownerId,
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String desc,
-            @RequestParam(required = false) RestaurantTheme theme,
-            @RequestParam(required = false) String phone,
-            @RequestParam(required = false) String image,
-            @RequestParam(required = false) AddressDTO address) {
-        RestaurantDTO restaurant = restaurantService.createRestaurant(ownerId, name, desc, theme, phone, image, address);
-        return new ResponseEntity<>(restaurant, HttpStatus.CREATED);
-    }
-
-    @PatchMapping("/{ownerId}/update/{restaurantId}")
+    @PatchMapping("/update/{restaurantId}")
     @PreAuthorize("hasAnyAuthority('OWNER','ADMIN')")
     public ResponseEntity<RestaurantDTO> updateRestaurant(
-            @PathVariable Long ownerId,
             @PathVariable Long restaurantId,
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String desc,
-            @RequestParam(required = false) RestaurantTheme theme,
-            @RequestParam(required = false) String phone,
-            @RequestParam(required = false) String image,
+            @RequestParam Long ownerId,
+            @RequestBody RestaurantDTO restaurantDto,
             @RequestParam(required = false) AddressDTO address) {
         RestaurantDTO restaurant = restaurantService.updateRestaurant(
-                ownerId, restaurantId, name, desc, theme, phone, image, address);
+                restaurantId,
+                ownerId,
+                restaurantDto.getName(),
+                restaurantDto.getDescription(),
+                RestaurantTheme.valueOf(restaurantDto.getTheme()),
+                restaurantDto.getPhone(),
+                restaurantDto.getImage(),
+                address
+        );
         return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{restaurantId}")
+    @DeleteMapping("/delete/{restaurantId}")
     @PreAuthorize("hasAnyAuthority('OWNER','ADMIN')")
-    public ResponseEntity<?> deleteRestaurant(@PathVariable Long restaurantId) {
-        String response = restaurantService.deleteRestaurant(restaurantId);
+    public ResponseEntity<?> deleteRestaurant(
+            @PathVariable Long restaurantId,
+            @RequestParam Long ownerId) {
+        String response = restaurantService.deleteRestaurant(restaurantId, ownerId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

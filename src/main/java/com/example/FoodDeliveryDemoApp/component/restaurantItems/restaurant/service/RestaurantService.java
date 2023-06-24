@@ -14,14 +14,11 @@ public interface RestaurantService {
 
     List<RestaurantDTO> getRestaurantsByTheme(String theme);
 
-/*    Restaurant createRestaurant(String username,
-                                String name, String desc, String theme, String phone, String image, AddressDTO address);*/
-
     RestaurantDTO createRestaurant(Long ownerId, String name, String desc, RestaurantTheme theme, String phone, String image,
                                    AddressDTO address);
 
-    RestaurantDTO updateRestaurant(Long ownerId, Long restaurantId, String name, String desc, RestaurantTheme theme,
+    RestaurantDTO updateRestaurant(Long restaurantId, Long ownerId, String name, String desc, RestaurantTheme theme,
                                    String phone, String image, AddressDTO address);
 
-    String deleteRestaurant(Long restaurantId);
+    String deleteRestaurant(Long restaurantId, Long ownerId);
 }

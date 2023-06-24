@@ -1,5 +1,6 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.item.service;
 
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.OwnershipHelper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Item;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.dto.ItemDTO;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.dto.ItemDTOMapper;
@@ -58,20 +59,27 @@ public class ItemServiceImpl implements ItemService {
         return ItemDTOMapper.toDto(item);
     }
 
-    public ItemDTO addItem(Long restaurantId, String itemName, String itemDesc, Double itemPrice, String itemImage,
+    public ItemDTO addItem(Long restaurantId, Long ownerId,
+                           String itemName, String itemDesc, Double itemPrice, String itemImage,
                            String itemIngredients, String itemAllergens) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new CustomNotFoundException("No restaurant with id: " + restaurantId));
+
+        OwnershipHelper.validateOwner(ownerId, restaurant.getOwner().getId());
+
         Item item = new Item(itemName, itemDesc, itemPrice, itemImage, itemIngredients, itemAllergens, restaurant);
         itemRepository.save(item);
         return ItemDTOMapper.toDto(item);
     }
 
-
-    public ItemDTO patchItem(Long itemId, String itemName, String itemDesc, Double itemPrice, String itemImage,
+    public ItemDTO patchItem(Long itemId, Long restaurantId, Long ownerId,
+                             String itemName, String itemDesc, Double itemPrice, String itemImage,
                              String itemIngredients, String itemAllergens) {
         return itemRepository.findById(itemId)
                 .map(item -> {
+                    OwnershipHelper.validateRestaurant(restaurantId, item.getRestaurant().getId());
+                    OwnershipHelper.validateOwner(ownerId, item.getOwner().getId());
+
                     Optional.ofNullable(itemName).ifPresent(item::setName);
                     Optional.ofNullable(itemDesc).ifPresent(item::setDescription);
                     Optional.ofNullable(itemPrice).ifPresent(item::setPrice);
@@ -86,11 +94,10 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new CustomNotFoundException("Item not found with id " + itemId));
     }
 
-
-
-    public String deleteItem(Long itemId) {
+    public String deleteItem(Long itemId, Long ownerId) {
         return itemRepository.findById(itemId)
                 .map(item -> {
+                    OwnershipHelper.validateOwner(ownerId, item.getOwner().getId());
                     itemRepository.delete(item);
                     return "Deleted item with id " + itemId;
                 }).orElseThrow(() -> new CustomNotFoundException("Item not found with id " + itemId));

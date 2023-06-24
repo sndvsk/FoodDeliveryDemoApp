@@ -1,6 +1,7 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.order.service;
 
 import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.service.DeliveryFeeService;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.OwnershipHelper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Item;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.repository.ItemRepository;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.Order;
@@ -76,12 +77,32 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
-    public List<OrderDTO> getOrdersByRestaurantId(Long restaurantId) {
-        List<Order> orders = restaurantRepository.findById(restaurantId)
-                .map(Restaurant::getOrders)
+    public List<OrderDTO> getOrdersByRestaurantId(Long restaurantId, Long ownerId) {
+        // Fetch restaurant first
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));
+        OwnershipHelper.validateOwner(ownerId, restaurant.getOwner().getId());
+        List<Order> orders = restaurant.getOrders();
         return OrderDTOMapper.toDtoList(orders);
     }
+
+    public List<OrderDTO> getOrdersByRestaurantIdAndCustomerId(Long restaurantId, Long ownerId, Long customerId) {
+        // Fetch restaurant first
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));
+
+        // Validate owner
+        OwnershipHelper.validateOwner(ownerId, restaurant.getOwner().getId());
+
+        // Get and filter orders
+        List<Order> orders = restaurant.getOrders();
+        List<Order> customerOrders = orders.stream()
+                .filter(order -> order.getCustomer().getId().equals(customerId))
+                .collect(Collectors.toList());
+
+        return OrderDTOMapper.toDtoList(customerOrders);
+    }
+
 
     public OrderDTO createOrder(Long customerId, Long restaurantId) {
         Customer customer = customerRepository.findById(customerId)
@@ -92,38 +113,58 @@ public class OrderServiceImpl implements OrderService {
 
         Order order = new Order(customer, restaurant);
         order.setStatus(OrderStatus.CREATED);
+        order.setItemPrice(calculateOrderItemPrice(order));
         orderRepository.save(order);
 
         return OrderDTOMapper.toDto(order);
     }
 
-    public OrderDTO updateOrder(Long id, String city, String vehicleType, String items) {
-        return orderRepository.findById(id).map(order -> {
-            // Assuming the items string is a comma-separated list of item ids
-            List<Long> itemIds = Arrays.stream(items.split(","))
-                    .map(Long::parseLong)
-                    .collect(Collectors.toList());
+    public OrderDTO updateOrder(Long id, String city, String vehicleType, String items, Long customerId) {
+        return orderRepository.findById(id)
+                .map(order -> {
+                    OwnershipHelper.validateCustomer(customerId, order.getCustomer().getId());
+                    List<Item> fetchedItems = getItemsFromIds(items);
+                    return updateOrderAttributes(order, fetchedItems, city, vehicleType);
+                })
+                .map(OrderDTOMapper::toDto)
+                .orElseThrow(() -> new CustomNotFoundException("Order not found with id " + id));
+    }
 
-            // Fetch the items from the database
-            List<Item> fetchedItems = itemRepository.findAllById(itemIds);
+    private List<Item> getItemsFromIds(String items) {
+        List<Long> itemIds = Arrays.stream(items.split(","))
+                .map(Long::parseLong)
+                .collect(Collectors.toList());
+        return itemRepository.findAllById(itemIds);
+    }
 
-            // Update the items in the order
-            order.setItems(fetchedItems);
-            order.setOrderDate(Instant.now());
+    private Order updateOrderAttributes(Order order, List<Item> fetchedItems, String city, String vehicleType) {
+        Double itemPrice = calculateItemPrice(fetchedItems);
+        Double deliveryFee = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, OffsetDateTime.now()).getDeliveryFee();
 
-            Double itemPrice = order.getItemPrice();
-            Double deliveryFee = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType,
-                    OffsetDateTime.ofInstant(order.getOrderDate(), ZoneId.systemDefault())).getDeliveryFee();
-            Double totalPrice = itemPrice + deliveryFee;
+        Order updatedOrder = Order.builder()
+                .id(order.getId())
+                .customer(order.getCustomer())
+                .items(fetchedItems) // This is a new list
+                .orderDate(Instant.now())
+                .itemPrice(itemPrice)
+                .deliveryFee(deliveryFee)
+                .totalPrice(itemPrice + deliveryFee)
+                .status(OrderStatus.SUBMITTED)
+                .build();
 
-            order.setItemPrice(itemPrice);
-            order.setDeliveryFee(deliveryFee);
-            order.setTotalPrice(totalPrice);
-            order.setStatus(OrderStatus.SUBMITTED);
-            orderRepository.save(order);
+        return orderRepository.save(updatedOrder);
+    }
 
-            return OrderDTOMapper.toDto(order);
-        }).orElseThrow(() -> new CustomNotFoundException("Order not found with id " + id));
+    private Double calculateItemPrice(List<Item> items) {
+        return items.stream()
+                .mapToDouble(Item::getPrice)
+                .sum();
+    }
+
+    public Double calculateOrderItemPrice(Order order) {
+        return order.getItems().stream()
+                .mapToDouble(Item::getPrice)
+                .sum();
     }
 
     public String deleteOrder(Long id) {

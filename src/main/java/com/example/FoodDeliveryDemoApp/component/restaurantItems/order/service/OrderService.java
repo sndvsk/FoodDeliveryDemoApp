@@ -12,12 +12,13 @@ public interface OrderService {
 
     List<OrderDTO> getOrdersByCustomerId(Long customerId);
 
-    List<OrderDTO> getOrdersByRestaurantId(Long restaurantId);
+    List<OrderDTO> getOrdersByRestaurantId(Long restaurantId, Long ownerId);
+
+    List<OrderDTO> getOrdersByRestaurantIdAndCustomerId(Long restaurantId, Long ownerId, Long customerId);
 
     OrderDTO createOrder(Long customerId, Long restaurantId);
 
-    OrderDTO updateOrder(Long id, String city, String vehicleType, String items);
+    OrderDTO updateOrder(Long id, String city, String vehicleType, String items, Long customerId);
 
     String deleteOrder(Long id);
-
 }

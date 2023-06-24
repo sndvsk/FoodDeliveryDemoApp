@@ -4,10 +4,7 @@ import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Ite
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 import com.example.FoodDeliveryDemoApp.component.userItems.customer.domain.Customer;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -17,6 +14,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -84,21 +82,5 @@ public class Order {
         this.customer = customer;
         this.restaurant = restaurant;
     }
-
-    public Double getItemPrice() {
-        Double price = 0.0;
-        for (Item item: items) {
-            price += item.getPrice();
-        }
-        return price;
-    }
-
-/*    public void addItem(Item item) {
-        items.add(item);
-    }
-
-    public void removeItem(Item item) {
-        items.remove(item);
-    }*/
 
 }

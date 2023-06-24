@@ -39,7 +39,7 @@ public class OrderDTO {
     @JsonProperty("status")
     private String status;
 
-    @JsonProperty("total_price")
+    @JsonProperty("items")
     private List<Long> items;
 
 }

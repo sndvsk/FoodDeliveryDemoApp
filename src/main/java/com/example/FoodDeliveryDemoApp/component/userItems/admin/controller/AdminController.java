@@ -21,15 +21,15 @@ public class AdminController {
     }
 
     @PostMapping("/approve-owner/{ownerId}")
-    public ResponseEntity<Void> approveOwner(@PathVariable Long ownerId) {
-        adminService.approveOwner(ownerId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> approveOwner(@PathVariable Long ownerId) {
+        String response = adminService.approveOwner(ownerId);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/reject-owner/{ownerId}")
-    public ResponseEntity<Void> rejectOwner(@PathVariable Long ownerId) {
-        adminService.rejectOwner(ownerId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> rejectOwner(@PathVariable Long ownerId) {
+        String response = adminService.rejectOwner(ownerId);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/owners/approved-false")

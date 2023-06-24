@@ -24,42 +24,11 @@ public class CustomerServiceImpl implements CustomerService {
         this.addressRepository = addressRepository;
     }
 
-/*    public Customer updateUserInformation(String username, UserDetailsDTO updatedCustomer) {
-        // Retrieve existing customer
-        Customer existingCustomer = getCustomerByUsername(username);
-        String existingEmail = existingCustomer.getEmail();
-        String existingUsername = existingCustomer.getUsername();
-
-        // Update only the non-null fields
-        Optional.ofNullable(updatedCustomer.getFirstname()).ifPresent(existingCustomer::setFirstname);
-        Optional.ofNullable(updatedCustomer.getLastname()).ifPresent(existingCustomer::setLastname);
-        Optional.ofNullable(updatedCustomer.getEmail()).ifPresent(newEmail -> {
-            if(emailExists(newEmail) && !newEmail.equals(existingEmail)) {
-                throw new CustomBadRequestException(String.format("Email: %s is already in use", newEmail));
-            }
-            existingCustomer.setEmail(newEmail);
-        });
-        Optional.ofNullable(updatedCustomer.getUsername()).ifPresent(newUsername -> {
-            if(usernameExists(newUsername) && !newUsername.equals(existingUsername)) {
-                throw new CustomBadRequestException(String.format("Username: %s is already taken", newUsername));
-            }
-            existingCustomer.setUsername(newUsername);
-        });
-        Optional.ofNullable(updatedCustomer.getPassword()).ifPresent(
-                password -> existingCustomer.setPassword(passwordEncoder.encode(password)));
-        existingCustomer.setUpdatedAt(Instant.now());
-
-        // Save and return updated customer
-        return customerRepository.save(existingCustomer);
-    }*/
-
     public Address addAddress(String username, Address address) {
         User user = getUserByUsername(username);
         Customer customer = getCustomerById(user.getId());
         address.setCustomer(customer);
-        addressRepository.save(address);
-        Address savedAddress = getAddressByUsername(user.getId());
-        customer.setAddress(savedAddress);
+        customer.setAddress(address);
         customerRepository.save(customer);
         return address;
     }

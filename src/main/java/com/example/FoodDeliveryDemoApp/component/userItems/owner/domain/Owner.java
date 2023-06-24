@@ -1,5 +1,6 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.owner.domain;
 
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Item;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.domain.Menu;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
@@ -23,6 +24,9 @@ public class Owner {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.MERGE)
+    private List<Item> items;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.MERGE)
     private List<Menu> menus;

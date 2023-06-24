@@ -1,5 +1,6 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.service;
 
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.OwnershipHelper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.dto.ItemDTO;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.dto.ItemDTOMapper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.repository.ItemRepository;
@@ -66,17 +67,6 @@ public class MenuServiceImpl implements MenuService {
         return MenuDTOMapper.toDtoList(menus);
     }
 
-    public ItemDTO addItemToMenu(Long itemId, Long menuId, Long restaurantId) {
-        Menu menu = menuRepository.findById(menuId)
-                .orElseThrow(() -> new CustomNotFoundException("Menu not found with id " + menuId));
-
-        return itemRepository.findById(itemId).map(item -> {
-            item.setMenu(menu);
-            itemRepository.save(item);
-            return ItemDTOMapper.toDto(item);
-        }).orElseThrow(() -> new CustomNotFoundException("Item not found with id " + itemId));
-    }
-
     public MenuDTO addMenu(Long ownerId, String menuName) {
         Owner owner = ownerRepository.findById(ownerId)
                 .orElseThrow(() -> new CustomNotFoundException("Owner not found with id " + ownerId));
@@ -88,11 +78,26 @@ public class MenuServiceImpl implements MenuService {
         return MenuDTOMapper.toDto(menu);
     }
 
-    public MenuDTO addMenuToRestaurant(Long menuId, Long restaurantId) {
+    public ItemDTO addItemToMenu(Long itemId, Long menuId, Long restaurantId, Long ownerId) {
+        Menu menu = menuRepository.findById(menuId)
+                .orElseThrow(() -> new CustomNotFoundException("Menu not found with id " + menuId));
 
+        OwnershipHelper.validateOwner(ownerId, menu.getOwner().getId());
+        OwnershipHelper.validateRestaurant(restaurantId, menu.getRestaurant().getId());
+
+        return itemRepository.findById(itemId).map(item -> {
+            item.setMenu(menu);
+            itemRepository.save(item);
+            return ItemDTOMapper.toDto(item);
+        }).orElseThrow(() -> new CustomNotFoundException("Item not found with id " + itemId));
+    }
+
+    public MenuDTO addMenuToRestaurant(Long menuId, Long restaurantId, Long ownerId) {
         Optional<Menu> optionalMenu = menuRepository.findById(menuId);
         Menu menu = optionalMenu
                 .orElseThrow(() -> new CustomNotFoundException("Menu not found with id " + menuId));
+
+        OwnershipHelper.validateOwner(ownerId, menu.getOwner().getId());
 
         Optional<Restaurant> optionalRestaurant = restaurantRepository.findById(restaurantId);
         Restaurant restaurant = optionalRestaurant
@@ -101,10 +106,20 @@ public class MenuServiceImpl implements MenuService {
         menu.setRestaurant(restaurant);
         menuRepository.save(menu);
         return MenuDTOMapper.toDto(menu);
-
     }
 
-    public MenuDTO patchMenuInRestaurant(Long menuId, String menuName, Long restaurantId) {
+    public MenuDTO makeMenuVisible(Long menuId, Long ownerId) {
+        return menuRepository.findById(menuId)
+                .map(menu -> {
+                    OwnershipHelper.validateOwner(ownerId, menu.getOwner().getId());
+                    menu.setHidden(MenuHidden.NO);
+                    menuRepository.save(menu);
+                    return MenuDTOMapper.toDto(menu);
+                })
+                .orElseThrow(() -> new CustomBadRequestException("Unexpected error. Menu was not updated."));
+    }
+
+    public MenuDTO patchMenuInRestaurant(Long menuId, String menuName, Long restaurantId, Long ownerId) {
         return menuRepository.findById(menuId).map(menu -> {
             Long expectedRestaurantId = menu.getRestaurant().getId();
             if (!expectedRestaurantId.equals(restaurantId)) {
@@ -112,21 +127,37 @@ public class MenuServiceImpl implements MenuService {
                         String.format("Id of restaurant is wrong. Expected: %s, provided: %s",
                                 expectedRestaurantId, restaurantId));
             }
-            if (menuName != null) {
-                menu.setName(menuName);
-            }
+
+            OwnershipHelper.validateOwner(ownerId, menu.getOwner().getId());
+            OwnershipHelper.validateRestaurant(restaurantId, menu.getRestaurant().getId());
+
+            Optional.ofNullable(menuName).ifPresent(menu::setName);
+
             menuRepository.save(menu);
             return MenuDTOMapper.toDto(menu);
         }).orElseThrow(() -> new CustomNotFoundException("Menu not found with id " + menuId));
     }
 
-    public String deleteMenuFromRestaurant(Long menuId, Long restaurantId) {
+    public String deleteMenuFromRestaurant(Long menuId, Long restaurantId, Long ownerId) {
         return menuRepository.findById(menuId)
                 .map(menu -> {
+                    OwnershipHelper.validateOwner(ownerId, menu.getOwner().getId());
+
                     menu.setRestaurant(null);
                     menuRepository.save(menu);
                     return "Deleted menu from restaurant with id " + menuId;
                 }).orElseThrow(() -> new CustomNotFoundException("Menu not found with id " + menuId));
+    }
+
+    public String deleteMenu(Long menuId, Long ownerId) {
+        return menuRepository.findById(menuId)
+                .map(menu -> {
+                    OwnershipHelper.validateOwner(ownerId, menu.getOwner().getId());
+
+                    menuRepository.delete(menu);
+                    return String.format("Menu with id: %s was deleted", menuId);
+                })
+                .orElseThrow(() -> new CustomNotFoundException("Menu not found with id " + menuId));
     }
 
 }

@@ -28,11 +28,9 @@ public class MenuController {
     public ResponseEntity<List<MenuDTO>> getAllMenus() {
 
         List<MenuDTO> menus = menuService.getAllMenus();
-
         return new ResponseEntity<>(menus, HttpStatus.OK);
     }
 
-    // todo get menu by id
     @GetMapping(path = "/restaurant/{restaurantId}")
     @Operation(summary = "Get all menus of a restaurant")
     public ResponseEntity<List<MenuDTO>> getMenusOfRestaurant(
@@ -40,7 +38,6 @@ public class MenuController {
             @PathVariable(value = "restaurantId") Long restaurantId) {
 
         List<MenuDTO> menus = menuService.getMenusOfRestaurant(restaurantId);
-
         return new ResponseEntity<>(menus, HttpStatus.OK);
     }
 
@@ -51,7 +48,6 @@ public class MenuController {
             @PathVariable(value = "menuId") Long menuId) {
 
         MenuDTO menu = menuService.getMenuById(menuId);
-
         return new ResponseEntity<>(menu, HttpStatus.OK);
     }
 
@@ -65,11 +61,10 @@ public class MenuController {
             @RequestParam(value = "menuName") String menuName) {
 
         MenuDTO menu = menuService.addMenu(ownerId, menuName);
-
         return new ResponseEntity<>(menu, HttpStatus.CREATED);
     }
 
-    @PostMapping(path = "/restaurant/{restaurantId}/menu/{menuId}")
+    @PostMapping(path = "/restaurant/{restaurantId}/{menuId}")
     @Operation(summary = "Add item to menu (only admin and owner)")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
     public ResponseEntity<ItemDTO> addItemToMenu(
@@ -78,8 +73,11 @@ public class MenuController {
             @Parameter(name = "restaurantId", description = "Restaurant id", example = "1")
             @PathVariable(value = "restaurantId") Long restaurantId,
             @Parameter(name = "itemId", description = "Item id", example = "1")
-            @RequestParam(value = "itemId") Long itemId) {
-        ItemDTO item = menuService.addItemToMenu(itemId, menuId, restaurantId);
+            @RequestParam(value = "itemId") Long itemId,
+            @Parameter(name = "ownerId", description = "Owner id", example = "1")
+            @RequestParam(value = "ownerId") Long ownerId) {
+
+        ItemDTO item = menuService.addItemToMenu(itemId, menuId, restaurantId, ownerId);
         return new ResponseEntity<>(item, HttpStatus.CREATED);
     }
 
@@ -89,15 +87,29 @@ public class MenuController {
     public ResponseEntity<MenuDTO> addMenuToRestaurant(
             @Parameter(name = "menuId", description = "Menu id", example = "1")
             @RequestParam Long menuId,
+            @Parameter(name = "ownerId", description = "Owner id", example = "1")
+            @RequestParam(value = "ownerId") Long ownerId,
             @Parameter(name = "restaurantId", description = "Restaurant id", example = "1")
             @PathVariable(value = "restaurantId") Long restaurantId) {
 
-        MenuDTO menu = menuService.addMenuToRestaurant(menuId, restaurantId);
-
+        MenuDTO menu = menuService.addMenuToRestaurant(menuId, restaurantId, ownerId);
         return new ResponseEntity<>(menu, HttpStatus.CREATED);
     }
 
-    @PatchMapping(path = "/restaurant/{restaurantId}/menu/{menuId}")
+    @PatchMapping(path = "/{menuId}")
+    @Operation(summary = "Delete menu from restaurant")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
+    public ResponseEntity<MenuDTO> makeMenuVisible(
+            @Parameter(name = "menuId", description = "Menu id", example = "1")
+            @PathVariable Long menuId,
+            @Parameter(name = "ownerId", description = "Owner id", example = "1")
+            @RequestParam Long ownerId) {
+
+        MenuDTO response = menuService.makeMenuVisible(menuId, ownerId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PatchMapping(path = "/restaurant/{restaurantId}/{menuId}")
     @Operation(summary = "Update menu in restaurant (only admin and owner)")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
     public ResponseEntity<MenuDTO> patchMenuInRestaurant(
@@ -105,11 +117,12 @@ public class MenuController {
             @PathVariable Long menuId,
             @Parameter(name = "menuName", description = "Menu name", example = "Burger menu")
             @RequestParam String menuName,
+            @Parameter(name = "ownerId", description = "Owner id", example = "1")
+            @RequestParam Long ownerId,
             @Parameter(name = "restaurantMenuId", description = "Restaurant menu id", example = "1")
             @PathVariable(value = "restaurantId") Long restaurantMenuId) {
 
-        MenuDTO menu = menuService.patchMenuInRestaurant(menuId, menuName, restaurantMenuId);
-
+        MenuDTO menu = menuService.patchMenuInRestaurant(menuId, menuName, restaurantMenuId, ownerId);
         return new ResponseEntity<>(menu, HttpStatus.OK);
     }
 
@@ -119,14 +132,26 @@ public class MenuController {
     public ResponseEntity<String> deleteMenuFromRestaurant(
             @Parameter(name = "menuId", description = "Menu id", example = "1")
             @PathVariable Long menuId,
+            @Parameter(name = "ownerId", description = "Owner id", example = "1")
+            @RequestParam Long ownerId,
             @Parameter(name = "restaurantMenuId", description = "Restaurant menu id", example = "1")
             @PathVariable(value = "restaurantId") Long restaurantId) {
 
-        String response = menuService.deleteMenuFromRestaurant(menuId, restaurantId);
-
+        String response = menuService.deleteMenuFromRestaurant(menuId, restaurantId, ownerId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    // todo delete menu
+    @DeleteMapping(path = "/{menuId}")
+    @Operation(summary = "Delete menu from restaurant")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
+    public ResponseEntity<String> deleteMenu(
+            @Parameter(name = "menuId", description = "Menu id", example = "1")
+            @PathVariable Long menuId,
+            @Parameter(name = "ownerId", description = "Owner id", example = "1")
+            @RequestParam Long ownerId) {
+
+        String response = menuService.deleteMenu(menuId, ownerId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
 }
