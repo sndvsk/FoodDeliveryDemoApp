@@ -39,7 +39,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     public Customer getCustomerById(Long id) {
-        return customerRepository.findById(id)
+        return customerRepository.findByUserId(id)
                 .orElseThrow(() -> new CustomNotFoundException("No customer with such id: " + id));
     }
 
@@ -49,7 +49,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     public Address getAddressByUsername(Long id) {
-        return addressRepository.findAddressByCustomer_Id(id)
+        return addressRepository.findAddressByCustomerId(id)
                 .orElseThrow(() -> new CustomNotFoundException("No addresses for this user"));
     }
 

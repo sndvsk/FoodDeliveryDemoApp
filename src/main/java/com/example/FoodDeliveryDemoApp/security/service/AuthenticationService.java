@@ -74,44 +74,6 @@ public class AuthenticationService {
         this.authenticationManager = authenticationManager;
     }
 
-/*    private Optional<? extends User> findByEmail(String email) {
-        var admin = adminRepository.findByEmail(email);
-        if (admin.isPresent()) {
-            return admin;
-        }
-
-        var owner = ownerRepository.findByEmail(email);
-        if (owner.isPresent()) {
-            return owner;
-        }
-
-        var customer = customerRepository.findByEmail(email);
-        if (customer.isPresent()) {
-            return customer;
-        }
-
-        return Optional.empty();
-    }
-
-    private Optional<? extends User> findByUsername(String username) {
-        var admin = adminRepository.findByUsername(username);
-        if (admin.isPresent()) {
-            return admin;
-        }
-
-        var owner = ownerRepository.findByUsername(username);
-        if (owner.isPresent()) {
-            return owner;
-        }
-
-        var customer = customerRepository.findByUsername(username);
-        if (customer.isPresent()) {
-            return customer;
-        }
-
-        return Optional.empty();
-    }*/
-
     private Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
@@ -191,65 +153,11 @@ public class AuthenticationService {
                 .lastname(request.getLastname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .telephone(request.getTelephone())
                 .role(request.getRole())
                 .createdAt(Instant.now())
                 .build();
     }
-
-/*    private Admin createAdmin(RegisterRequest request) {
-        return Admin.builder()
-                .username(request.getUsername())
-                .firstname(request.getFirstname())
-                .lastname(request.getLastname())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
-                .createdAt(Instant.now())
-                .level(3L)
-                .build();
-    }
-
-    private Owner createOwner(RegisterRequest request) {
-        return Owner.builder()
-                .username(request.getUsername())
-                .firstname(request.getFirstname())
-                .lastname(request.getLastname())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
-                .createdAt(Instant.now())
-                .build();
-    }
-
-    private Customer createCustomer(RegisterRequest request) {
-        return Customer.builder()
-                .username(request.getUsername())
-                .firstname(request.getFirstname())
-                .lastname(request.getLastname())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
-                .createdAt(Instant.now())
-                .build();
-    }*/
-
-/*    private User saveUser(User user) {
-        if(user instanceof Admin) {
-            logger.info("User type:" + user.getRole().name() +
-                    " is registered with username " + user.getUsername() + ".");
-            return adminRepository.save((Admin) user);
-        } else if(user instanceof Owner) {
-            logger.info("User type:" + user.getRole().name() +
-                    " is registered with username " + user.getUsername() + ".");
-            return ownerRepository.save((Owner) user);
-        } else if(user instanceof Customer) {
-            logger.info("User type:" + user.getRole().name() +
-                    " is registered with username " + user.getUsername() + ".");
-            return customerRepository.save((Customer) user);
-        }
-
-        throw new CustomBadRequestException("User type not supported: " + user.getClass().getSimpleName());
-    }*/
 
     private User saveUser(User user) {
         logger.info("User type: " + user.getRole().name() + " is registered with username " + user.getUsername() + ".");
@@ -318,34 +226,6 @@ public class AuthenticationService {
         return user;
     }
 
-
-/*    private void saveUserToken(User user, String jwtToken) {
-        var token = Token.builder()
-                .token(jwtToken)
-                .tokenType(TokenType.BEARER)
-                .expired(false)
-                .revoked(false)
-                .build();
-
-        if (user instanceof Admin) {
-            token.setAdmin((Admin) user);
-            token.setOwner(null);
-            token.setCustomer(null);
-        } else if (user instanceof Owner) {
-            token.setOwner((Owner) user);
-            token.setAdmin(null);
-            token.setCustomer(null);
-        } else if (user instanceof Customer) {
-            token.setCustomer((Customer) user);
-            token.setAdmin(null);
-            token.setOwner(null);
-        } else {
-            throw new CustomBadRequestException("Unsupported user type: " + user.getClass());
-        }
-
-        tokenRepository.save(token);
-    }*/
-
     private void saveUserToken(User user, String jwtToken) {
         var token = Token.builder()
                 .token(jwtToken)
@@ -357,30 +237,6 @@ public class AuthenticationService {
 
         tokenRepository.save(token);
     }
-
-/*    private void revokeAllUserTokens(User user) {
-        List<Token> validUserTokens;
-
-        if (user instanceof Admin) {
-            validUserTokens = tokenRepository.findAllValidTokenByAdmin(user.getId());
-        } else if (user instanceof Owner) {
-            validUserTokens = tokenRepository.findAllValidTokenByOwner(user.getId());
-        } else if (user instanceof Customer) {
-            validUserTokens = tokenRepository.findAllValidTokenByCustomer(user.getId());
-        } else {
-            throw new CustomBadRequestException("Unsupported user type: " + user.getClass());
-        }
-
-        if (validUserTokens.isEmpty())
-            return;
-
-        validUserTokens.forEach(token -> {
-            token.setExpired(true);
-            token.setRevoked(true);
-        });
-
-        tokenRepository.saveAll(validUserTokens);
-    }*/
 
     private void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokensByUser(user.getId());
