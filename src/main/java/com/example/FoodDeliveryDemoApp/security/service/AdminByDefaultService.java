@@ -37,7 +37,6 @@ public class AdminByDefaultService {
         createDefaultAdminIfNotExist();
     }
 
-    @Transactional
     public void createDefaultAdminIfNotExist() {
         if (userRepository.countByRole(Role.ADMIN) == 0) {
             // Create the default admin user

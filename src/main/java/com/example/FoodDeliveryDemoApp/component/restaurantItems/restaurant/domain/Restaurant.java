@@ -26,7 +26,7 @@ public class Restaurant {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "desc")
+    @Column(name = "description")
     private String description;
 
     @Enumerated(EnumType.STRING)
@@ -40,7 +40,7 @@ public class Restaurant {
     private String image;
 
     @ManyToOne
-    @JoinColumn(name = "owner")
+    @JoinColumn(name = "owner_id")
     private Owner owner;
 
     @OneToOne(mappedBy = "restaurant", cascade = CascadeType.ALL)

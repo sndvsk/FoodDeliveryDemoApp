@@ -33,7 +33,7 @@ public class Menu {
     private MenuHidden hidden;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner")
+    @JoinColumn(name = "owner_id")
     private Owner owner;
 
     @ManyToOne(fetch = FetchType.LAZY)

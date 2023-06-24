@@ -25,7 +25,7 @@ public class Item {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "desc")
+    @Column(name = "description")
     private String description;
 
     @Column(name = "price")

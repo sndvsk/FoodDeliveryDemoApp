@@ -35,14 +35,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 public class AuthenticationService {
@@ -147,7 +145,7 @@ public class AuthenticationService {
         List<Role> userRoles = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .map(Role::valueOf)
-                .collect(Collectors.toList());
+                .toList();
 
         if (request.getRole().equals(Role.ADMIN) && !userRoles.contains(Role.ADMIN)) {
             throw new CustomAccessDeniedException("Only admins can create new admins");
@@ -167,16 +165,16 @@ public class AuthenticationService {
         }
 
         switch (request.getRole()) {
-            case ADMIN:
+            case ADMIN -> {
                 if (!userHasAdminRole()) {
                     throw new CustomAccessDeniedException("Regular users cannot create admins");
                 }
                 return buildUser(request);
-            case OWNER:
-            case CUSTOMER:
+            }
+            case OWNER, CUSTOMER -> {
                 return buildUser(request);
-            default:
-                throw new CustomBadRequestException("Invalid role: " + request.getRole());
+            }
+            default -> throw new CustomBadRequestException("Invalid role: " + request.getRole());
         }
     }
 
@@ -314,7 +312,6 @@ public class AuthenticationService {
                 .build();
     }
 
-    @Transactional
     public User getUserByUsername(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("No such user with username: " + username));

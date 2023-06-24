@@ -63,12 +63,10 @@ public class UserService {
         return UserDTOMapper.toDto(getUserByUsername(username));
     }
 
-    @Transactional
     public User saveUser(User user) {
         return userRepository.save(user);
     }
 
-    @Transactional
     public User getUserByUsername(String username) {
         User user = findUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("No such user with username: " + username));
