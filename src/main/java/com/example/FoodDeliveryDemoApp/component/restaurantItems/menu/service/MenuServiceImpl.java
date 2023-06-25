@@ -1,6 +1,6 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.service;
 
-import com.example.FoodDeliveryDemoApp.component.restaurantItems.OwnershipHelper;
+import com.example.FoodDeliveryDemoApp.component.utils.OwnershipHelper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.dto.ItemDTO;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.dto.ItemDTOMapper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.repository.ItemRepository;

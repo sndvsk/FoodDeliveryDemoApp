@@ -1,7 +1,7 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.admin.controller;
 
 import com.example.FoodDeliveryDemoApp.component.userItems.admin.service.AdminService;
-import com.example.FoodDeliveryDemoApp.component.userItems.owner.domain.Owner;
+import com.example.FoodDeliveryDemoApp.component.userItems.owner.dto.OwnerDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -33,8 +33,8 @@ public class AdminController {
     }
 
     @GetMapping("/owners/approved-false")
-    public ResponseEntity<List<Owner>> getOwnersWithApprovalStatusFalse() {
-        List<Owner> owners = adminService.getOwnersWithApprovalStatus(false);
+    public ResponseEntity<List<OwnerDTO>> getOwnersWithApprovalStatusFalse() {
+        List<OwnerDTO> owners = adminService.getOwnersWithApprovalStatus(false);
         return ResponseEntity.ok(owners);
     }
 

@@ -2,7 +2,6 @@ package com.example.FoodDeliveryDemoApp.component.userItems.customer.controller;
 
 import com.example.FoodDeliveryDemoApp.component.address.domain.Address;
 import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTO;
-import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTOMapper;
 import com.example.FoodDeliveryDemoApp.component.userItems.customer.service.CustomerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,23 +18,31 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
-    @GetMapping("/{username}/address")
+    @GetMapping("/{userId}/address")
     public ResponseEntity<AddressDTO> getAddress(
-            @PathVariable String username) {
+            @PathVariable Long userId) {
 
-        Address savedAddress = customerService.getAddress(username);
-        AddressDTO response = AddressDTOMapper.toDto(savedAddress);
+        AddressDTO response = customerService.getAddress(userId);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/{username}/address")
+    @PostMapping("/{userId}/address")
     public ResponseEntity<AddressDTO> addAddress(
-            @PathVariable String username,
-            @RequestBody Address address) {
+            @PathVariable Long userId,
+            @RequestBody AddressDTO address) {
 
-        Address savedAddress = customerService.addAddress(username, address);
-        AddressDTO response = AddressDTOMapper.toDto(savedAddress);
+        AddressDTO response = customerService.addAddress(userId, address);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PatchMapping("/{userId}/address")
+    public ResponseEntity<AddressDTO> updateAddress(
+            @PathVariable Long userId,
+            @RequestBody AddressDTO address) {
+
+        AddressDTO response = customerService.updateAddress(userId, address);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

@@ -1,6 +1,8 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.customer.service;
 
 import com.example.FoodDeliveryDemoApp.component.address.domain.Address;
+import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTO;
+import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTOMapper;
 import com.example.FoodDeliveryDemoApp.component.userItems.customer.domain.Customer;
 import com.example.FoodDeliveryDemoApp.component.address.repository.AddressRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.customer.repository.CustomerRepository;
@@ -8,6 +10,8 @@ import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.stereotype.Component;
+
+import java.time.Instant;
 
 @Component
 public class CustomerServiceImpl implements CustomerService {
@@ -24,31 +28,59 @@ public class CustomerServiceImpl implements CustomerService {
         this.addressRepository = addressRepository;
     }
 
-    public Address addAddress(String username, Address address) {
-        User user = getUserByUsername(username);
+    public AddressDTO getAddress(Long userId) {
+        User user = getUserById(userId);
+        Address address = getAddressByUsername(user.getId());
+        return AddressDTOMapper.toDto(address);
+    }
+
+    public AddressDTO addAddress(Long userId, AddressDTO addressDto) {
+        User user = getUserById(userId);
         Customer customer = getCustomerById(user.getId());
-        address.setCustomer(customer);
-        customer.setAddress(address);
+
+        Address newAddress = buildAddress(addressDto);
+        newAddress.setCustomer(customer);
+        customer.setAddress(newAddress);
+
+        user.setUpdatedAt(Instant.now());
+        customer.setUser(user);
         customerRepository.save(customer);
-        return address;
+
+        return AddressDTOMapper.toDto(newAddress);
     }
 
-    public Address getAddress(String username) {
-        User user = getUserByUsername(username);
-        return getAddressByUsername(user.getId());
+    public AddressDTO updateAddress(Long userId, AddressDTO addressDto) {
+        User user = getUserById(userId);
+        Customer customer = getCustomerById(user.getId());
+        Address currentAddress = customer.getAddress();
+
+        // Copy new values from DTO to address
+        Address updatedAddress = buildAddress(addressDto);
+        updatedAddress.setId(currentAddress.getId()); // retain original ID
+        updatedAddress.setCustomer(customer);
+
+        user.setUpdatedAt(Instant.now());
+        customer.setAddress(updatedAddress);
+        customerRepository.save(customer);
+
+        return AddressDTOMapper.toDto(updatedAddress);
     }
 
-    public Customer getCustomerById(Long id) {
+    private Address buildAddress(AddressDTO addressDTO) {
+        return AddressDTOMapper.toEntity(addressDTO, null);
+    }
+
+    private Customer getCustomerById(Long id) {
         return customerRepository.findByUserId(id)
                 .orElseThrow(() -> new CustomNotFoundException("No customer with such id: " + id));
     }
 
-    public User getUserByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomNotFoundException("No user with such username: " + username));
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomNotFoundException("No user with such id: " + userId));
     }
 
-    public Address getAddressByUsername(Long id) {
+    private Address getAddressByUsername(Long id) {
         return addressRepository.findAddressByCustomerId(id)
                 .orElseThrow(() -> new CustomNotFoundException("No addresses for this user"));
     }

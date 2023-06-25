@@ -66,13 +66,13 @@ public class User extends UserDetailsImpl {
     private List<Token> tokens;
 
     // One-to-one relationships
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Admin admin;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Owner owner;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Customer customer;
 
     public void setAdmin(Admin admin) {

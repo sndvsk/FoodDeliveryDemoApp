@@ -1,7 +1,7 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.order.service;
 
 import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.service.DeliveryFeeService;
-import com.example.FoodDeliveryDemoApp.component.restaurantItems.OwnershipHelper;
+import com.example.FoodDeliveryDemoApp.component.utils.OwnershipHelper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Item;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.repository.ItemRepository;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.Order;
@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;

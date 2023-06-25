@@ -1,4 +1,4 @@
-package com.example.FoodDeliveryDemoApp.component.restaurantItems;
+package com.example.FoodDeliveryDemoApp.component.utils;
 
 
 import com.example.FoodDeliveryDemoApp.exception.CustomAccessDeniedException;

@@ -1,6 +1,6 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.service;
 
-import com.example.FoodDeliveryDemoApp.component.restaurantItems.OwnershipHelper;
+import com.example.FoodDeliveryDemoApp.component.utils.OwnershipHelper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.RestaurantTheme;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.dto.RestaurantDTO;

@@ -1,16 +1,13 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.customer.service;
 
-import com.example.FoodDeliveryDemoApp.component.address.domain.Address;
+import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTO;
 
 public interface CustomerService {
 
-    //Customer getCustomerByUsername(String username);
+    AddressDTO addAddress(Long userId, AddressDTO address);
 
-    //Customer updateUserInformation(String username, UserDetailsDTO updatedCustomer);
+    AddressDTO getAddress(Long userId);
 
-    Address addAddress(String username, Address address);
+    AddressDTO updateAddress(Long userId, AddressDTO address);
 
-    Address getAddress(String username);
-
-    //UserDetailsDTO getUserInformation(String username);
 }

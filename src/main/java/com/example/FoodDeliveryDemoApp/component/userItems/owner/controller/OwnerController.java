@@ -14,13 +14,4 @@ public class OwnerController {
         this.ownerService = ownerService;
     }
 
-/*    @PostMapping("/register")
-    public ResponseEntity<Owner> registerOwner(@RequestBody RegisterRequest request) {
-
-        Owner savedOwner = ownerService.registerOwner(request);
-
-        return new ResponseEntity<>(savedOwner, HttpStatus.CREATED);
-    }*/
-
-
 }
