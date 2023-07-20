@@ -21,24 +21,6 @@ public class OwnerServiceImpl implements OwnerService {
         this.userRepository = userRepository;
     }
 
-    public Long getCurrentAccount() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails) {
-            String username = ((UserDetails)principal).getUsername();
-            User user = getOwnerByUsername(username);
-            if (user != null) {
-                return user.getId();
-            }
-            throw new UsernameNotFoundException("Owner not found with username: " + username);
-        }
-        throw new IllegalArgumentException("Invalid principal type");
-    }
-
-    public User getOwnerByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomNotFoundException("No user with such username: " + username));
-    }
-
     public Long getIdByUsername(String username) {
         User owner = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomNotFoundException("No user with such username: " + username));

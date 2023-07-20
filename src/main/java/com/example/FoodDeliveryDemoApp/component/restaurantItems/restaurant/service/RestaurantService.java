@@ -5,6 +5,7 @@ import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.doma
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.dto.RestaurantDTO;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface RestaurantService {
 
@@ -14,8 +15,11 @@ public interface RestaurantService {
 
     List<RestaurantDTO> getRestaurantsByTheme(String theme);
 
-    RestaurantDTO createRestaurant(Long ownerId, String name, String desc, RestaurantTheme theme, String phone, String image,
-                                   AddressDTO address);
+    RestaurantDTO createRestaurant(Long ownerId, String name, String desc, RestaurantTheme theme, String phone,
+                                   String image, AddressDTO address);
+
+/*    CompletableFuture<RestaurantDTO> createRestaurant(Long ownerId, String name, String desc, RestaurantTheme theme, String phone,
+                                       String image, AddressDTO address);*/
 
     RestaurantDTO updateRestaurant(Long restaurantId, Long ownerId, String name, String desc, RestaurantTheme theme,
                                    String phone, String image, AddressDTO address);

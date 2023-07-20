@@ -10,6 +10,7 @@ import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
@@ -28,12 +29,18 @@ public class CustomerServiceImpl implements CustomerService {
         this.addressRepository = addressRepository;
     }
 
+    @Transactional
     public AddressDTO getAddress(Long userId) {
         User user = getUserById(userId);
-        Address address = getAddressByUsername(user.getId());
-        return AddressDTOMapper.toDto(address);
+        Address address = user.getCustomer().getAddress();
+        //Address address = getAddressById(user.getId());
+        if (address == null) {
+            return AddressDTOMapper.toDto(new Address());
+        } else
+            return AddressDTOMapper.toDto(address);
     }
 
+    @Transactional
     public AddressDTO addAddress(Long userId, AddressDTO addressDto) {
         User user = getUserById(userId);
         Customer customer = getCustomerById(user.getId());
@@ -80,7 +87,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .orElseThrow(() -> new CustomNotFoundException("No user with such id: " + userId));
     }
 
-    private Address getAddressByUsername(Long id) {
+    private Address getAddressById(Long id) {
         return addressRepository.findAddressByCustomerId(id)
                 .orElseThrow(() -> new CustomNotFoundException("No addresses for this user"));
     }

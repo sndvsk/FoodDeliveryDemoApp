@@ -1,6 +1,5 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.customer.controller;
 
-import com.example.FoodDeliveryDemoApp.component.address.domain.Address;
 import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTO;
 import com.example.FoodDeliveryDemoApp.component.userItems.customer.service.CustomerService;
 import org.springframework.http.HttpStatus;

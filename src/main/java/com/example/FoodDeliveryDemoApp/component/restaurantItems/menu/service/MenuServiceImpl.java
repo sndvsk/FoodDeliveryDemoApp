@@ -16,6 +16,7 @@ import com.example.FoodDeliveryDemoApp.component.userItems.owner.repository.Owne
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -60,6 +61,7 @@ public class MenuServiceImpl implements MenuService {
         return MenuDTOMapper.toDto(menu);
     }
 
+    @Transactional
     public List<MenuDTO> getMenusOfRestaurant(Long restaurantId) {
         List<Menu> menus = restaurantRepository.findById(restaurantId)
                 .map(Restaurant::getMenus)

@@ -32,7 +32,7 @@ public class Address {
     private String country;
 
     @Column(name = "zip_code")
-    private String zipCode;
+    private Integer zipCode;
 
     @Column(name = "house_number")
     private String houseNumber;

@@ -7,6 +7,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -22,6 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final TokenRepository tokenRepository;
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     public JwtAuthenticationFilter(JwtService jwtService,
                                    UserDetailsServiceImpl userDetailsServiceImpl,
@@ -43,13 +47,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String userId;
+        String userId = null;
         if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
         jwt = authHeader.substring(7);
-        userId = jwtService.extractUserId(jwt);
+        try {
+            userId = jwtService.extractUserId(jwt);
+        } catch (Exception e) {
+            // Log the exception message for debugging purposes
+            logger.error("Exception occurred when extracting user ID from jwt: " + e.getMessage());
+            // Continue processing the filter chain
+            filterChain.doFilter(request, response);
+        }
         if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsServiceImpl.loadUserById(userId);
             var isTokenValid = tokenRepository.findByToken(jwt)

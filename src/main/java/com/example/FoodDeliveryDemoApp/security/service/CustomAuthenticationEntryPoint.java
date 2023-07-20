@@ -1,6 +1,6 @@
 package com.example.FoodDeliveryDemoApp.security.service;
 
-import com.example.FoodDeliveryDemoApp.exception.RestError;
+import com.example.FoodDeliveryDemoApp.exception.dto.RestError;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

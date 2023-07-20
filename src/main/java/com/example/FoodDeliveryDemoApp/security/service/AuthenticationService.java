@@ -252,12 +252,12 @@ public class AuthenticationService {
         tokenRepository.saveAll(validUserTokens);
     }
 
-    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public AuthenticationResponse refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         final String refreshToken;
         final String userName;
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return;
+            throw new CustomBadRequestException("Invalid or missing authorization header");
         }
         refreshToken = authHeader.substring(7);
         userName = jwtService.extractUsernameFromClaims(refreshToken);
@@ -272,9 +272,10 @@ public class AuthenticationService {
                         .accessToken(accessToken)
                         .refreshToken(refreshToken)
                         .build();
-                new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+                return authResponse;
             }
         }
+        throw new CustomBadRequestException("Invalid refresh token");
     }
 
 }

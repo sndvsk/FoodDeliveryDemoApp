@@ -45,8 +45,7 @@ public class RestaurantController {
     @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     public ResponseEntity<RestaurantDTO> createRestaurant(
             @PathVariable Long ownerId,
-            @RequestBody RestaurantDTO restaurantDto,
-            @RequestParam AddressDTO address) {
+            @RequestBody RestaurantDTO restaurantDto) {
         RestaurantDTO restaurant = restaurantService.createRestaurant(
                 ownerId,
                 restaurantDto.getName(),
@@ -54,7 +53,7 @@ public class RestaurantController {
                 RestaurantTheme.valueOf(restaurantDto.getTheme()),
                 restaurantDto.getPhone(),
                 restaurantDto.getImage(),
-                address
+                restaurantDto.getAddress()
         );
         return new ResponseEntity<>(restaurant, HttpStatus.CREATED);
     }
@@ -64,8 +63,7 @@ public class RestaurantController {
     public ResponseEntity<RestaurantDTO> updateRestaurant(
             @PathVariable Long restaurantId,
             @RequestParam Long ownerId,
-            @RequestBody RestaurantDTO restaurantDto,
-            @RequestParam(required = false) AddressDTO address) {
+            @RequestBody RestaurantDTO restaurantDto) {
         RestaurantDTO restaurant = restaurantService.updateRestaurant(
                 restaurantId,
                 ownerId,
@@ -74,14 +72,14 @@ public class RestaurantController {
                 RestaurantTheme.valueOf(restaurantDto.getTheme()),
                 restaurantDto.getPhone(),
                 restaurantDto.getImage(),
-                address
+                restaurantDto.getAddress()
         );
         return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{restaurantId}")
     @PreAuthorize("hasAnyAuthority('OWNER','ADMIN')")
-    public ResponseEntity<?> deleteRestaurant(
+    public ResponseEntity<String> deleteRestaurant(
             @PathVariable Long restaurantId,
             @RequestParam Long ownerId) {
         String response = restaurantService.deleteRestaurant(restaurantId, ownerId);

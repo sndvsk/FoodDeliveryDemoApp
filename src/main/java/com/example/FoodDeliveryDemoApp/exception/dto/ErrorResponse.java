@@ -1,4 +1,4 @@
-package com.example.FoodDeliveryDemoApp.exception;
+package com.example.FoodDeliveryDemoApp.exception.dto;
 
 public class ErrorResponse {
     private String message;

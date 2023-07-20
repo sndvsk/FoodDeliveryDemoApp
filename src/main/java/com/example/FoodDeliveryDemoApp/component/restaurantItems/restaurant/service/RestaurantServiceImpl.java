@@ -1,5 +1,6 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.service;
 
+import com.example.FoodDeliveryDemoApp.component.userItems.owner.domain.Owner;
 import com.example.FoodDeliveryDemoApp.component.utils.OwnershipHelper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.RestaurantTheme;
@@ -13,28 +14,42 @@ import com.example.FoodDeliveryDemoApp.component.address.repository.AddressRepos
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.repository.OwnerRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.service.OwnerService;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.invoke.MethodHandles;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 @Component
 public class RestaurantServiceImpl implements RestaurantService {
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final OwnerService ownerService;
     private final RestaurantRepository restaurantRepository;
     private final OwnerRepository ownerRepository;
     private final AddressRepository addressRepository;
 
+    private final Executor threadPoolTaskExecutor;
+
     public RestaurantServiceImpl(OwnerService ownerService,
                                  RestaurantRepository restaurantRepository,
                                  OwnerRepository ownerRepository,
-                                 AddressRepository addressRepository) {
+                                 AddressRepository addressRepository,
+                                 @Qualifier("threadPoolTaskExecutor")Executor threadPoolTaskExecutor) {
         this.ownerService = ownerService;
         this.restaurantRepository = restaurantRepository;
         this.ownerRepository = ownerRepository;
         this.addressRepository = addressRepository;
+        this.threadPoolTaskExecutor = threadPoolTaskExecutor;
     }
 
     private void validateInputs() {
@@ -55,16 +70,25 @@ public class RestaurantServiceImpl implements RestaurantService {
         return restaurants;
     }
 
+    @Transactional
     public List<RestaurantDTO> getRestaurantsByOwnerId(Long ownerId) {
-        return ownerRepository.findById(ownerId)
-                .map(owner -> owner.getRestaurants().stream()
-                        .map(RestaurantDTOMapper::toDto)
-                        .collect(Collectors.toList()))
+        Owner owner = ownerRepository.findOwnerByUserId(ownerId)
                 .orElseThrow(() -> new CustomNotFoundException("Owner not found with id " + ownerId));
+
+        List<Restaurant> restaurants = owner.getRestaurants();
+
+        if (restaurants.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            return restaurants.stream()
+                    .map(RestaurantDTOMapper::toDto)
+                    .collect(Collectors.toList());
+        }
     }
 
     public List<RestaurantDTO> getRestaurantsByTheme(String theme) {
-        List<RestaurantDTO> restaurants = restaurantRepository.findByTheme(theme)
+        RestaurantTheme parsedTheme = RestaurantTheme.fromString(theme);
+        List<RestaurantDTO> restaurants = restaurantRepository.findByTheme(parsedTheme)
                 .stream()
                 .map(RestaurantDTOMapper::toDto)
                 .collect(Collectors.toList());
@@ -75,7 +99,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     public RestaurantDTO createRestaurant(Long ownerId, String name, String desc, RestaurantTheme theme,
                                           String phone, String image, AddressDTO addressGiven) {
-        return ownerRepository.findById(ownerId)
+        return ownerRepository.findOwnerByUserId(ownerId)
                 .map(owner -> {
                     Restaurant restaurant = new Restaurant(name, desc, theme, phone, image, owner);
                     Address address = AddressDTOMapper.toEntity(addressGiven, restaurant);
@@ -86,7 +110,22 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .orElseThrow(() -> new CustomNotFoundException("Owner not found with id " + ownerId));
     }
 
-    public RestaurantDTO updateRestaurant(Long ownerId, Long restaurantId, String name, String desc,
+/*    public CompletableFuture<RestaurantDTO> createRestaurant(Long ownerId, String name, String desc, RestaurantTheme theme,
+                                                             String phone, String image, AddressDTO addressGiven) {
+        return CompletableFuture.supplyAsync(() -> ownerRepository.findById(ownerId)
+                .map(owner -> {
+                    Restaurant restaurant = new Restaurant(name, desc, theme, phone, image, owner);
+                    Address address = AddressDTOMapper.toEntity(addressGiven, restaurant);
+                    restaurant.setAddress(address);
+                    Restaurant created = restaurantRepository.save(restaurant);
+                    return RestaurantDTOMapper.toDto(created);
+                })
+                .orElseThrow(() ->
+                        new CustomNotFoundException("Owner not found with id " + ownerId)), threadPoolTaskExecutor);
+    }*/
+
+
+    public RestaurantDTO updateRestaurant(Long restaurantId, Long ownerId, String name, String desc,
                                           RestaurantTheme theme, String phone, String image, AddressDTO addressDTO) {
         return restaurantRepository.findById(restaurantId).map(restaurant -> {
 
@@ -109,13 +148,20 @@ public class RestaurantServiceImpl implements RestaurantService {
         }).orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));
     }
 
+    @Transactional
     public String deleteRestaurant(Long restaurantId, Long ownerId) {
-        return restaurantRepository.findById(restaurantId)
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));
+        OwnershipHelper.validateOwner(ownerId, restaurant.getOwner().getId());
+        restaurantRepository.delete(restaurant);
+        logger.info("Deleted restaurant from with id " + restaurantId);
+        return "Deleted restaurant from with id " + restaurantId;
+/*        return restaurantRepository.findById(restaurantId)
                 .map(restaurant -> {
                     OwnershipHelper.validateOwner(ownerId, restaurant.getOwner().getId());
                     restaurantRepository.delete(restaurant);
                     return "Deleted restaurant from with id " + restaurantId;
-                }).orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));
+                }).orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));*/
     }
 
 }

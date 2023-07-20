@@ -25,19 +25,20 @@ public class Owner {
     @Column(name = "id")
     private Long id;
 
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private List<Item> items;
 
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private List<Menu> menus;
 
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private List<Restaurant> restaurants;
 
     @Column(name = "approved")
     private boolean approved;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @MapsId
     @JoinColumn(name = "user_id")
     private User user;
 

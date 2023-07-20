@@ -1,5 +1,7 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain;
 
+import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
+
 public enum RestaurantTheme {
     ASIAN,
     MEXICAN,
@@ -10,5 +12,14 @@ public enum RestaurantTheme {
     MEDITERRANEAN,
     VEGAN,
     SEAFOOD,
-    BBQ
+    BBQ;
+
+    public static RestaurantTheme fromString(String themeStr) {
+        for (RestaurantTheme theme : RestaurantTheme.values()) {
+            if (theme.name().equalsIgnoreCase(themeStr)) {
+                return theme;
+            }
+        }
+        throw new CustomNotFoundException("Invalid theme: " + themeStr.toUpperCase());
+    }
 }
