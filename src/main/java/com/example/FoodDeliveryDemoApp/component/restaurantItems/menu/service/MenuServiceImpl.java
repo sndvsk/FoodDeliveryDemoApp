@@ -161,6 +161,7 @@ public class MenuServiceImpl implements MenuService {
                     OwnershipHelper.validateRestaurant(restaurantId, menu.getRestaurant().getId());
 
                     menu.setRestaurant(null);
+                    menu.setVisibility(false);
                     menuRepository.save(menu);
                     return MenuDTOMapper.toDto(menu);
                 }).orElseThrow(() -> new CustomNotFoundException("Menu not found with id " + menuId));
