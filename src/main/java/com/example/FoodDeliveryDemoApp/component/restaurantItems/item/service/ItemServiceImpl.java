@@ -89,7 +89,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     public ItemDTO addItemToMenu(Long ownerId, Long menuId, Long itemId) {
-        Owner owner = ownerRepository.findById(ownerId)
+        ownerRepository.findById(ownerId)
                 .orElseThrow(() -> new CustomNotFoundException("No owner with id: " + ownerId));
 
         Menu menu = menuRepository.findById(menuId)
@@ -107,7 +107,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     public ItemDTO addItemToRestaurant(Long ownerId, Long restaurantId, Long itemId) {
-        Owner owner = ownerRepository.findById(ownerId)
+        ownerRepository.findById(ownerId)
                 .orElseThrow(() -> new CustomNotFoundException("No owner with id: " + ownerId));
 
         Restaurant restaurant = restaurantRepository.findById(restaurantId)

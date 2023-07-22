@@ -45,7 +45,7 @@ public class AuthenticationController {
     @PostMapping("/refresh-token")
     public ResponseEntity<AuthenticationResponse> refreshToken(
             HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
+            HttpServletResponse response) {
         AuthenticationResponse res = service.refreshToken(request, response);
         return new ResponseEntity<>(res, HttpStatus.OK);
     }

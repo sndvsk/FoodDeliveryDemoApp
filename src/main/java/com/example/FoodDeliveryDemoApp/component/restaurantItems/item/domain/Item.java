@@ -53,6 +53,18 @@ public class Item {
     @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
 
+/*    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "item_menu",
+            joinColumns = @JoinColumn(name = "item_id"),
+            inverseJoinColumns = @JoinColumn(name = "menu_id"))
+    private List<Menu> menus;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "item_restaurant",
+            joinColumns = @JoinColumn(name = "item_id"),
+            inverseJoinColumns = @JoinColumn(name = "restaurant_id"))
+    private List<Restaurant> restaurants;*/
+
     @ManyToMany(mappedBy = "items")
     private List<Order> orders;
 

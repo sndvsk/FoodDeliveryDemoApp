@@ -5,7 +5,7 @@ import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.doma
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.dto.RestaurantDTO;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+//import java.util.concurrent.CompletableFuture;
 
 public interface RestaurantService {
 

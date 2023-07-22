@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.nio.file.AccessDeniedException;
-import java.util.concurrent.CompletionException;
+//import java.util.concurrent.CompletionException;
 
 @ControllerAdvice
 public class DefaultExceptionHandler extends ResponseEntityExceptionHandler {

@@ -3,7 +3,6 @@ package com.example.FoodDeliveryDemoApp.exception.handlers;
 import com.example.FoodDeliveryDemoApp.exception.*;
 import com.example.FoodDeliveryDemoApp.exception.dto.RestError;
 import io.jsonwebtoken.ExpiredJwtException;
-import org.hibernate.LazyInitializationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

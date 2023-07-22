@@ -1,6 +1,5 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.owner.repository;
 
-import com.example.FoodDeliveryDemoApp.component.address.domain.Address;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.domain.Owner;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

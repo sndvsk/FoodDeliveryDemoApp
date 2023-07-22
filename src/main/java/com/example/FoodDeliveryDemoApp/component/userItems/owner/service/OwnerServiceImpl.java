@@ -4,9 +4,6 @@ import com.example.FoodDeliveryDemoApp.component.userItems.owner.repository.Owne
 import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 @Component
