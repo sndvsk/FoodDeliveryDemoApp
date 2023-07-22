@@ -133,6 +133,38 @@ public class ItemController {
         return new ResponseEntity<>(item, HttpStatus.OK);
     }
 
+    @PatchMapping(path = "/remove/menu/{menuId}")
+    @Operation(summary = "Remove item from restaurant (only admin and owner)")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
+    public ResponseEntity<ItemDTO> removeItemFromMenu(
+            @Parameter(name = "itemId", description = "Item id", example = "1")
+            @RequestParam Long itemId,
+            @Parameter(name = "ownerId", description = "Owner id", example = "1")
+            @RequestParam Long ownerId,
+            @Parameter(name = "restaurantId", description = "Restaurant id", example = "1")
+            @RequestParam Long restaurantId,
+            @Parameter(name = "menuId", description = "Menu id", example = "1")
+            @PathVariable Long menuId) {
+
+        ItemDTO item = itemService.removeItemFromMenu(itemId, ownerId, restaurantId, menuId);
+        return new ResponseEntity<>(item, HttpStatus.OK);
+    }
+
+    @PatchMapping(path = "/remove/restaurant/{restaurantId}")
+    @Operation(summary = "Remove item from restaurant (only admin and owner)")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
+    public ResponseEntity<ItemDTO> removeItemFromRestaurant(
+            @Parameter(name = "itemId", description = "Item id", example = "1")
+            @RequestParam Long itemId,
+            @Parameter(name = "ownerId", description = "Owner id", example = "1")
+            @RequestParam Long ownerId,
+            @Parameter(name = "restaurantId", description = "Restaurant id", example = "1")
+            @PathVariable Long restaurantId) {
+
+        ItemDTO item = itemService.removeItemFromRestaurant(itemId, ownerId, restaurantId);
+        return new ResponseEntity<>(item, HttpStatus.OK);
+    }
+
     @DeleteMapping(path = "/{itemId}")
     @Operation(summary = "Delete item (only admin and owner)")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")

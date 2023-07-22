@@ -129,6 +129,9 @@ public class ItemServiceImpl implements ItemService {
                              String itemIngredients, String itemAllergens) {
         return itemRepository.findById(itemId)
                 .map(item -> {
+                    restaurantRepository.findById(restaurantId)
+                            .orElseThrow(() -> new CustomNotFoundException("No restaurant with id: " + restaurantId));
+
                     OwnershipHelper.validateRestaurant(restaurantId, item.getRestaurant().getId());
                     OwnershipHelper.validateOwner(ownerId, item.getOwner().getId());
 
@@ -144,6 +147,31 @@ public class ItemServiceImpl implements ItemService {
                     return ItemDTOMapper.toDto(item);
                 })
                 .orElseThrow(() -> new CustomNotFoundException("Item not found with id " + itemId));
+    }
+
+    @Transactional
+    public ItemDTO removeItemFromMenu(Long itemId, Long ownerId, Long restaurantId, Long menuId) {
+        return itemRepository.findById(itemId)
+                .map(item -> {
+                    OwnershipHelper.validateOwner(ownerId, item.getOwner().getId());
+                    OwnershipHelper.validateRestaurant(restaurantId, item.getRestaurant().getId());
+                    OwnershipHelper.validateMenu(menuId, item.getMenu().getId());
+                    item.setMenu(null);
+                    itemRepository.save(item);
+                    return ItemDTOMapper.toDto(item);
+                }).orElseThrow(() -> new CustomNotFoundException("Item not found with id " + itemId));
+    }
+
+    @Transactional
+    public ItemDTO removeItemFromRestaurant(Long itemId, Long ownerId, Long restaurantId) {
+        return itemRepository.findById(itemId)
+                .map(item -> {
+                    OwnershipHelper.validateOwner(ownerId, item.getOwner().getId());
+                    OwnershipHelper.validateRestaurant(restaurantId, item.getRestaurant().getId());
+                    item.setRestaurant(null);
+                    itemRepository.save(item);
+                    return ItemDTOMapper.toDto(item);
+                }).orElseThrow(() -> new CustomNotFoundException("Item not found with id " + itemId));
     }
 
     @Transactional

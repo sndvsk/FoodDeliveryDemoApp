@@ -25,5 +25,9 @@ public interface ItemService {
     ItemDTO patchItem(Long itemId, Long restaurantId, Long ownerId, String itemName, String itemDesc, Double itemPrice, String itemImage,
                          String itemIngredients, String itemAllergens);
 
+    ItemDTO removeItemFromMenu(Long itemId, Long ownerId, Long restaurantId, Long menuId);
+
+    ItemDTO removeItemFromRestaurant(Long itemId, Long ownerId, Long restaurantId);
+
     String deleteItem(Long itemId, Long ownerId);
 }
