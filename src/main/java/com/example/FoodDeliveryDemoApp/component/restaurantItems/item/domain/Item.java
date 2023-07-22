@@ -67,23 +67,13 @@ public class Item {
         this.menu = menu;
     }
 
-    public Item(String name, String description, Double price, String image, String ingredients, String allergens, Restaurant restaurant) {
+    public Item(String name, String description, Double price, String image, String ingredients, String allergens, Owner owner) {
         this.name = name;
         this.description = description;
         this.price = price;
         this.image = image;
         this.ingredients = ingredients;
         this.allergens = allergens;
-        this.restaurant = restaurant;
+        this.owner = owner;
     }
-
-    public Item(String name, String description, Double price, String image, String ingredients, String allergens) {
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.image = image;
-        this.ingredients = ingredients;
-        this.allergens = allergens;
-    }
-
 }

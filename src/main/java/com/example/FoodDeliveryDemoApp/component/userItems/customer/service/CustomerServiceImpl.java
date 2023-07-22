@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Objects;
 
 @Component
 public class CustomerServiceImpl implements CustomerService {
@@ -34,10 +35,7 @@ public class CustomerServiceImpl implements CustomerService {
         User user = getUserById(userId);
         Address address = user.getCustomer().getAddress();
         //Address address = getAddressById(user.getId());
-        if (address == null) {
-            return AddressDTOMapper.toDto(new Address());
-        } else
-            return AddressDTOMapper.toDto(address);
+        return AddressDTOMapper.toDto(Objects.requireNonNullElseGet(address, Address::new));
     }
 
     @Transactional
@@ -56,6 +54,7 @@ public class CustomerServiceImpl implements CustomerService {
         return AddressDTOMapper.toDto(newAddress);
     }
 
+    @Transactional
     public AddressDTO updateAddress(Long userId, AddressDTO addressDto) {
         User user = getUserById(userId);
         Customer customer = getCustomerById(user.getId());

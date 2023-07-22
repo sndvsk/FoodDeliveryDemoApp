@@ -1,5 +1,6 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.item.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS;
 
 @Data
 @Builder
@@ -26,6 +29,7 @@ public class ItemDTO {
     @JsonProperty("price")
     private Double price;
 
+    @JsonInclude(ALWAYS)
     @JsonProperty("image")
     private String image;
 
@@ -37,5 +41,8 @@ public class ItemDTO {
 
     @JsonProperty("menu_id")
     private Long menuId;
+
+    @JsonProperty("restaurant_id")
+    private Long restaurantId;
 
 }

@@ -1,5 +1,7 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.item.service;
 
+import com.example.FoodDeliveryDemoApp.component.userItems.owner.domain.Owner;
+import com.example.FoodDeliveryDemoApp.component.userItems.owner.repository.OwnerRepository;
 import com.example.FoodDeliveryDemoApp.component.utils.OwnershipHelper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Item;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.dto.ItemDTO;
@@ -11,6 +13,7 @@ import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.doma
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.repository.RestaurantRepository;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,13 +24,15 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final MenuRepository menuRepository;
     private final RestaurantRepository restaurantRepository;
+    private final OwnerRepository ownerRepository;
 
     public ItemServiceImpl(ItemRepository itemRepository,
                            MenuRepository menuRepository,
-                           RestaurantRepository restaurantRepository) {
+                           RestaurantRepository restaurantRepository, OwnerRepository ownerRepository) {
         this.itemRepository = itemRepository;
         this.menuRepository = menuRepository;
         this.restaurantRepository = restaurantRepository;
+        this.ownerRepository = ownerRepository;
     }
 
     private void validateInputs() {
@@ -38,6 +43,7 @@ public class ItemServiceImpl implements ItemService {
 
     }
 
+    @Transactional
     public List<ItemDTO> getAllItems() {
         List<Item> items = itemRepository.findAll();
         if (items.isEmpty()) {
@@ -46,6 +52,15 @@ public class ItemServiceImpl implements ItemService {
         return ItemDTOMapper.toDtoList(items);
     }
 
+    @Transactional
+    public List<ItemDTO> getItemsByOwnerId(Long ownerId) {
+        List<Item> items = ownerRepository.findById(ownerId)
+                .map(Owner::getItems)
+                .orElseThrow(() -> new CustomNotFoundException("Owner not found with id " + ownerId));
+        return ItemDTOMapper.toDtoList(items);
+    }
+
+    @Transactional
     public List<ItemDTO> getItemsFromMenu(Long menuId) {
         List<Item> items = menuRepository.findById(menuId)
                 .map(Menu::getItems)
@@ -53,25 +68,62 @@ public class ItemServiceImpl implements ItemService {
         return ItemDTOMapper.toDtoList(items);
     }
 
+    @Transactional
     public ItemDTO getItem(Long itemId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new CustomNotFoundException("No item with id: " + itemId));
         return ItemDTOMapper.toDto(item);
     }
 
-    public ItemDTO addItem(Long restaurantId, Long ownerId,
+    @Transactional
+    public ItemDTO addItem(Long ownerId,
                            String itemName, String itemDesc, Double itemPrice, String itemImage,
                            String itemIngredients, String itemAllergens) {
+        Owner owner = ownerRepository.findById(ownerId)
+                .orElseThrow(() -> new CustomNotFoundException("No owner with id: " + ownerId));
+
+        Item item = new Item(itemName, itemDesc, itemPrice, itemImage, itemIngredients, itemAllergens, owner);
+        itemRepository.save(item);
+        return ItemDTOMapper.toDto(item);
+    }
+
+    @Transactional
+    public ItemDTO addItemToMenu(Long ownerId, Long menuId, Long itemId) {
+        Owner owner = ownerRepository.findById(ownerId)
+                .orElseThrow(() -> new CustomNotFoundException("No owner with id: " + ownerId));
+
+        Menu menu = menuRepository.findById(menuId)
+                .orElseThrow(() -> new CustomNotFoundException("No menu with id: " + menuId));
+
+        OwnershipHelper.validateOwner(ownerId, menu.getOwner().getId());
+
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new CustomNotFoundException("No item with id: " + itemId));
+
+        item.setMenu(menu);
+        itemRepository.save(item);
+        return ItemDTOMapper.toDto(item);
+    }
+
+    @Transactional
+    public ItemDTO addItemToRestaurant(Long ownerId, Long restaurantId, Long itemId) {
+        Owner owner = ownerRepository.findById(ownerId)
+                .orElseThrow(() -> new CustomNotFoundException("No owner with id: " + ownerId));
+
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new CustomNotFoundException("No restaurant with id: " + restaurantId));
 
         OwnershipHelper.validateOwner(ownerId, restaurant.getOwner().getId());
 
-        Item item = new Item(itemName, itemDesc, itemPrice, itemImage, itemIngredients, itemAllergens, restaurant);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new CustomNotFoundException("No item with id: " + itemId));
+
+        item.setRestaurant(restaurant);
         itemRepository.save(item);
         return ItemDTOMapper.toDto(item);
     }
 
+    @Transactional
     public ItemDTO patchItem(Long itemId, Long restaurantId, Long ownerId,
                              String itemName, String itemDesc, Double itemPrice, String itemImage,
                              String itemIngredients, String itemAllergens) {
@@ -94,6 +146,7 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new CustomNotFoundException("Item not found with id " + itemId));
     }
 
+    @Transactional
     public String deleteItem(Long itemId, Long ownerId) {
         return itemRepository.findById(itemId)
                 .map(item -> {

@@ -5,6 +5,8 @@ import com.example.FoodDeliveryDemoApp.component.userItems.customer.domain.Custo
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Objects;
+
 @Builder
 @Getter
 @Setter
@@ -45,7 +47,29 @@ public class Address {
     private Customer customer;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "restaurant_id", referencedColumnName = "id")
+    @JoinColumn(name = "restaurant_id", referencedColumnName = "id", unique = true)
     private Restaurant restaurant;
 
+    public void update(Address newAddress) {
+        this.setStreet(newAddress.getStreet());
+        this.setCity(newAddress.getCity());
+        this.setCounty(newAddress.getCounty());
+        this.setCountry(newAddress.getCountry());
+        this.setZipCode(newAddress.getZipCode());
+        this.setHouseNumber(newAddress.getHouseNumber());
+        this.setAptNumber(newAddress.getAptNumber());
+    }
+
+    // prevent the creation of new address instance in the repository
+    public boolean isAddressEqual(Address other) {
+        if (other == null) return false;
+
+        return Objects.equals(street, other.street) &&
+                Objects.equals(city, other.city) &&
+                Objects.equals(county, other.county) &&
+                Objects.equals(country, other.country) &&
+                Objects.equals(zipCode, other.zipCode) &&
+                Objects.equals(houseNumber, other.houseNumber) &&
+                Objects.equals(aptNumber, other.aptNumber);
+    }
 }

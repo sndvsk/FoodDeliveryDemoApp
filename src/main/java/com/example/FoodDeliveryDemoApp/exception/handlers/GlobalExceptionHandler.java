@@ -3,6 +3,7 @@ package com.example.FoodDeliveryDemoApp.exception.handlers;
 import com.example.FoodDeliveryDemoApp.exception.*;
 import com.example.FoodDeliveryDemoApp.exception.dto.RestError;
 import io.jsonwebtoken.ExpiredJwtException;
+import org.hibernate.LazyInitializationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -70,6 +71,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         RestError re = new RestError(HttpStatus.FORBIDDEN.value(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(re);
     }
+
+/*    @ExceptionHandler(Exception.class)
+    @ResponseBody
+    public ResponseEntity<RestError> handleAllOtherExceptions(Exception ex) {
+        logger.error("An unexpected error occurred", ex); // Log the actual error details for your own review
+        String error = "An unexpected error occurred. Please contact the maintainer of the site";
+        RestError re = new RestError(HttpStatus.INTERNAL_SERVER_ERROR.value(), error);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(re);
+    }*/
 
     @ExceptionHandler(CompletionException.class)
     @ResponseBody

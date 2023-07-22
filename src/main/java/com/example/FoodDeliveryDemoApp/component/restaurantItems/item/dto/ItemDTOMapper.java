@@ -2,6 +2,7 @@ package com.example.FoodDeliveryDemoApp.component.restaurantItems.item.dto;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Item;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,14 +18,28 @@ public class ItemDTOMapper {
         dto.setImage(item.getImage());
 
         String ingredients = item.getIngredients();
-        List<String> ingredientsList = Arrays.asList(ingredients.split(","));
-        dto.setIngredients(ingredientsList);
+        if (ingredients != null) {
+            List<String> ingredientsList = Arrays.asList(ingredients.split(","));
+            dto.setIngredients(ingredientsList);
+        } else {
+            dto.setIngredients(new ArrayList<>());
+        }
 
-        String allergens = item.getIngredients();
-        List<String> allergensList = Arrays.asList(allergens.split(","));
-        dto.setAllergens(allergensList);
+        String allergens = item.getAllergens();
+        if (allergens != null) {
+            List<String> allergensList = Arrays.asList(allergens.split(","));
+            dto.setAllergens(allergensList);
+        } else {
+            dto.setAllergens(new ArrayList<>());
+        }
 
-        dto.setMenuId(item.getMenu().getId());
+        if (item.getMenu() != null) {
+            dto.setMenuId(item.getMenu().getId());
+        }
+
+        if (item.getRestaurant() != null) {
+            dto.setRestaurantId(item.getRestaurant().getId());
+        }
         return dto;
     }
 

@@ -16,6 +16,7 @@ import com.example.FoodDeliveryDemoApp.component.userItems.customer.repository.C
 import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -75,7 +76,7 @@ public class OrderServiceImpl implements OrderService {
         return OrderDTOMapper.toDtoList(orders);
     }
 
-
+    @Transactional
     public List<OrderDTO> getOrdersByRestaurantId(Long restaurantId, Long ownerId) {
         // Fetch restaurant first
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
@@ -85,6 +86,7 @@ public class OrderServiceImpl implements OrderService {
         return OrderDTOMapper.toDtoList(orders);
     }
 
+    @Transactional
     public List<OrderDTO> getOrdersByRestaurantIdAndCustomerId(Long restaurantId, Long ownerId, Long customerId) {
         // Fetch restaurant first
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
@@ -102,7 +104,7 @@ public class OrderServiceImpl implements OrderService {
         return OrderDTOMapper.toDtoList(customerOrders);
     }
 
-
+    @Transactional
     public OrderDTO createOrder(Long customerId, Long restaurantId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomNotFoundException("Customer not found with id " + customerId));
@@ -118,6 +120,7 @@ public class OrderServiceImpl implements OrderService {
         return OrderDTOMapper.toDto(order);
     }
 
+    @Transactional
     public OrderDTO updateOrder(Long id, String city, String vehicleType, String items, Long customerId) {
         return orderRepository.findById(id)
                 .map(order -> {
@@ -160,12 +163,13 @@ public class OrderServiceImpl implements OrderService {
                 .sum();
     }
 
-    public Double calculateOrderItemPrice(Order order) {
+    private Double calculateOrderItemPrice(Order order) {
         return order.getItems().stream()
                 .mapToDouble(Item::getPrice)
                 .sum();
     }
 
+    @Transactional
     public String deleteOrder(Long id) {
         Optional<Order> orderOptional = orderRepository.findById(id);
         if (orderOptional.isPresent()) {

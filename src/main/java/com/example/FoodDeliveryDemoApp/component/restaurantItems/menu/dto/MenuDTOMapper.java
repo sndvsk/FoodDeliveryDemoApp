@@ -13,9 +13,12 @@ public class MenuDTOMapper {
         MenuDTO dto = new MenuDTO();
         dto.setId(menu.getId());
         dto.setName(menu.getName());
-        dto.setHidden(menu.getHidden().name());
+        dto.setVisibility(String.valueOf(menu.isVisibility()));
         dto.setOwnerId(menu.getOwner().getId());
-        dto.setRestaurantId(menu.getRestaurant().getId());
+
+        if (menu.getRestaurant() != null) {
+            dto.setRestaurantId(menu.getRestaurant().getId());
+        }
         List<ItemDTO> items = menu.getItems().stream()
                 .map(ItemDTOMapper::toDto)
                 .collect(Collectors.toList());

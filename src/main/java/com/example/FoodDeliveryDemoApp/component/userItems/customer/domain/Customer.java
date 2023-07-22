@@ -23,8 +23,7 @@ import java.util.List;
 public class Customer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "user_id")
     private Long id;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)

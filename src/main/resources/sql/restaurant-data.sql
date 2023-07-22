@@ -19,12 +19,12 @@ VALUES
 
 -- menus.sql
 
-INSERT INTO menus(name, hidden, restaurant_id, owner_id)
-VALUES ('Asian Menu', 'YES', 1, 2),
-       ('Mexican Menu', 'YES', 2, 3),
-       ('Italian Menu', 'YES', 3, 4),
-       ('French Menu', 'YES', 4, 5),
-       ('American Menu', 'YES', 5, 6);
+INSERT INTO menus(name, visibility, restaurant_id, owner_id)
+VALUES ('Asian Menu', true, 1, 2),
+       ('Mexican Menu', true, 2, 3),
+       ('Italian Menu', true, 3, 4),
+       ('French Menu', true, 4, 5),
+       ('American Menu', true, 5, 6);
 
 -- items.sql
 

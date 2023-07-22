@@ -9,6 +9,8 @@ public interface MenuService {
 
     List<MenuDTO> getAllMenus();
 
+    List<MenuDTO> getMenusByOwnerId(Long ownerId);
+
     MenuDTO getMenuById(Long menuId);
 
     List<MenuDTO> getMenusOfRestaurant(Long restaurantId);
@@ -19,9 +21,9 @@ public interface MenuService {
 
     MenuDTO addMenuToRestaurant(Long menuId, Long restaurantId, Long ownerId);
 
-    MenuDTO makeMenuVisible(Long menuId, Long ownerId);
+    MenuDTO toggleMenuVisibility(Long menuId, Long ownerId);
 
-    MenuDTO patchMenuInRestaurant(Long menuId, String menuName, Long restaurantId, Long ownerId);
+    MenuDTO patchMenu(Long menuId, String menuName, Long ownerId);
 
     String deleteMenuFromRestaurant(Long menuId, Long restaurantId, Long ownerId);
 

@@ -29,6 +29,17 @@ public class ItemController {
         return new ResponseEntity<>(items, HttpStatus.OK);
     }
 
+    @GetMapping(path = "/owner/{ownerId}")
+    @Operation(summary = "Get all items by owner id")
+    public ResponseEntity<List<ItemDTO>> getItemsByOwnerId(
+            @Parameter(name = "ownerId", description = "Owner id", example = "1")
+            @PathVariable(value = "ownerId") Long ownerId) {
+
+        List<ItemDTO> items = itemService.getItemsByOwnerId(ownerId);
+
+        return new ResponseEntity<>(items, HttpStatus.OK);
+    }
+
     @GetMapping(path = "/restaurant/menu/{restaurantMenuId}")
     @Operation(summary = "Get all items from menu")
     public ResponseEntity<List<ItemDTO>> getItemsFromRestaurantMenu(
@@ -51,16 +62,14 @@ public class ItemController {
         return new ResponseEntity<>(items, HttpStatus.OK);
     }
 
-    @PostMapping(path = "/add/restaurant/{restaurantId}")
+    @PostMapping(path = "/add/{ownerId}")
     @Operation(summary = "Add item (only admin and owner)")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
     public ResponseEntity<ItemDTO> addItem(
-            @PathVariable Long restaurantId,
-            @RequestParam Long ownerId,
+            @PathVariable Long ownerId,
             @RequestBody ItemDTO itemDto) {
 
         ItemDTO item = itemService.addItem(
-                restaurantId,
                 ownerId,
                 itemDto.getName(),
                 itemDto.getDescription(),
@@ -73,13 +82,39 @@ public class ItemController {
         return new ResponseEntity<>(item, HttpStatus.CREATED);
     }
 
-    @PatchMapping(path = "/patch/restaurant/{restaurantId}/{itemId}")
+    @PostMapping(path = "/add/menu/{menuId}")
+    @Operation(summary = "Add item (only admin and owner)")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
+    public ResponseEntity<ItemDTO> addItemToMenu(
+            @PathVariable Long menuId,
+            @RequestParam Long ownerId,
+            @RequestParam Long itemId) {
+
+        ItemDTO item = itemService.addItemToMenu(ownerId, menuId, itemId);
+
+        return new ResponseEntity<>(item, HttpStatus.CREATED);
+    }
+
+    @PostMapping(path = "/add/restaurant/{restaurantId}")
+    @Operation(summary = "Add item (only admin and owner)")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
+    public ResponseEntity<ItemDTO> addItemToRestaurant(
+            @PathVariable Long restaurantId,
+            @RequestParam Long ownerId,
+            @RequestParam Long itemId) {
+
+        ItemDTO item = itemService.addItemToRestaurant(ownerId, restaurantId, itemId);
+
+        return new ResponseEntity<>(item, HttpStatus.CREATED);
+    }
+
+    @PatchMapping(path = "/patch/{itemId}")
     @Operation(summary = "Patch item (only admin and owner)")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
     public ResponseEntity<ItemDTO> patchItem(
             @Parameter(name = "itemId", description = "Item id", example = "1")
             @PathVariable Long itemId,
-            @PathVariable Long restaurantId,
+            @RequestParam Long restaurantId,
             @RequestParam Long ownerId,
             @RequestBody ItemDTO itemDto) {
 

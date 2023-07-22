@@ -28,9 +28,9 @@ public class Menu {
     @Column(name = "name")
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "hidden")
-    private MenuHidden hidden;
+    //@Enumerated(EnumType.STRING)
+    @Column(name = "visibility")
+    private boolean visibility;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")

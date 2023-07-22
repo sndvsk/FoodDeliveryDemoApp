@@ -20,7 +20,6 @@ import com.example.FoodDeliveryDemoApp.security.jwt.JwtService;
 import com.example.FoodDeliveryDemoApp.security.token.Token;
 import com.example.FoodDeliveryDemoApp.security.token.TokenType;
 import com.example.FoodDeliveryDemoApp.security.token.TokenRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -36,7 +35,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.List;
@@ -221,9 +219,8 @@ public class AuthenticationService {
     }
 
     public User getUserByUsername(String username) {
-        User user = userRepository.findByUsername(username)
+        return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("No such user with username: " + username));
-        return user;
     }
 
     private void saveUserToken(User user, String jwtToken) {
@@ -252,7 +249,7 @@ public class AuthenticationService {
         tokenRepository.saveAll(validUserTokens);
     }
 
-    public AuthenticationResponse refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public AuthenticationResponse refreshToken(HttpServletRequest request, HttpServletResponse response) {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         final String refreshToken;
         final String userName;

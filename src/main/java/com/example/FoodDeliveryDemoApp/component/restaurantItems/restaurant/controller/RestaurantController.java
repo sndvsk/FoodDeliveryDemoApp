@@ -1,6 +1,5 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.controller;
 
-import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTO;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.RestaurantTheme;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.dto.RestaurantDTO;
 import org.springframework.http.HttpStatus;
@@ -39,6 +38,12 @@ public class RestaurantController {
     public ResponseEntity<List<RestaurantDTO>> getRestaurantsByTheme(@PathVariable String theme) {
         List<RestaurantDTO> restaurantList = restaurantService.getRestaurantsByTheme(theme);
         return new ResponseEntity<>(restaurantList, HttpStatus.OK);
+    }
+
+    @GetMapping("/{restaurantId}")
+    public ResponseEntity<RestaurantDTO> getRestaurant(@PathVariable Long restaurantId) {
+        RestaurantDTO restaurant = restaurantService.getRestaurant(restaurantId);
+        return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
     @PostMapping("/create/{ownerId}")

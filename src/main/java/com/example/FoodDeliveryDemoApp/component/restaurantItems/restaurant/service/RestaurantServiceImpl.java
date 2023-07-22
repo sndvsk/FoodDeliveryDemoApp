@@ -60,6 +60,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     }
 
+    @Transactional
     public List<RestaurantDTO> getAllRestaurants() {
         List<RestaurantDTO> restaurants = restaurantRepository.findAll()
                 .stream()
@@ -86,6 +87,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         }
     }
 
+    @Transactional
     public List<RestaurantDTO> getRestaurantsByTheme(String theme) {
         RestaurantTheme parsedTheme = RestaurantTheme.fromString(theme);
         List<RestaurantDTO> restaurants = restaurantRepository.findByTheme(parsedTheme)
@@ -97,6 +99,14 @@ public class RestaurantServiceImpl implements RestaurantService {
         return restaurants;
     }
 
+    @Transactional
+    public RestaurantDTO getRestaurant(Long restaurantId) {
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));
+        return RestaurantDTOMapper.toDto(restaurant);
+    }
+
+    @Transactional
     public RestaurantDTO createRestaurant(Long ownerId, String name, String desc, RestaurantTheme theme,
                                           String phone, String image, AddressDTO addressGiven) {
         return ownerRepository.findOwnerByUserId(ownerId)
@@ -125,6 +135,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     }*/
 
 
+    @Transactional
     public RestaurantDTO updateRestaurant(Long restaurantId, Long ownerId, String name, String desc,
                                           RestaurantTheme theme, String phone, String image, AddressDTO addressDTO) {
         return restaurantRepository.findById(restaurantId).map(restaurant -> {
@@ -139,7 +150,9 @@ public class RestaurantServiceImpl implements RestaurantService {
 
             if (addressDTO != null) {
                 Address newAddress = AddressDTOMapper.toEntity(addressDTO, restaurant);
-                restaurant.setAddress(newAddress);
+                if(!restaurant.getAddress().isAddressEqual(newAddress)){
+                    restaurant.getAddress().update(newAddress); // You would need to implement this update method in Address
+                }
             }
 
             Restaurant updatedRestaurant = restaurantRepository.save(restaurant);
@@ -163,5 +176,7 @@ public class RestaurantServiceImpl implements RestaurantService {
                     return "Deleted restaurant from with id " + restaurantId;
                 }).orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));*/
     }
+
+
 
 }

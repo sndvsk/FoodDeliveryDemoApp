@@ -21,8 +21,8 @@ public class MenuDTO {
     @JsonProperty("name")
     private String name;
 
-    @JsonProperty("hidden")
-    private String hidden;
+    @JsonProperty("visibility")
+    private String visibility;
 
     @JsonProperty("owner_id")
     private Long ownerId;

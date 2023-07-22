@@ -15,6 +15,8 @@ public interface RestaurantService {
 
     List<RestaurantDTO> getRestaurantsByTheme(String theme);
 
+    RestaurantDTO getRestaurant(Long restaurantId);
+
     RestaurantDTO createRestaurant(Long ownerId, String name, String desc, RestaurantTheme theme, String phone,
                                    String image, AddressDTO address);
 

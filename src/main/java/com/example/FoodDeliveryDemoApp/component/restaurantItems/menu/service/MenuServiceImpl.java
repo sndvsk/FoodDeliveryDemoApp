@@ -5,7 +5,6 @@ import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.dto.ItemDT
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.dto.ItemDTOMapper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.repository.ItemRepository;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.domain.Menu;
-import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.domain.MenuHidden;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.dto.MenuDTO;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.dto.MenuDTOMapper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.repository.MenuRepository;
@@ -47,6 +46,7 @@ public class MenuServiceImpl implements MenuService {
 
     }
 
+    @Transactional
     public List<MenuDTO> getAllMenus() {
         List<Menu> listOfMenus = menuRepository.findAll();
         if (listOfMenus.isEmpty()) {
@@ -55,6 +55,15 @@ public class MenuServiceImpl implements MenuService {
         return MenuDTOMapper.toDtoList(listOfMenus);
     }
 
+    @Transactional
+    public List<MenuDTO> getMenusByOwnerId(Long ownerId) {
+        List<Menu> menus = ownerRepository.findById(ownerId)
+                .map(Owner::getMenus)
+                .orElseThrow(() -> new CustomNotFoundException("Owner not found with id " + ownerId));
+        return MenuDTOMapper.toDtoList(menus);
+    }
+
+    @Transactional
     public MenuDTO getMenuById(Long menuId) {
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new CustomNotFoundException("Menu not found with id " + menuId));
@@ -69,17 +78,19 @@ public class MenuServiceImpl implements MenuService {
         return MenuDTOMapper.toDtoList(menus);
     }
 
+    @Transactional
     public MenuDTO addMenu(Long ownerId, String menuName) {
         Owner owner = ownerRepository.findById(ownerId)
                 .orElseThrow(() -> new CustomNotFoundException("Owner not found with id " + ownerId));
         Menu menu = new Menu();
         menu.setName(menuName);
-        menu.setHidden(MenuHidden.YES);
+        menu.setVisibility(false);
         menu.setOwner(owner);
         menuRepository.save(menu);
         return MenuDTOMapper.toDto(menu);
     }
 
+    @Transactional
     public ItemDTO addItemToMenu(Long itemId, Long menuId, Long restaurantId, Long ownerId) {
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new CustomNotFoundException("Menu not found with id " + menuId));
@@ -94,9 +105,9 @@ public class MenuServiceImpl implements MenuService {
         }).orElseThrow(() -> new CustomNotFoundException("Item not found with id " + itemId));
     }
 
+    @Transactional
     public MenuDTO addMenuToRestaurant(Long menuId, Long restaurantId, Long ownerId) {
-        Optional<Menu> optionalMenu = menuRepository.findById(menuId);
-        Menu menu = optionalMenu
+        Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new CustomNotFoundException("Menu not found with id " + menuId));
 
         OwnershipHelper.validateOwner(ownerId, menu.getOwner().getId());
@@ -110,28 +121,30 @@ public class MenuServiceImpl implements MenuService {
         return MenuDTOMapper.toDto(menu);
     }
 
-    public MenuDTO makeMenuVisible(Long menuId, Long ownerId) {
+    @Transactional
+    public MenuDTO toggleMenuVisibility(Long menuId, Long ownerId) {
         return menuRepository.findById(menuId)
                 .map(menu -> {
                     OwnershipHelper.validateOwner(ownerId, menu.getOwner().getId());
-                    menu.setHidden(MenuHidden.NO);
+                    menu.setVisibility(!menu.isVisibility());
                     menuRepository.save(menu);
                     return MenuDTOMapper.toDto(menu);
                 })
                 .orElseThrow(() -> new CustomBadRequestException("Unexpected error. Menu was not updated."));
     }
 
-    public MenuDTO patchMenuInRestaurant(Long menuId, String menuName, Long restaurantId, Long ownerId) {
+    @Transactional
+    public MenuDTO patchMenu(Long menuId, String menuName, Long ownerId) {
         return menuRepository.findById(menuId).map(menu -> {
-            Long expectedRestaurantId = menu.getRestaurant().getId();
+            /*Long expectedRestaurantId = menu.getRestaurant().getId();
             if (!expectedRestaurantId.equals(restaurantId)) {
                 throw new CustomBadRequestException(
                         String.format("Id of restaurant is wrong. Expected: %s, provided: %s",
                                 expectedRestaurantId, restaurantId));
-            }
+            }*/
 
             OwnershipHelper.validateOwner(ownerId, menu.getOwner().getId());
-            OwnershipHelper.validateRestaurant(restaurantId, menu.getRestaurant().getId());
+            //OwnershipHelper.validateRestaurant(restaurantId, menu.getRestaurant().getId());
 
             Optional.ofNullable(menuName).ifPresent(menu::setName);
 
@@ -140,10 +153,12 @@ public class MenuServiceImpl implements MenuService {
         }).orElseThrow(() -> new CustomNotFoundException("Menu not found with id " + menuId));
     }
 
+    @Transactional
     public String deleteMenuFromRestaurant(Long menuId, Long restaurantId, Long ownerId) {
         return menuRepository.findById(menuId)
                 .map(menu -> {
                     OwnershipHelper.validateOwner(ownerId, menu.getOwner().getId());
+                    OwnershipHelper.validateRestaurant(restaurantId, menu.getRestaurant().getId());
 
                     menu.setRestaurant(null);
                     menuRepository.save(menu);
@@ -151,6 +166,7 @@ public class MenuServiceImpl implements MenuService {
                 }).orElseThrow(() -> new CustomNotFoundException("Menu not found with id " + menuId));
     }
 
+    @Transactional
     public String deleteMenu(Long menuId, Long ownerId) {
         return menuRepository.findById(menuId)
                 .map(menu -> {

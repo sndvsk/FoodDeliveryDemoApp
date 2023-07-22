@@ -31,6 +31,16 @@ public class MenuController {
         return new ResponseEntity<>(menus, HttpStatus.OK);
     }
 
+    @GetMapping(path = "/owner/{ownerId}")
+    @Operation(summary = "Get all menus of a restaurant")
+    public ResponseEntity<List<MenuDTO>> getMenusByOwnerId(
+            @Parameter(name = "ownerId", description = "Owner id", example = "1")
+            @PathVariable(value = "ownerId") Long ownerId) {
+
+        List<MenuDTO> menus = menuService.getMenusByOwnerId(ownerId);
+        return new ResponseEntity<>(menus, HttpStatus.OK);
+    }
+
     @GetMapping(path = "/restaurant/{restaurantId}")
     @Operation(summary = "Get all menus of a restaurant")
     public ResponseEntity<List<MenuDTO>> getMenusOfRestaurant(
@@ -96,33 +106,31 @@ public class MenuController {
         return new ResponseEntity<>(menu, HttpStatus.CREATED);
     }
 
-    @PatchMapping(path = "/{menuId}")
+    @PatchMapping(path = "/visibility/{menuId}")
     @Operation(summary = "Delete menu from restaurant")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
-    public ResponseEntity<MenuDTO> makeMenuVisible(
+    public ResponseEntity<MenuDTO> toggleMenuVisibility(
             @Parameter(name = "menuId", description = "Menu id", example = "1")
             @PathVariable Long menuId,
             @Parameter(name = "ownerId", description = "Owner id", example = "1")
             @RequestParam Long ownerId) {
 
-        MenuDTO response = menuService.makeMenuVisible(menuId, ownerId);
+        MenuDTO response = menuService.toggleMenuVisibility(menuId, ownerId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PatchMapping(path = "/restaurant/{restaurantId}/{menuId}")
+    @PatchMapping(path = "/{menuId}")
     @Operation(summary = "Update menu in restaurant (only admin and owner)")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
-    public ResponseEntity<MenuDTO> patchMenuInRestaurant(
+    public ResponseEntity<MenuDTO> patchMenu(
             @Parameter(name = "menuId", description = "Menu id", example = "1")
             @PathVariable Long menuId,
             @Parameter(name = "menuName", description = "Menu name", example = "Burger menu")
             @RequestParam String menuName,
             @Parameter(name = "ownerId", description = "Owner id", example = "1")
-            @RequestParam Long ownerId,
-            @Parameter(name = "restaurantMenuId", description = "Restaurant menu id", example = "1")
-            @PathVariable(value = "restaurantId") Long restaurantMenuId) {
+            @RequestParam Long ownerId) {
 
-        MenuDTO menu = menuService.patchMenuInRestaurant(menuId, menuName, restaurantMenuId, ownerId);
+        MenuDTO menu = menuService.patchMenu(menuId, menuName, ownerId);
         return new ResponseEntity<>(menu, HttpStatus.OK);
     }
 

@@ -19,8 +19,7 @@ import lombok.experimental.SuperBuilder;
 public class Admin {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "user_id")
     private Long id;
 
     @Column(name = "level")

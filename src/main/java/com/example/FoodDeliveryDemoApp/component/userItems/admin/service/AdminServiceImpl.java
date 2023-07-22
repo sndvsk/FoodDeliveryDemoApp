@@ -9,6 +9,7 @@ import com.example.FoodDeliveryDemoApp.component.userItems.owner.repository.Owne
 import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -30,6 +31,7 @@ public class AdminServiceImpl implements AdminService {
         this.customerRepository = customerRepository;
     }
 
+    @Transactional
     public String approveOwner(Long ownerId) {
         Owner owner = getOwnerById(ownerId);
         owner.setApproved(true);
@@ -50,6 +52,7 @@ public class AdminServiceImpl implements AdminService {
                 .orElseThrow(() -> new CustomNotFoundException("Owner not found with ID: " + ownerId));
     }
 
+    @Transactional
     public List<OwnerDTO> getOwnersWithApprovalStatus(boolean approved) {
         List<Owner> owners = ownerRepository.findByApproved(approved)
                 .orElseThrow(() -> new CustomNotFoundException("No unapproved owners"));
