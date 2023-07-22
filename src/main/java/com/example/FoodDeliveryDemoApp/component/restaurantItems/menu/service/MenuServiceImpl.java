@@ -154,7 +154,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Transactional
-    public String deleteMenuFromRestaurant(Long menuId, Long restaurantId, Long ownerId) {
+    public MenuDTO removeMenuFromRestaurant(Long menuId, Long restaurantId, Long ownerId) {
         return menuRepository.findById(menuId)
                 .map(menu -> {
                     OwnershipHelper.validateOwner(ownerId, menu.getOwner().getId());
@@ -162,7 +162,7 @@ public class MenuServiceImpl implements MenuService {
 
                     menu.setRestaurant(null);
                     menuRepository.save(menu);
-                    return "Deleted menu from restaurant with id " + menuId;
+                    return MenuDTOMapper.toDto(menu);
                 }).orElseThrow(() -> new CustomNotFoundException("Menu not found with id " + menuId));
     }
 

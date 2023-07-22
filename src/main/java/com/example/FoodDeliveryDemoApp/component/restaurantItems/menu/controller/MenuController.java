@@ -134,10 +134,10 @@ public class MenuController {
         return new ResponseEntity<>(menu, HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/restaurant/{restaurantId}/menu/{menuId}")
-    @Operation(summary = "Delete menu from restaurant")
+    @PatchMapping(path = "/restaurant/{restaurantId}/menu/{menuId}")
+    @Operation(summary = "Remove menu from restaurant")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
-    public ResponseEntity<String> deleteMenuFromRestaurant(
+    public ResponseEntity<MenuDTO> removeMenuFromRestaurant(
             @Parameter(name = "menuId", description = "Menu id", example = "1")
             @PathVariable Long menuId,
             @Parameter(name = "ownerId", description = "Owner id", example = "1")
@@ -145,8 +145,8 @@ public class MenuController {
             @Parameter(name = "restaurantMenuId", description = "Restaurant menu id", example = "1")
             @PathVariable(value = "restaurantId") Long restaurantId) {
 
-        String response = menuService.deleteMenuFromRestaurant(menuId, restaurantId, ownerId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        MenuDTO menu = menuService.removeMenuFromRestaurant(menuId, restaurantId, ownerId);
+        return new ResponseEntity<>(menu, HttpStatus.OK);
     }
 
     @DeleteMapping(path = "/{menuId}")

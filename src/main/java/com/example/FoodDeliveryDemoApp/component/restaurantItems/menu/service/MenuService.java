@@ -25,7 +25,7 @@ public interface MenuService {
 
     MenuDTO patchMenu(Long menuId, String menuName, Long ownerId);
 
-    String deleteMenuFromRestaurant(Long menuId, Long restaurantId, Long ownerId);
+    MenuDTO removeMenuFromRestaurant(Long menuId, Long restaurantId, Long ownerId);
 
     String deleteMenu(Long menuId, Long ownerId);
 }

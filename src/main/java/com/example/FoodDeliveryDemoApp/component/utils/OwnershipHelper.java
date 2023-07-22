@@ -11,6 +11,11 @@ public class OwnershipHelper {
         validateIdMatch(providedOwnerId, actualOwnerId, "Actual owner id is not matching with provided owner id.");
     }
 
+    public static void validateMenu(Long providedOwnerId, Long actualOwnerId) {
+        validateIdMatch(providedOwnerId, actualOwnerId,
+                "Actual menu id is not matching with provided menu id.");
+    }
+
     public static void validateRestaurant(Long providedOwnerId, Long actualOwnerId) {
         validateIdMatch(providedOwnerId, actualOwnerId,
                 "Actual restaurant id is not matching with provided restaurant id.");
