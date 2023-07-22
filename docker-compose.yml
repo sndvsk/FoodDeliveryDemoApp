@@ -21,25 +21,25 @@ services:
 
   postgres_db:
     container_name: food_app_db
-    image: postgres:13
+    image: postgres:15
     environment:
       - POSTGRES_DB=fd_db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123
     ports:
-      - "5432"
+      - "5433:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
 
   postgres_test_db:
     container_name: food_app_test_db
-    image: postgres:13
+    image: postgres:15
     environment:
       - POSTGRES_DB=fd_db_test
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123
     ports:
-      - "5432"
+      - "5434:5432"
     volumes:
       - test_db_data:/var/lib/postgresql/data
 

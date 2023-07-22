@@ -4,14 +4,15 @@ import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.domain
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -24,11 +25,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @BootstrapWith(SpringBootTestContextBootstrapper.class)
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@TestPropertySource(locations = "classpath:application-integration.properties")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource(locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-@Profile("test")
+@ActiveProfiles("test")
 public class DeliveryFeeControllerIT {
 
     @Autowired
@@ -36,6 +37,11 @@ public class DeliveryFeeControllerIT {
 
     @LocalServerPort
     private int port;
+
+    @Value("${host.url.test}")
+    private String hostUrl;
+
+    private final String apiUrl = "/api/v1/delivery-fee";
 
     private final HttpHeaders headers = new HttpHeaders();
 
@@ -45,7 +51,6 @@ public class DeliveryFeeControllerIT {
     }
 
     @Test
-    //@Sql("/init-data.sql")
     @Order(1)
     public void testCalculateDeliveryFee() throws InterruptedException {
         // Arrange
@@ -54,8 +59,8 @@ public class DeliveryFeeControllerIT {
 
         // Act
         ResponseEntity<DeliveryFee> response = restTemplate.exchange(
-                "http://localhost:" + port +
-                        String.format("/api/delivery-fee?city=%s&vehicleType=%s", city, vehicleType),
+                hostUrl + port + apiUrl + "?" +
+                        String.format("city=%s&vehicleType=%s", city, vehicleType),
                 HttpMethod.POST, new HttpEntity<>(null, headers), DeliveryFee.class
         );
 
@@ -91,7 +96,7 @@ public class DeliveryFeeControllerIT {
 
         // Make a request to get all delivery fees
         ResponseEntity<List<DeliveryFee>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/delivery-fee",
+                hostUrl + port + apiUrl,
                 HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
         );
         List<DeliveryFee> deliveryFeeList = response.getBody();
@@ -106,7 +111,7 @@ public class DeliveryFeeControllerIT {
             Long id, String city, String vehicleType, double deliveryFeePrice, OffsetDateTime timestamp) {
 
         ResponseEntity<DeliveryFee> response = restTemplate.exchange(
-                "http://localhost:" + port + String.format("/api/delivery-fee/%s", id),
+                hostUrl + port + apiUrl + "/" + id,
                 HttpMethod.GET, new HttpEntity<>(null, headers), DeliveryFee.class
         );
 
@@ -135,7 +140,7 @@ public class DeliveryFeeControllerIT {
         Long id = Long.MAX_VALUE;
 
         ResponseEntity<DeliveryFee> response = restTemplate.exchange(
-                "http://localhost:" + port + String.format("/api/delivery-fee/%s", id),
+                hostUrl + port + apiUrl + "/" + id,
                 HttpMethod.GET, new HttpEntity<>(null, headers), DeliveryFee.class
         );
 
@@ -149,7 +154,7 @@ public class DeliveryFeeControllerIT {
         Long id = null;
 
         ResponseEntity<DeliveryFee> response = restTemplate.exchange(
-                "http://localhost:" + port + String.format("/api/delivery-fee/%s", id),
+                hostUrl + port + apiUrl + "/" + id,
                 HttpMethod.GET, new HttpEntity<>(null, headers), DeliveryFee.class
         );
 

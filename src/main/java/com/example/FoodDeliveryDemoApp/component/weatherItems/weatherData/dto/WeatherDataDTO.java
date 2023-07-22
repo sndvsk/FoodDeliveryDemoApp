@@ -6,6 +6,8 @@ import java.time.Instant;
 import java.util.List;
 
 @SuppressWarnings("unused")
+
+//fixme rename to ExternalWeatherDataDTO and move to the according directory
 public class WeatherDataDTO {
 
     @SuppressWarnings({"unused"})

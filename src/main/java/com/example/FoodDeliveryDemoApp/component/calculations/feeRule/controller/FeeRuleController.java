@@ -20,8 +20,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @SuppressWarnings("DefaultAnnotationParam")
+@CrossOrigin
 @RestController
-@RequestMapping("/api/rules")
+@RequestMapping("/api/v1/rules")
 @Tag(name = "Rules API", description = "Endpoint for managing delivery fee calculation business rules " +
         "(base and extra fees)")
 public class FeeRuleController {

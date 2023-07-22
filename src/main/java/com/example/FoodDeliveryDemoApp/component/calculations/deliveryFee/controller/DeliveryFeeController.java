@@ -16,8 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+@CrossOrigin
 @RestController
-@RequestMapping("/api/delivery-fee")
+@RequestMapping("/api/v1/delivery-fee")
 @Tag(name = "Delivery Fee API", description = "Endpoint for calculating delivery fee")
 public class DeliveryFeeController {
 

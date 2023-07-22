@@ -3,6 +3,9 @@ package com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.domai
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -10,7 +13,9 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
-
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "delivery_fee")
 public class DeliveryFee {
@@ -40,9 +45,6 @@ public class DeliveryFee {
     @JsonProperty("timestamp")
     private OffsetDateTime rest_timestamp;
 
-    public DeliveryFee() {
-    }
-
     public DeliveryFee(String city, String vehicleType, double deliveryFee, Instant timestamp) {
         this.city = city;
         this.vehicleType = vehicleType;
@@ -50,49 +52,12 @@ public class DeliveryFee {
         this.timestamp = timestamp;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    @SuppressWarnings("unused")
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
     public void setCity(String city) {
         this.city = city.toLowerCase(Locale.ROOT);
     }
 
-    public String getVehicleType() {
-        return vehicleType;
-    }
-
     public void setVehicleType(String vehicleType) {
         this.vehicleType = vehicleType.toLowerCase(Locale.ROOT);
-    }
-
-    public double getDeliveryFee() {
-        return deliveryFee;
-    }
-
-    public void setDeliveryFee(double deliveryFee) {
-        this.deliveryFee = deliveryFee;
-    }
-
-    public Long getWeatherId() {
-        return weatherId;
-    }
-
-    public void setWeatherId(Long weatherId) {
-        this.weatherId = weatherId;
-    }
-
-    public Instant getTimestamp() {
-        return timestamp;
     }
 
     /**
@@ -108,12 +73,4 @@ public class DeliveryFee {
         this.rest_timestamp = OffsetDateTime.ofInstant(this.timestamp, ZoneId.systemDefault());
     }
 
-    public OffsetDateTime getRest_timestamp() {
-        return rest_timestamp;
-    }
-
-    @SuppressWarnings("unused")
-    public void setRest_timestamp(OffsetDateTime rest_timestamp) {
-        this.rest_timestamp = rest_timestamp;
-    }
 }

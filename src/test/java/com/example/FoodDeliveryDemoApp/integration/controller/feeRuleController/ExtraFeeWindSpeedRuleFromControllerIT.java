@@ -8,18 +8,18 @@ import okhttp3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
@@ -33,9 +33,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(locations = "classpath:application-integration.properties")
+@TestPropertySource(locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-@Profile("test")
+@ActiveProfiles("test")
 public class ExtraFeeWindSpeedRuleFromControllerIT {
 
     @Autowired
@@ -43,6 +43,11 @@ public class ExtraFeeWindSpeedRuleFromControllerIT {
 
     @LocalServerPort
     private int port;
+
+    @Value("${host.url.test}")
+    private String hostUrl;
+
+    private final String apiUrl = "/api/v1/rules/fee/extra/windspeed";
 
     private final HttpHeaders headers = new HttpHeaders();
 
@@ -52,13 +57,12 @@ public class ExtraFeeWindSpeedRuleFromControllerIT {
     }
 
     @Test
-    @Sql("/wind-rule-fix.sql")
     @Order(1)
     public void testGetAllExtraFeeWindSpeedRules() {
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
         ResponseEntity<List<ExtraFeeWindSpeedRule>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/rules/fee/extra/windspeed",
+                hostUrl + port + apiUrl,
                 HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
         );
         List<ExtraFeeWindSpeedRule> ruleList = response.getBody();
@@ -77,7 +81,6 @@ public class ExtraFeeWindSpeedRuleFromControllerIT {
     }
 
     @Test
-    @Sql("/wind-rule-fix.sql")
     @Order(2)
     public void testAddExtraFeeWindSpeedRule() throws InterruptedException, IOException {
         Double startRange = 30.0;
@@ -86,9 +89,8 @@ public class ExtraFeeWindSpeedRuleFromControllerIT {
 
         // Send a POST request to the needed endpoint
         ResponseEntity<ExtraFeeWindSpeedRule> response = restTemplate.exchange(
-                "http://localhost:" + port +
-                        String.format("/api/rules/fee/extra/" +
-                                "windspeed?startWindSpeedRange=%s&endWindSpeedRange=%s&fee=%s",
+                hostUrl + port + apiUrl + "?" +
+                        String.format("startWindSpeedRange=%s&endWindSpeedRange=%s&fee=%s",
                                 startRange, endRange, fee),
                 HttpMethod.POST, new HttpEntity<>(null, headers), ExtraFeeWindSpeedRule.class
         );
@@ -116,7 +118,6 @@ public class ExtraFeeWindSpeedRuleFromControllerIT {
         testDeleteExtraFeeWindSpeedRuleById(responseRule.getId());
     }
 
-
     public void testGetExtraFeeWindSpeedRuleById(Long id) {
         Double startRange = 30.0;
         Double endRange = 40.0;
@@ -124,7 +125,7 @@ public class ExtraFeeWindSpeedRuleFromControllerIT {
 
         // Send a GET request to the needed endpoint
         ResponseEntity<ExtraFeeWindSpeedRule> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/rules/fee/extra/windspeed/" + id,
+                hostUrl + port + apiUrl + "/" + id,
                 HttpMethod.GET, new HttpEntity<>(null, headers), ExtraFeeWindSpeedRule.class);
 
         // Assert that the API returns the created rule with a status of OK
@@ -155,7 +156,7 @@ public class ExtraFeeWindSpeedRuleFromControllerIT {
 
         OkHttpClient client = new OkHttpClient();
 
-        HttpUrl url = HttpUrl.parse("http://localhost:" + port + "/api/rules/fee/extra/windspeed/" + id);
+        HttpUrl url = HttpUrl.parse(hostUrl + port + apiUrl + "/" + id);
         assertNotNull(url);
 
         HttpUrl.Builder urlBuilder = url.newBuilder();
@@ -189,7 +190,7 @@ public class ExtraFeeWindSpeedRuleFromControllerIT {
     public void testDeleteExtraFeeWindSpeedRuleById(Long id) {
         // Send a GET request to the needed endpoint
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/rules/fee/extra/windspeed/" + id,
+                hostUrl + port + apiUrl + "/" + id,
                 HttpMethod.DELETE, new HttpEntity<>(null, headers), String.class);
 
         // Assert that the API returns the created rule with a status of OK

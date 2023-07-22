@@ -1,7 +1,13 @@
 package com.example.FoodDeliveryDemoApp.component.calculations.feeRule.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "base_fee_rules")
 public class RegionalBaseFeeRule implements FeeRule {
@@ -30,43 +36,6 @@ public class RegionalBaseFeeRule implements FeeRule {
         this.fee = fee;
     }
 
-    public RegionalBaseFeeRule() {
-
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    @SuppressWarnings("unused")
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public Long getWmoCode() {
-        return wmoCode;
-    }
-
-    public void setWmoCode(Long wmoCode) {
-        this.wmoCode = wmoCode;
-    }
-
-    public String getVehicleType() {
-        return vehicleType;
-    }
-
-    public void setVehicleType(String vehicleType) {
-        this.vehicleType = vehicleType;
-    }
-
     @Override
     public Double getFee() {
         return fee;
@@ -76,6 +45,5 @@ public class RegionalBaseFeeRule implements FeeRule {
     public void setFee(Double fee) {
         this.fee = fee;
     }
-
 
 }

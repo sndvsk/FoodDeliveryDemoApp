@@ -490,9 +490,7 @@ public class WeatherDataServiceImpl implements WeatherDataService {
      * @param weatherDataList the list of weather data to be saved
      */
     private void saveWeatherData(List<WeatherData> weatherDataList) {
-        for (WeatherData weatherData: weatherDataList) {
-            weatherDataRepository.save(weatherData);
-        }
+        weatherDataRepository.saveAll(weatherDataList);
     }
 
     /**

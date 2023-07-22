@@ -2,7 +2,13 @@ package com.example.FoodDeliveryDemoApp.component.calculations.feeRule.domain.ex
 
 import com.example.FoodDeliveryDemoApp.component.calculations.feeRule.domain.FeeRule;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "extra_fee_rules_windspeed")
 public class ExtraFeeWindSpeedRule implements FeeRule {
@@ -25,34 +31,6 @@ public class ExtraFeeWindSpeedRule implements FeeRule {
         this.startWindSpeedRange = startWindSpeedRange;
         this.endWindSpeedRange = endWindSpeedRange;
         this.fee = fee;
-    }
-
-    public ExtraFeeWindSpeedRule() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    @SuppressWarnings("unused")
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Double getStartWindSpeedRange() {
-        return startWindSpeedRange;
-    }
-
-    public void setStartWindSpeedRange(Double startWindSpeedRange) {
-        this.startWindSpeedRange = startWindSpeedRange;
-    }
-
-    public Double getEndWindSpeedRange() {
-        return endWindSpeedRange;
-    }
-
-    public void setEndWindSpeedRange(Double endWindSpeedRange) {
-        this.endWindSpeedRange = endWindSpeedRange;
     }
 
     public Double getFee() {

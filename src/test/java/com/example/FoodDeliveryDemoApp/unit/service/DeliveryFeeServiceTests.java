@@ -19,6 +19,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 //import java.time.Instant;
 //import java.time.LocalDateTime;
@@ -28,6 +31,9 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@TestPropertySource(locations = "classpath:application-test.properties")
+@ActiveProfiles("test")
+@SpringBootTest
 public class DeliveryFeeServiceTests {
 
     private DeliveryFeeService deliveryFeeService;

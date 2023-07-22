@@ -7,15 +7,16 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import okhttp3.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -34,18 +35,24 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @BootstrapWith(SpringBootTestContextBootstrapper.class)
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@TestPropertySource(locations = "classpath:application-integration.properties")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestPropertySource(locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-@Profile("test")
+@ActiveProfiles("test")
 public class WeatherDataControllerIT {
+
+    @Autowired
+    private TestRestTemplate restTemplate;
 
     @LocalServerPort
     private int port;
 
-    final TestRestTemplate restTemplate = new TestRestTemplate();
+    @Value("${host.url.test}")
+    private String hostUrl;
+
+    private final String apiUrl = "/api/v1/weather";
 
     final HttpHeaders headers = new HttpHeaders();
 
@@ -56,7 +63,7 @@ public class WeatherDataControllerIT {
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
         ResponseEntity<List<WeatherData>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/weather/cities",
+                hostUrl + port + apiUrl + "/cities",
                 HttpMethod.GET, entity, new ParameterizedTypeReference<>() {
                 }
         );
@@ -80,11 +87,11 @@ public class WeatherDataControllerIT {
     @Test
     @Order(2)
     public void testGetWeatherDataForSelectedCities() {
-
         String cities = "tallinn,tartu,pärnu";
+
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
         ResponseEntity<List<WeatherData>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/weather/cities/" + cities,
+                hostUrl + port + apiUrl + "/cities/" + cities,
                 HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
         );
         List<WeatherData> weatherDataList = response.getBody();
@@ -119,7 +126,7 @@ public class WeatherDataControllerIT {
     public void testGetAllWeatherData() {
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
         ResponseEntity<List<WeatherData>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/weather",
+                hostUrl + port + apiUrl,
                 HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
         );
         List<WeatherData> weatherDataList = response.getBody();
@@ -150,13 +157,10 @@ public class WeatherDataControllerIT {
         Double windSpeed = 25.0;
         String weatherPhenomenon = "Heavy rain";
 
-
-
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
         ResponseEntity<WeatherData> response = restTemplate.exchange(
-                "http://localhost:" + port +
-                        String.format("/api/weather" +
-                                "?stationName=%s&wmoCode=%s&airTemperature=%s&windSpeed=%s&weatherPhenomenon=%s",
+                hostUrl+ port + apiUrl + "?" +
+                        String.format("stationName=%s&wmoCode=%s&airTemperature=%s&windSpeed=%s&weatherPhenomenon=%s",
                                 stationName, wmoCode, airTemperature, windSpeed, weatherPhenomenon),
 
                 HttpMethod.POST, entity, new ParameterizedTypeReference<>() {}
@@ -205,8 +209,7 @@ public class WeatherDataControllerIT {
 
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
         ResponseEntity<WeatherData> response = restTemplate.exchange(
-                "http://localhost:" + port +
-                        String.format("/api/weather/%S", id),
+                hostUrl + port + apiUrl + "/" + id,
                 HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
         );
 
@@ -244,7 +247,7 @@ public class WeatherDataControllerIT {
 
         OkHttpClient client = new OkHttpClient();
 
-        HttpUrl url = HttpUrl.parse("http://localhost:" + port + "/api/weather/" + id);
+        HttpUrl url = HttpUrl.parse(hostUrl + port + apiUrl + "/" + id);
         assertNotNull(url);
 
         HttpUrl.Builder urlBuilder = url.newBuilder();
@@ -282,12 +285,11 @@ public class WeatherDataControllerIT {
     }
 
     public void testDeleteWeatherDataById(Long id) {
-
         String expectedResponse = String.format("Weather data with id: ´%s´ was deleted", id);
 
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/weather/" + id,
+                hostUrl + port + apiUrl + "/" + id,
                 HttpMethod.DELETE, entity, new ParameterizedTypeReference<>() {}
         );
         String weatherDataResponse = response.getBody();
@@ -305,8 +307,7 @@ public class WeatherDataControllerIT {
 
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
         ResponseEntity<WeatherData> response = restTemplate.exchange(
-                "http://localhost:" + port +
-                        String.format("/api/weather/%s", id),
+                hostUrl + port + apiUrl + "/" + id,
                 HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
         );
 
@@ -321,8 +322,7 @@ public class WeatherDataControllerIT {
 
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
         ResponseEntity<WeatherData> response = restTemplate.exchange(
-                "http://localhost:" + port +
-                        String.format("/api/weather/%s", id),
+                hostUrl + port + apiUrl + "/" + id,
                 HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
         );
 

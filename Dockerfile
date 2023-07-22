@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk-jdk
+FROM openjdk:17-jdk
 
 COPY . /app
 

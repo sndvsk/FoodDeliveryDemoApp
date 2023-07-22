@@ -36,6 +36,6 @@ build/
 .mvn
 data
 logs
-src/test/java/com/example/FoodDeliveryDemoApp/integration/repository/DatabaseCleanupTestExecutionListener.java
+src/test/java/com/example/FoodDeliveryDemoApp/integration/repository
 src/test/java/com/example/FoodDeliveryDemoApp/integration/config
 src/main/java/com/example/FoodDeliveryDemoApp/component/logger

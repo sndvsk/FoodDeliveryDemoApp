@@ -1,6 +1,5 @@
 package com.example.FoodDeliveryDemoApp.exception;
 
-
 import org.assertj.core.util.VisibleForTesting;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
