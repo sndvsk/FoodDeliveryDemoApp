@@ -1,6 +1,7 @@
 package com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.service;
 
 
+import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.dto.DeliveryFeeDTO;
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.domain.DeliveryFee;
@@ -15,9 +16,9 @@ public interface DeliveryFeeService {
     DeliveryFee getDeliveryFeeById(Long id) throws CustomNotFoundException;
 
     @SuppressWarnings("UnusedReturnValue")
-    DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType) throws CustomBadRequestException;
+    DeliveryFeeDTO calculateAndSaveDeliveryFee(String city, String vehicleType) throws CustomBadRequestException;
 
-    DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime)
+    DeliveryFeeDTO calculateAndSaveDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime)
             throws CustomBadRequestException;
 
 }

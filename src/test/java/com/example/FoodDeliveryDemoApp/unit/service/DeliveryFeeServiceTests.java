@@ -1,5 +1,6 @@
 package com.example.FoodDeliveryDemoApp.unit.service;
 
+import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.dto.DeliveryFeeDTO;
 import com.example.FoodDeliveryDemoApp.component.calculations.feeRule.domain.RegionalBaseFeeRule;
 import com.example.FoodDeliveryDemoApp.component.calculations.feeRule.domain.extraFee.ExtraFeeAirTemperatureRule;
 import com.example.FoodDeliveryDemoApp.component.calculations.feeRule.domain.extraFee.ExtraFeeWeatherPhenomenonRule;
@@ -12,7 +13,6 @@ import com.example.FoodDeliveryDemoApp.component.calculations.feeRule.service.ex
 import com.example.FoodDeliveryDemoApp.component.calculations.feeRule.service.regionalBaseFee.RegionalBaseFeeRuleService;
 import com.example.FoodDeliveryDemoApp.component.weatherItems.weatherData.service.WeatherDataService;
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
-import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.domain.DeliveryFee;
 import com.example.FoodDeliveryDemoApp.component.weatherItems.weatherData.domain.WeatherData;
 import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.repository.DeliveryFeeRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -189,7 +189,7 @@ public class DeliveryFeeServiceTests {
         doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService)
                 .getByWeatherPhenomenonName(weatherPhenomenonName);
 
-        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
+        DeliveryFeeDTO response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
 
         assertNotNull(response);
         assertEquals(deliveryFee, response.getDeliveryFee());
@@ -258,7 +258,7 @@ public class DeliveryFeeServiceTests {
         doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService)
                 .getByWeatherPhenomenonName(weatherPhenomenonName);
 
-        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
+        DeliveryFeeDTO response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
 
         assertNotNull(response);
         assertEquals(deliveryFee, response.getDeliveryFee());
@@ -326,7 +326,7 @@ public class DeliveryFeeServiceTests {
         doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService)
                 .getByWeatherPhenomenonName(weatherPhenomenonName);
 
-        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
+        DeliveryFeeDTO response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
 
         assertNotNull(response);
         assertEquals(deliveryFee, response.getDeliveryFee());
@@ -400,7 +400,7 @@ public class DeliveryFeeServiceTests {
         doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService)
                 .getByWeatherPhenomenonName(weatherPhenomenonName);
 
-        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(
+        DeliveryFeeDTO response = deliveryFeeService.calculateAndSaveDeliveryFee(
                 city.toLowerCase(Locale.ROOT), vehicleType.toLowerCase(Locale.ROOT), null);
 
         assertNotNull(response);
@@ -623,7 +623,7 @@ public class DeliveryFeeServiceTests {
         doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService)
                 .getByWeatherPhenomenonName(weatherPhenomenonName);
 
-        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
+        DeliveryFeeDTO response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
 
         assertNotNull(response);
         assertEquals(deliveryFee, response.getDeliveryFee());
@@ -693,7 +693,7 @@ public class DeliveryFeeServiceTests {
         doReturn(weatherPhenomenonRule).when(weatherPhenomenonRuleService)
                 .getByWeatherPhenomenonName(weatherPhenomenonName);
 
-        DeliveryFee response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
+        DeliveryFeeDTO response = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, null);
 
         assertNotNull(response);
         assertEquals(deliveryFee, response.getDeliveryFee());

@@ -1,5 +1,6 @@
 package com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.controller;
 
+import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.dto.DeliveryFeeDTO;
 import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.service.DeliveryFeeService;
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
@@ -40,7 +41,7 @@ public class DeliveryFeeController {
      */
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Calculate delivery fee based on city and vehicle type parameters")
-    public ResponseEntity<DeliveryFee> calculateDeliveryFee(
+    public ResponseEntity<DeliveryFeeDTO> calculateDeliveryFee(
             @Parameter(name = "city", description = "City of delivery", example = "Tallinn")
             @RequestParam String city,
             @Parameter(name = "vehicleType", description = "Vehicle type for delivery", example = "Car")
@@ -51,7 +52,7 @@ public class DeliveryFeeController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dateTime)
             throws CustomBadRequestException {
 
-        DeliveryFee responseDeliveryFee = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, dateTime);
+        DeliveryFeeDTO responseDeliveryFee = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, dateTime);
 
         return new ResponseEntity<>(responseDeliveryFee, HttpStatus.CREATED);
     }

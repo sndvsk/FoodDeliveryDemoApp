@@ -115,6 +115,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order(customer, restaurant);
         order.setStatus(OrderStatus.CREATED);
         order.setItemPrice(calculateOrderItemPrice(order));
+        order.setOrderDate(Instant.now());
         orderRepository.save(order);
 
         return OrderDTOMapper.toDto(order);

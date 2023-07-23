@@ -1,5 +1,7 @@
 package com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.service;
 
+import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.dto.DeliveryFeeDTO;
+import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.dto.DeliveryFeeDTOMapper;
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.domain.DeliveryFee;
@@ -296,7 +298,7 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * Overload of the {@link #calculateAndSaveDeliveryFee(String, String, OffsetDateTime)}method with a
      * default {@code dateTime}.
      */
-    public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType) throws CustomBadRequestException {
+    public DeliveryFeeDTO calculateAndSaveDeliveryFee(String city, String vehicleType) throws CustomBadRequestException {
         return calculateAndSaveDeliveryFee(city, vehicleType, null);
     }
 
@@ -310,7 +312,7 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * @return a DeliveryFee object with the delivery fee calculation result
      * @throws CustomBadRequestException if there is an error in the input validation or the fee calculation
      */
-    public DeliveryFee calculateAndSaveDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime)
+    public DeliveryFeeDTO calculateAndSaveDeliveryFee(String city, String vehicleType, OffsetDateTime dateTime)
             throws CustomBadRequestException {
         validateRequiredInputs(city, vehicleType);
 
@@ -322,7 +324,7 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
 
         saveDeliveryFee(returnDeliveryFee);
 
-        return returnDeliveryFee;
+        return DeliveryFeeDTOMapper.toDto(returnDeliveryFee);
 
     }
 
