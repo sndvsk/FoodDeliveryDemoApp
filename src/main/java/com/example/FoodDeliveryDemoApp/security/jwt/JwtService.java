@@ -96,4 +96,10 @@ public class JwtService {
         String username = jwt.getClaim("username").asString();
         return username;
     }
+
+    public boolean compareIncomingTokenAndId(String authorization, Long customerId) {
+        String token = authorization.substring(7);
+        Long tokenId = Long.parseLong(extractUserId(token));
+        return tokenId.equals(customerId);
+    }
 }

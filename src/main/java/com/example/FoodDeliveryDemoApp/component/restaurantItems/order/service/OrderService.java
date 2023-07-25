@@ -1,6 +1,8 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.order.service;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto.OrderDTO;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto.OrderDTOResponse;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
@@ -10,7 +12,9 @@ public interface OrderService {
 
     OrderDTO getOrderById(Long id);
 
-    List<OrderDTO> getOrdersByCustomerId(Long customerId);
+    List<OrderDTO> getOrdersByCustomerIdByAdmin(Long customerId);
+
+    List<OrderDTOResponse> getOrdersByCustomerId(String authorization, Long customerId);
 
     List<OrderDTO> getOrdersByRestaurantId(Long restaurantId, Long ownerId);
 

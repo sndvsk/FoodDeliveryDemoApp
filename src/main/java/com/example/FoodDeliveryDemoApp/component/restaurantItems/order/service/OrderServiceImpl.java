@@ -3,6 +3,7 @@ package com.example.FoodDeliveryDemoApp.component.restaurantItems.order.service;
 import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.service.DeliveryFeeService;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.OrderItem;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.OrderItemId;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto.OrderDTOResponse;
 import com.example.FoodDeliveryDemoApp.component.utils.OwnershipHelper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Item;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.repository.ItemRepository;
@@ -15,8 +16,9 @@ import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.doma
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.repository.RestaurantRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.customer.domain.Customer;
 import com.example.FoodDeliveryDemoApp.component.userItems.customer.repository.CustomerRepository;
-import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
+import com.example.FoodDeliveryDemoApp.exception.CustomAccessDeniedException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
+import com.example.FoodDeliveryDemoApp.security.jwt.JwtService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -33,20 +35,21 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ItemRepository itemRepository;
     private final CustomerRepository customerRepository;
-    private final UserRepository userRepository;
     private final RestaurantRepository restaurantRepository;
     private final DeliveryFeeService deliveryFeeService;
+    private final JwtService jwtService;
 
     public OrderServiceImpl(OrderRepository orderRepository,
                             ItemRepository itemRepository,
                             CustomerRepository customerRepository,
-                            UserRepository userRepository, RestaurantRepository restaurantRepository, DeliveryFeeService deliveryFeeService) {
+                            RestaurantRepository restaurantRepository,
+                            DeliveryFeeService deliveryFeeService, JwtService jwtService) {
         this.orderRepository = orderRepository;
         this.itemRepository = itemRepository;
         this.customerRepository = customerRepository;
-        this.userRepository = userRepository;
         this.restaurantRepository = restaurantRepository;
         this.deliveryFeeService = deliveryFeeService;
+        this.jwtService = jwtService;
     }
 
     private void validateInputs() {
@@ -57,6 +60,11 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
+    // todo
+    // add jwtService.compareIncomingTokenAndId(authorization, customerId);
+    // to necessary methods
+
+    @Transactional
     public List<OrderDTO> getAllOrders() {
         List<Order> listOfOrders = orderRepository.findAll();
         if (listOfOrders.isEmpty()) {
@@ -65,17 +73,30 @@ public class OrderServiceImpl implements OrderService {
         return OrderDTOMapper.toDtoList(listOfOrders);
     }
 
+    @Transactional
     public OrderDTO getOrderById(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new CustomNotFoundException("Order not found with id " + id));
         return OrderDTOMapper.toDto(order);
     }
 
-    public List<OrderDTO> getOrdersByCustomerId(Long userId) {
+    @Transactional
+    public List<OrderDTO> getOrdersByCustomerIdByAdmin(Long userId) {
         List<Order> orders = customerRepository.findByUserId(userId)
                 .map(Customer::getOrders)
                 .orElseThrow(() -> new CustomNotFoundException("User not found with id " + userId));
         return OrderDTOMapper.toDtoList(orders);
+    }
+
+    @Transactional
+    public List<OrderDTOResponse> getOrdersByCustomerId(String authorization, Long customerId) {
+        boolean check = jwtService.compareIncomingTokenAndId(authorization, customerId);
+        if (check) {
+            List<Order> orders = customerRepository.findByUserId(customerId)
+                    .map(Customer::getOrders)
+                    .orElseThrow(() -> new CustomNotFoundException("User not found with id " + customerId));
+            return OrderDTOMapper.toDtoResponseList(orders);
+        } else throw new CustomAccessDeniedException("Mismatch in token and id.");
     }
 
     @Transactional

@@ -1,7 +1,9 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.order.controller;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto.OrderDTO;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto.OrderDTOResponse;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.service.OrderService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,11 +37,21 @@ public class OrderController {
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 
-    @GetMapping(path = "/customer/{customerId}")
+    @GetMapping(path = "/admin/customer/{customerId}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<List<OrderDTO>> getOrdersByCustomer(
+    public ResponseEntity<List<OrderDTO>> getOrdersByCustomerByAdmin(
             @PathVariable Long customerId) {
-        List<OrderDTO> order = orderService.getOrdersByCustomerId(customerId);
+        List<OrderDTO> order = orderService.getOrdersByCustomerIdByAdmin(customerId);
+        return new ResponseEntity<>(order, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/customer/{customerId}")
+    public ResponseEntity<List<OrderDTOResponse>> getOrdersByCustomer(
+            HttpServletRequest request,
+            @PathVariable Long customerId) {
+        List<OrderDTOResponse> order = orderService.getOrdersByCustomerId(
+                request.getHeader("Authorization"),
+                customerId);
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 

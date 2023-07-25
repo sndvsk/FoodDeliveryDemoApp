@@ -41,4 +41,38 @@ public class OrderDTOMapper {
                 .collect(Collectors.toList());
     }
 
+    public static OrderDTOResponse toDtoResponse(Order order) {
+        OrderDTOResponse dto = new OrderDTOResponse();
+        dto.setId(order.getId());
+        dto.setCustomerId(order.getCustomer().getId());
+        dto.setRestaurantId(order.getRestaurant().getId());
+        dto.setRestaurantName(order.getRestaurant().getName());
+        dto.setOrderDate(OffsetDateTime.ofInstant(order.getOrderDate(), ZoneId.systemDefault()));
+        dto.setItemPrice(order.getItemPrice());
+        dto.setDeliveryFee(order.getDeliveryFee());
+        dto.setTotalPrice(order.getTotalPrice());
+        dto.setStatus(order.getStatus().name());
+
+        List<OrderItemDTOResponse> items = order.getOrderItems().stream()
+                .map(orderItem -> {
+                    OrderItemDTOResponse itemDto = new OrderItemDTOResponse();
+                    itemDto.setItemId(orderItem.getItem().getId());
+                    itemDto.setItemName(orderItem.getItem().getName()); // assuming Item class has getName() method
+                    itemDto.setQuantity(orderItem.getQuantity());
+                    itemDto.setOrderId(order.getId());
+                    return itemDto;
+                })
+                .toList();
+
+        dto.setItems(items);
+
+        return dto;
+    }
+
+    public static List<OrderDTOResponse> toDtoResponseList(List<Order> orders) {
+        return orders.stream()
+                .map(OrderDTOMapper::toDtoResponse)
+                .collect(Collectors.toList());
+    }
+
 }
