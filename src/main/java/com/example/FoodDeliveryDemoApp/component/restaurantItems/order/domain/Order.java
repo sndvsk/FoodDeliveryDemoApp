@@ -1,6 +1,5 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain;
 
-import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Item;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 import com.example.FoodDeliveryDemoApp.component.userItems.customer.domain.Customer;
 import jakarta.persistence.*;
@@ -48,13 +47,8 @@ public class Order {
     @Column(name = "status")
     private OrderStatus status;
 
-    @ManyToMany
-    @JoinTable(
-            name = "order_items",
-            joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "item_id")
-    )
-    private List<Item> items = new ArrayList<>();
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<OrderItem> orderItems = new ArrayList<>();
 
     public Order(Long id,
                  Customer customer,

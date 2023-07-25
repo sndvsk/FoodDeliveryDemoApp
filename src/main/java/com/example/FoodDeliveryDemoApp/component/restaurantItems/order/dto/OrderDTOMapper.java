@@ -1,6 +1,5 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto;
 
-import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Item;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.Order;
 
 import java.time.OffsetDateTime;
@@ -21,11 +20,18 @@ public class OrderDTOMapper {
         dto.setTotalPrice(order.getTotalPrice());
         dto.setStatus(order.getStatus().name());
 
-        List<Long> items = order.getItems().stream()
-                .map(Item::getId)
-                .collect(Collectors.toList());
+        List<OrderItemDTO> items = order.getOrderItems().stream()
+                .map(orderItem -> {
+                    OrderItemDTO itemDto = new OrderItemDTO();
+                    itemDto.setItemId(orderItem.getItem().getId());
+                    itemDto.setQuantity(orderItem.getQuantity());
+                    itemDto.setOrderId(order.getId());
+                    return itemDto;
+                })
+                .toList();
 
         dto.setItems(items);
+
         return dto;
     }
 

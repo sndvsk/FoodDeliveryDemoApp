@@ -1,7 +1,7 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.domain.Menu;
-import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.Order;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.OrderItem;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.domain.Owner;
 import jakarta.persistence.*;
@@ -65,8 +65,8 @@ public class Item {
             inverseJoinColumns = @JoinColumn(name = "restaurant_id"))
     private List<Restaurant> restaurants;*/
 
-    @ManyToMany(mappedBy = "items")
-    private List<Order> orders;
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<OrderItem> orderItems;
 
     public Item(Long id, String name, String description, Double price, String image, String ingredients, String allergens, Menu menu) {
         this.id = id;

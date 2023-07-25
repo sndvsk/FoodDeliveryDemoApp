@@ -71,14 +71,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(re);
     }
 
-/*    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(Exception.class)
     @ResponseBody
     public ResponseEntity<RestError> handleAllOtherExceptions(Exception ex) {
         logger.error("An unexpected error occurred", ex); // Log the actual error details for your own review
-        String error = "An unexpected error occurred. Please contact the maintainer of the site";
-        RestError re = new RestError(HttpStatus.INTERNAL_SERVER_ERROR.value(), error);
+/*        String error = "An unexpected error occurred. Please contact the maintainer of the site";
+        RestError re = new RestError(HttpStatus.INTERNAL_SERVER_ERROR.value(), error);*/
+        // fixme
+        // ex.message() is only for testing purposes
+        RestError re = new RestError(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(re);
-    }*/
+    }
 
     @ExceptionHandler(CompletionException.class)
     @ResponseBody

@@ -1,3 +1,4 @@
+-- todo update schema
 create schema if not exists public;
 
 create sequence if not exists base_fee_rules_id_seq;

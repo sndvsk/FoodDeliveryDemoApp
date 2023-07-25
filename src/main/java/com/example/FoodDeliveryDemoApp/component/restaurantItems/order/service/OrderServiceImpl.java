@@ -1,6 +1,8 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.order.service;
 
 import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.service.DeliveryFeeService;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.OrderItem;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.OrderItemId;
 import com.example.FoodDeliveryDemoApp.component.utils.OwnershipHelper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Item;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.repository.ItemRepository;
@@ -15,14 +17,14 @@ import com.example.FoodDeliveryDemoApp.component.userItems.customer.domain.Custo
 import com.example.FoodDeliveryDemoApp.component.userItems.customer.repository.CustomerRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -114,7 +116,6 @@ public class OrderServiceImpl implements OrderService {
 
         Order order = new Order(customer, restaurant);
         order.setStatus(OrderStatus.CREATED);
-        order.setItemPrice(calculateOrderItemPrice(order));
         order.setOrderDate(Instant.now());
         orderRepository.save(order);
 
@@ -126,28 +127,46 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findById(id)
                 .map(order -> {
                     OwnershipHelper.validateCustomer(customerId, order.getCustomer().getId());
-                    List<Item> fetchedItems = getItemsFromIds(items);
+                    Map<Long, Integer> itemsMap = getItemsAndQuantities(items);
+                    List<OrderItem> fetchedItems = getItemsFromMap(order, itemsMap);
                     return updateOrderAttributes(order, fetchedItems, city, vehicleType);
                 })
                 .map(OrderDTOMapper::toDto)
                 .orElseThrow(() -> new CustomNotFoundException("Order not found with id " + id));
     }
 
-    private List<Item> getItemsFromIds(String items) {
-        List<Long> itemIds = Arrays.stream(items.split(","))
-                .map(Long::parseLong)
-                .collect(Collectors.toList());
-        return itemRepository.findAllById(itemIds);
+    private Map<Long, Integer> getItemsAndQuantities(String items) {
+        ObjectMapper mapper = new ObjectMapper();
+        TypeReference<HashMap<Long,Integer>> typeRef = new TypeReference<>() {};
+        try {
+            Map<Long, Integer> itemsMap = mapper.readValue(items, typeRef);
+            return itemsMap;
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid items input format", e);
+        }
     }
 
-    private Order updateOrderAttributes(Order order, List<Item> fetchedItems, String city, String vehicleType) {
-        Double itemPrice = calculateItemPrice(fetchedItems);
+    private List<OrderItem> getItemsFromMap(Order order, Map<Long, Integer> itemsMap) {
+        return itemsMap.entrySet().stream()
+                .map(entry -> {
+                    Item item = itemRepository.findById(entry.getKey())
+                            .orElseThrow(() -> new CustomNotFoundException("Item not found with id " + entry.getKey()));
+                    OrderItemId orderItemId = new OrderItemId(order.getId(), item.getId());
+                    return new OrderItem(orderItemId, order, item, entry.getValue());
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public Order updateOrderAttributes(Order order, List<OrderItem> orderItems, String city, String vehicleType) {
+        Double itemPrice = calculateOrderItemPrice(orderItems);
         Double deliveryFee = deliveryFeeService.calculateAndSaveDeliveryFee(city, vehicleType, OffsetDateTime.now()).getDeliveryFee();
 
         Order updatedOrder = Order.builder()
                 .id(order.getId())
                 .customer(order.getCustomer())
-                .items(fetchedItems) // This is a new list
+                .restaurant(order.getRestaurant())
+                .orderItems(orderItems)
                 .orderDate(Instant.now())
                 .itemPrice(itemPrice)
                 .deliveryFee(deliveryFee)
@@ -155,18 +174,14 @@ public class OrderServiceImpl implements OrderService {
                 .status(OrderStatus.SUBMITTED)
                 .build();
 
+        orderItems.forEach(orderItem -> orderItem.setOrder(updatedOrder));
+
         return orderRepository.save(updatedOrder);
     }
 
-    private Double calculateItemPrice(List<Item> items) {
-        return items.stream()
-                .mapToDouble(Item::getPrice)
-                .sum();
-    }
-
-    private Double calculateOrderItemPrice(Order order) {
-        return order.getItems().stream()
-                .mapToDouble(Item::getPrice)
+    private Double calculateOrderItemPrice(List<OrderItem> orderItems) {
+        return orderItems.stream()
+                .mapToDouble(orderItem -> orderItem.getItem().getPrice() * orderItem.getQuantity())
                 .sum();
     }
 

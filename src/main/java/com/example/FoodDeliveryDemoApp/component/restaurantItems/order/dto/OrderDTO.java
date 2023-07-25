@@ -40,6 +40,6 @@ public class OrderDTO {
     private String status;
 
     @JsonProperty("items")
-    private List<Long> items;
+    private List<OrderItemDTO> items;
 
 }
