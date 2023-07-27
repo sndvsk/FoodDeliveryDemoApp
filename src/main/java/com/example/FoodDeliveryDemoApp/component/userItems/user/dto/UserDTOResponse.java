@@ -1,6 +1,5 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.user.dto;
 
-import com.example.FoodDeliveryDemoApp.component.userItems.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
