@@ -65,27 +65,27 @@ public class OrderServiceImpl implements OrderService {
     // to necessary methods
 
     @Transactional
-    public List<OrderDTO> getAllOrders() {
-        List<Order> listOfOrders = orderRepository.findAll();
-        if (listOfOrders.isEmpty()) {
+    public List<OrderDTOResponse> getAllOrders() {
+        List<Order> orders = orderRepository.findAll();
+        if (orders.isEmpty()) {
             throw new CustomNotFoundException("No orders in the database.");
         }
-        return OrderDTOMapper.toDtoList(listOfOrders);
+        return OrderDTOMapper.toDtoResponseList(orders);
     }
 
     @Transactional
-    public OrderDTO getOrderById(Long id) {
+    public OrderDTOResponse getOrderById(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new CustomNotFoundException("Order not found with id " + id));
-        return OrderDTOMapper.toDto(order);
+        return OrderDTOMapper.toDtoResponse(order);
     }
 
     @Transactional
-    public List<OrderDTO> getOrdersByCustomerIdByAdmin(Long userId) {
+    public List<OrderDTOResponse> getOrdersByCustomerIdByAdmin(Long userId) {
         List<Order> orders = customerRepository.findByUserId(userId)
                 .map(Customer::getOrders)
                 .orElseThrow(() -> new CustomNotFoundException("User not found with id " + userId));
-        return OrderDTOMapper.toDtoList(orders);
+        return OrderDTOMapper.toDtoResponseList(orders);
     }
 
     @Transactional
@@ -100,17 +100,17 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Transactional
-    public List<OrderDTO> getOrdersByRestaurantId(Long restaurantId, Long ownerId) {
+    public List<OrderDTOResponse> getOrdersByRestaurantId(Long restaurantId, Long ownerId) {
         // Fetch restaurant first
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));
         OwnershipHelper.validateOwner(ownerId, restaurant.getOwner().getId());
         List<Order> orders = restaurant.getOrders();
-        return OrderDTOMapper.toDtoList(orders);
+        return OrderDTOMapper.toDtoResponseList(orders);
     }
 
     @Transactional
-    public List<OrderDTO> getOrdersByRestaurantIdAndCustomerId(Long restaurantId, Long ownerId, Long customerId) {
+    public List<OrderDTOResponse> getOrdersByRestaurantIdAndCustomerId(Long restaurantId, Long ownerId, Long customerId) {
         // Fetch restaurant first
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));
@@ -124,7 +124,7 @@ public class OrderServiceImpl implements OrderService {
                 .filter(order -> order.getCustomer().getId().equals(customerId))
                 .collect(Collectors.toList());
 
-        return OrderDTOMapper.toDtoList(customerOrders);
+        return OrderDTOMapper.toDtoResponseList(customerOrders);
     }
 
     @Transactional

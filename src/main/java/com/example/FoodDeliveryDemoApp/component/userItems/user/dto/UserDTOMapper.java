@@ -15,6 +15,7 @@ public class UserDTOMapper {
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setTelephone(user.getTelephone());
+        dto.setRole(user.getRole());
         return dto;
     }
 

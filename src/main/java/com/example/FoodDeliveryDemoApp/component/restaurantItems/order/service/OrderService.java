@@ -2,23 +2,22 @@ package com.example.FoodDeliveryDemoApp.component.restaurantItems.order.service;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto.OrderDTO;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto.OrderDTOResponse;
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
 public interface OrderService {
 
-    List<OrderDTO> getAllOrders();
+    List<OrderDTOResponse> getAllOrders();
 
-    OrderDTO getOrderById(Long id);
+    OrderDTOResponse getOrderById(Long id);
 
-    List<OrderDTO> getOrdersByCustomerIdByAdmin(Long customerId);
+    List<OrderDTOResponse> getOrdersByCustomerIdByAdmin(Long customerId);
 
     List<OrderDTOResponse> getOrdersByCustomerId(String authorization, Long customerId);
 
-    List<OrderDTO> getOrdersByRestaurantId(Long restaurantId, Long ownerId);
+    List<OrderDTOResponse> getOrdersByRestaurantId(Long restaurantId, Long ownerId);
 
-    List<OrderDTO> getOrdersByRestaurantIdAndCustomerId(Long restaurantId, Long ownerId, Long customerId);
+    List<OrderDTOResponse> getOrdersByRestaurantIdAndCustomerId(Long restaurantId, Long ownerId, Long customerId);
 
     OrderDTO createOrder(Long customerId, Long restaurantId);
 

@@ -1,5 +1,6 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto;
 
+import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.UserDTOResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +21,9 @@ public class OrderDTOResponse {
 
     @JsonProperty("customer_id")
     private Long customerId;
+
+    @JsonProperty("customer")
+    private UserDTOResponse customer;
 
     @JsonProperty("restaurant_id")
     private Long restaurantId;

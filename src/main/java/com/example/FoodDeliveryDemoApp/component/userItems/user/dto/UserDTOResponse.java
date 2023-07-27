@@ -2,16 +2,16 @@ package com.example.FoodDeliveryDemoApp.component.userItems.user.dto;
 
 import com.example.FoodDeliveryDemoApp.component.userItems.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTO {
-
-    @JsonProperty("user_id")
-    private Long id;
+public class UserDTOResponse {
 
     @JsonProperty("firstname")
     private String firstname;
@@ -22,17 +22,4 @@ public class UserDTO {
     @JsonProperty("username")
     private String username;
 
-    @JsonProperty("email")
-    private String email;
-
-    @JsonProperty("password")
-    private String password;
-
-    @JsonProperty("telephone")
-    private String telephone;
-
-    @JsonProperty("role")
-    private Role role;
-
 }
-

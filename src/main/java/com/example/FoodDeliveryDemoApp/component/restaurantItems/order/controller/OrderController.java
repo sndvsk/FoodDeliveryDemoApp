@@ -24,24 +24,24 @@ public class OrderController {
 
     @GetMapping(path = "/all")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<List<OrderDTO>> getAllOrders() {
-        List<OrderDTO> orders = orderService.getAllOrders();
+    public ResponseEntity<List<OrderDTOResponse>> getAllOrders() {
+        List<OrderDTOResponse> orders = orderService.getAllOrders();
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<OrderDTO> getOrderById(
+    public ResponseEntity<OrderDTOResponse> getOrderById(
             @PathVariable Long id) {
-        OrderDTO order = orderService.getOrderById(id);
+        OrderDTOResponse order = orderService.getOrderById(id);
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 
     @GetMapping(path = "/admin/customer/{customerId}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<List<OrderDTO>> getOrdersByCustomerByAdmin(
+    public ResponseEntity<List<OrderDTOResponse>> getOrdersByCustomerByAdmin(
             @PathVariable Long customerId) {
-        List<OrderDTO> order = orderService.getOrdersByCustomerIdByAdmin(customerId);
+        List<OrderDTOResponse> order = orderService.getOrdersByCustomerIdByAdmin(customerId);
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 
@@ -57,20 +57,20 @@ public class OrderController {
 
     @GetMapping(path = "/{restaurantId}")
     @PreAuthorize("hasAnyAuthority('OWNER','ADMIN')")
-    public ResponseEntity<List<OrderDTO>> getOrdersByRestaurant(
+    public ResponseEntity<List<OrderDTOResponse>> getOrdersByRestaurant(
             @PathVariable Long restaurantId,
             @RequestParam Long ownerId) {
-        List<OrderDTO> order = orderService.getOrdersByRestaurantId(restaurantId, ownerId);
+        List<OrderDTOResponse> order = orderService.getOrdersByRestaurantId(restaurantId, ownerId);
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 
     @GetMapping(path = "/{restaurantId}/customer/{customerId}")
     @PreAuthorize("hasAnyAuthority('OWNER','ADMIN')")
-    public ResponseEntity<List<OrderDTO>> getOrdersByRestaurantAndCustomer(
+    public ResponseEntity<List<OrderDTOResponse>> getOrdersByRestaurantAndCustomer(
             @PathVariable Long restaurantId,
             @RequestParam Long ownerId,
             @PathVariable Long customerId) {
-        List<OrderDTO> order = orderService.getOrdersByRestaurantIdAndCustomerId(restaurantId, ownerId, customerId);
+        List<OrderDTOResponse> order = orderService.getOrdersByRestaurantIdAndCustomerId(restaurantId, ownerId, customerId);
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 

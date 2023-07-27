@@ -11,7 +11,9 @@ import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class AdminServiceImpl implements AdminService {
@@ -54,9 +56,19 @@ public class AdminServiceImpl implements AdminService {
 
     @Transactional
     public List<OwnerDTO> getOwnersWithApprovalStatus(boolean approved) {
-        List<Owner> owners = ownerRepository.findByApproved(approved)
-                .orElseThrow(() -> new CustomNotFoundException("No unapproved owners"));
-        return OwnerDTOMapper.toDtoList(owners);
+        Optional<List<Owner>> optionalOwners = ownerRepository.findByApproved(approved);
+
+        return optionalOwners.isPresent()
+                ? OwnerDTOMapper.toDtoList(optionalOwners.get())
+                : Collections.emptyList();
+    }
+
+    @Transactional
+    public List<OwnerDTO> getOwners() {
+        List<Owner> owners = ownerRepository.findAll();
+        return !owners.isEmpty()
+                ? OwnerDTOMapper.toDtoList(owners)
+                : Collections.emptyList();
     }
 
 }

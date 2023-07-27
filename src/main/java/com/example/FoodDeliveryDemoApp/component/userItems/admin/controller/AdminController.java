@@ -38,4 +38,10 @@ public class AdminController {
         return ResponseEntity.ok(owners);
     }
 
+    @GetMapping("/owners")
+    public ResponseEntity<List<OwnerDTO>> getOwners() {
+        List<OwnerDTO> owners = adminService.getOwners();
+        return ResponseEntity.ok(owners);
+    }
+
 }

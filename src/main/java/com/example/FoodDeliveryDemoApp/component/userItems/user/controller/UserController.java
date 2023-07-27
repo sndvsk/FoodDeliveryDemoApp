@@ -4,7 +4,10 @@ import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.UserDTO;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @CrossOrigin
 @RestController
@@ -17,7 +20,25 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/{username}")
+    @GetMapping("/all")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER')")
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+
+        List<UserDTO> customer = userService.getAllUsers();
+
+        return new ResponseEntity<>(customer, HttpStatus.OK);
+    }
+
+    @GetMapping("/id/{userId}")
+    public ResponseEntity<UserDTO> getById(
+            @PathVariable Long userId) {
+
+        UserDTO customer = userService.getUserById(userId);
+
+        return new ResponseEntity<>(customer, HttpStatus.OK);
+    }
+
+    @GetMapping("/username/{username}")
     public ResponseEntity<UserDTO> getUser(
             @PathVariable String username) {
 

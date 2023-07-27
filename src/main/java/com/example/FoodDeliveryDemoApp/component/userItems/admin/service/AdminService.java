@@ -13,4 +13,5 @@ public interface AdminService {
 
     List<OwnerDTO> getOwnersWithApprovalStatus(boolean approved);
 
+    List<OwnerDTO> getOwners();
 }

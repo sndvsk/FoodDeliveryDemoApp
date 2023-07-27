@@ -1,6 +1,7 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.domain.Order;
+import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.UserDTOResponse;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -45,6 +46,12 @@ public class OrderDTOMapper {
         OrderDTOResponse dto = new OrderDTOResponse();
         dto.setId(order.getId());
         dto.setCustomerId(order.getCustomer().getId());
+        dto.setCustomer(
+                new UserDTOResponse(
+                        order.getCustomer().getUser().getFirstname(),
+                        order.getCustomer().getUser().getLastname(),
+                        order.getCustomer().getUser().getUsername()
+                ));
         dto.setRestaurantId(order.getRestaurant().getId());
         dto.setRestaurantName(order.getRestaurant().getName());
         dto.setOrderDate(OffsetDateTime.ofInstant(order.getOrderDate(), ZoneId.systemDefault()));
