@@ -6,12 +6,14 @@ import com.example.FoodDeliveryDemoApp.component.weatherItems.weatherData.domain
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.xml.bind.JAXBException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
@@ -21,6 +23,8 @@ import java.util.List;
 @CrossOrigin
 @RestController
 @RequestMapping("/api/v1/weather")
+@PreAuthorize("isAuthenticated()")
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Weather Data API", description = "Endpoint for getting weather data from database")
 public class WeatherDataController {
 

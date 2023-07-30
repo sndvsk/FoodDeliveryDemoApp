@@ -270,12 +270,12 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * @return a list of all DeliveryFee objects in the deliveryFeeRepository
      * @throws CustomNotFoundException if there are no delivery fees in repository
      */
-    public List<DeliveryFee> getAllDeliveryFees() throws CustomNotFoundException {
+    public List<DeliveryFeeDTO> getAllDeliveryFees() throws CustomNotFoundException {
         List<DeliveryFee> deliveryFeeList = deliveryFeeRepository.findAll();
         if (deliveryFeeList.isEmpty()) {
             throw new CustomNotFoundException("There are no calculated delivery fees");
         } else {
-            return deliveryFeeList;
+            return DeliveryFeeDTOMapper.toDtoList(deliveryFeeList);
         }
     }
 
@@ -286,12 +286,11 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
      * @return the DeliveryFee object with the specified id
      * @throws CustomNotFoundException if no DeliveryFee object with the specified id exists
      */
-    public DeliveryFee getDeliveryFeeById(Long id) throws CustomNotFoundException {
-        Optional<DeliveryFee> deliveryFee = deliveryFeeRepository.findById(id);
+    public DeliveryFeeDTO getDeliveryFeeById(Long id) throws CustomNotFoundException {
+        DeliveryFee deliveryFee = deliveryFeeRepository.findById(id)
+                .orElseThrow(() -> new CustomNotFoundException("This delivery fee calculation does not exist"));
 
-        return deliveryFee.
-                orElseThrow(() -> new CustomNotFoundException("This delivery fee calculation does not exist"));
-
+        return DeliveryFeeDTOMapper.toDto(deliveryFee);
     }
 
     /**

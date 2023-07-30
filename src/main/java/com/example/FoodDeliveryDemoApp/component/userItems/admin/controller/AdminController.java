@@ -2,6 +2,7 @@ package com.example.FoodDeliveryDemoApp.component.userItems.admin.controller;
 
 import com.example.FoodDeliveryDemoApp.component.userItems.admin.service.AdminService;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.dto.OwnerDTO;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +12,8 @@ import java.util.List;
 @CrossOrigin
 @RestController
 @RequestMapping("/api/v2/admins")
-@PreAuthorize("hasAuthority('ADMIN')")
+@SecurityRequirement(name = "bearerAuth")
+@PreAuthorize("hasAuthority('ADMIN') and isAuthenticated()")
 public class AdminController {
 
     private final AdminService adminService;

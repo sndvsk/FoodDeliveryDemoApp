@@ -1,27 +1,33 @@
 package com.example.FoodDeliveryDemoApp.integration.controller;
 
-import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.domain.DeliveryFee;
+import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.dto.DeliveryFeeDTO;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @BootstrapWith(SpringBootTestContextBootstrapper.class)
 @ExtendWith(SpringExtension.class)
@@ -30,10 +36,15 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource(locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ActiveProfiles("test")
+@WithMockUser(username = "admin", roles = {"ADMIN"})
+@AutoConfigureMockMvc
 public class DeliveryFeeControllerIT {
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @LocalServerPort
     private int port;
@@ -43,30 +54,22 @@ public class DeliveryFeeControllerIT {
 
     private final String apiUrl = "/api/v1/delivery-fee";
 
-    private final HttpHeaders headers = new HttpHeaders();
-
-    @BeforeEach
-    public void setUp() {
-        headers.setContentType(MediaType.APPLICATION_JSON);
-    }
-
     @Test
     @Order(1)
-    public void testCalculateDeliveryFee() throws InterruptedException {
+    public void testCalculateDeliveryFee() throws Exception {
         // Arrange
         String city = "tallinn";
         String vehicleType = "car";
 
-        // Act
-        ResponseEntity<DeliveryFee> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "?" +
-                        String.format("city=%s&vehicleType=%s", city, vehicleType),
-                HttpMethod.POST, new HttpEntity<>(null, headers), DeliveryFee.class
-        );
+        // Send a POST request to the needed endpoint
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post( hostUrl + port + apiUrl + "?" +
+                                String.format("city=%s&vehicleType=%s", city, vehicleType))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn();
 
-        // Assert
-        DeliveryFee deliveryFee = response.getBody();
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        String content = mvcResult.getResponse().getContentAsString();
+        DeliveryFeeDTO deliveryFee = objectMapper.readValue(content, DeliveryFeeDTO.class);
 
         assertNotNull(deliveryFee);
         assertNotNull(deliveryFee.getId());
@@ -91,16 +94,14 @@ public class DeliveryFeeControllerIT {
 
     @Test
     @Order(2)
-    public void testGetAllExistingDeliveryFees() {
-        HttpEntity<String> entity = new HttpEntity<>(null, headers);
+    public void testGetAllExistingDeliveryFees() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(hostUrl + port + apiUrl)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        // Make a request to get all delivery fees
-        ResponseEntity<List<DeliveryFee>> response = restTemplate.exchange(
-                hostUrl + port + apiUrl,
-                HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
-        );
-        List<DeliveryFee> deliveryFeeList = response.getBody();
-        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        String content = mvcResult.getResponse().getContentAsString();
+        List<DeliveryFeeDTO> deliveryFeeList = objectMapper.readValue(content, new TypeReference<>() {});
 
         // Assert that the API returns a non-empty list of delivery fees
         assertNotNull(deliveryFeeList);
@@ -108,15 +109,16 @@ public class DeliveryFeeControllerIT {
     }
 
     public void testGetExistingDeliveryFeeById(
-            Long id, String city, String vehicleType, double deliveryFeePrice, OffsetDateTime timestamp) {
+            Long id, String city, String vehicleType,
+            double deliveryFeePrice, OffsetDateTime timestamp) throws Exception {
 
-        ResponseEntity<DeliveryFee> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "/" + id,
-                HttpMethod.GET, new HttpEntity<>(null, headers), DeliveryFee.class
-        );
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(hostUrl + port + apiUrl + "/" + id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        DeliveryFee deliveryFee = response.getBody();
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        String content = mvcResult.getResponse().getContentAsString();
+        DeliveryFeeDTO deliveryFee = objectMapper.readValue(content, DeliveryFeeDTO.class);
 
         assertNotNull(deliveryFee);
         assertNotNull(deliveryFee.getId());
@@ -131,35 +133,26 @@ public class DeliveryFeeControllerIT {
         assertEquals(vehicleType, deliveryFee.getVehicleType());
         assertEquals(deliveryFeePrice, deliveryFee.getDeliveryFee());
         assertEquals(timestamp, deliveryFee.getRest_timestamp());
-
     }
 
     @Test
     @Order(3)
-    public void testGetExistingDeliveryFeeByIdFail() {
-        Long id = Long.MAX_VALUE;
+    public void testGetExistingDeliveryFeeByIdFail() throws Exception {
+        long id = Long.MAX_VALUE;
 
-        ResponseEntity<DeliveryFee> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "/" + id,
-                HttpMethod.GET, new HttpEntity<>(null, headers), DeliveryFee.class
-        );
-
-        assertEquals(response.getStatusCode(), HttpStatus.NOT_FOUND);
-
+        mockMvc.perform(MockMvcRequestBuilders.get(hostUrl + port + apiUrl + "/" + id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     @Order(4)
-    public void testGetExistingDeliveryFeeByIdFail2() {
+    public void testGetExistingDeliveryFeeByIdFail2() throws Exception {
         Long id = null;
 
-        ResponseEntity<DeliveryFee> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "/" + id,
-                HttpMethod.GET, new HttpEntity<>(null, headers), DeliveryFee.class
-        );
-
-        assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-
+        mockMvc.perform(MockMvcRequestBuilders.get(hostUrl + port + apiUrl + "/" + id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
 }

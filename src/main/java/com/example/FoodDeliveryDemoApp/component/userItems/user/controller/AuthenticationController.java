@@ -4,10 +4,12 @@ import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.Authenticati
 import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.AuthenticationResponse;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.RegisterRequest;
 import com.example.FoodDeliveryDemoApp.security.service.AuthenticationService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +29,8 @@ public class AuthenticationController {
         return ResponseEntity.ok(service.register(request));
     }
 
+    @PreAuthorize("hasAuthority('ADMIN') and isAuthenticated()")
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/register-admin")
     public ResponseEntity<AuthenticationResponse> registerAdmin(@RequestBody RegisterRequest request,
                                                            Authentication authentication) {
@@ -40,6 +44,8 @@ public class AuthenticationController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/refresh-token")
     public ResponseEntity<AuthenticationResponse> refreshToken(
             HttpServletRequest request,

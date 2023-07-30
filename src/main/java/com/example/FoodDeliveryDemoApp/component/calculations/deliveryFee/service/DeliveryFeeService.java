@@ -11,9 +11,9 @@ import java.util.List;
 
 public interface DeliveryFeeService {
 
-    List<DeliveryFee> getAllDeliveryFees() throws CustomNotFoundException;
+    List<DeliveryFeeDTO> getAllDeliveryFees() throws CustomNotFoundException;
 
-    DeliveryFee getDeliveryFeeById(Long id) throws CustomNotFoundException;
+    DeliveryFeeDTO getDeliveryFeeById(Long id) throws CustomNotFoundException;
 
     @SuppressWarnings("UnusedReturnValue")
     DeliveryFeeDTO calculateAndSaveDeliveryFee(String city, String vehicleType) throws CustomBadRequestException;

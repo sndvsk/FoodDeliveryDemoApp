@@ -2,6 +2,7 @@ package com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.con
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.RestaurantTheme;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.dto.RestaurantDTO;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.service.RestaurantService;
@@ -13,6 +14,8 @@ import java.util.List;
 
 @CrossOrigin
 @RestController
+@PreAuthorize("isAuthenticated()")
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/v2/restaurants")
 public class RestaurantController {
 

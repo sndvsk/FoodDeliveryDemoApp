@@ -1,6 +1,9 @@
 package com.example.FoodDeliveryDemoApp.integration.controller.feeRuleController;
 
 import com.example.FoodDeliveryDemoApp.component.calculations.feeRule.domain.extraFee.ExtraFeeAirTemperatureRule;
+import com.example.FoodDeliveryDemoApp.component.calculations.feeRule.domain.extraFee.ExtraFeeWeatherPhenomenonRule;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -9,6 +12,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -16,11 +20,15 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,6 +36,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @BootstrapWith(SpringBootTestContextBootstrapper.class)
 @ExtendWith(SpringExtension.class)
@@ -36,10 +45,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource(locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ActiveProfiles("test")
+@WithMockUser(username = "admin", roles = {"ADMIN"})
+@AutoConfigureMockMvc
 public class ExtraFeeAirTemperatureRuleFromControllerIT {
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private MockMvc mockMvc;
 
     @LocalServerPort
     private int port;
@@ -49,24 +60,16 @@ public class ExtraFeeAirTemperatureRuleFromControllerIT {
 
     private final String apiUrl = "/api/v1/rules/fee/extra/temperature";
 
-    private final HttpHeaders headers = new HttpHeaders();
-
-    @BeforeEach
-    public void setUp() {
-        headers.setContentType(MediaType.APPLICATION_JSON);
-    }
-
     @Test
     @Order(1)
-    public void getAllExtraFeeAirTemperatureRules() {
-        HttpEntity<String> entity = new HttpEntity<>(null, headers);
+    public void getAllExtraFeeAirTemperatureRules() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(hostUrl + port + apiUrl)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        ResponseEntity<List<ExtraFeeAirTemperatureRule>> response = restTemplate.exchange(
-                hostUrl + port + apiUrl,
-                HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
-        );
-        List<ExtraFeeAirTemperatureRule> ruleList = response.getBody();
-        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        String content = mvcResult.getResponse().getContentAsString();
+        List<ExtraFeeAirTemperatureRule> ruleList = new ObjectMapper().readValue(content, new TypeReference<>() {});
 
         assertNotNull(ruleList);
         assertTrue(ruleList.size() > 0);
@@ -82,24 +85,22 @@ public class ExtraFeeAirTemperatureRuleFromControllerIT {
 
     @Test
     @Order(2)
-    public void addExtraFeeAirTemperatureRule() throws InterruptedException, IOException {
+    public void addExtraFeeAirTemperatureRule() throws Exception {
         Double startRange = -25.0;
         Double endRange = -30.0;
         Double fee = 5.0;
 
         // Send a POST request to the needed endpoint
-        ResponseEntity<ExtraFeeAirTemperatureRule> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "?" +
-                        String.format("startTemperatureRange=%s&endTemperatureRange=%s&fee=%s",
-                                startRange, endRange, fee),
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(hostUrl + port + apiUrl + "?" +
+                                String.format("startTemperatureRange=%s&endTemperatureRange=%s&fee=%s",
+                                        startRange, endRange, fee))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn();
 
-                HttpMethod.POST, new HttpEntity<>(null, headers), ExtraFeeAirTemperatureRule.class
-        );
-
-        // Assert that the API returns the created rule with a status of CREATED
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-
-        ExtraFeeAirTemperatureRule responseRule = response.getBody();
+        String content = mvcResult.getResponse().getContentAsString();
+        ExtraFeeAirTemperatureRule responseRule = new ObjectMapper()
+                .readValue(content,ExtraFeeAirTemperatureRule.class);
 
         assertNotNull(responseRule);
         assertNotNull(responseRule.getId());
@@ -120,20 +121,20 @@ public class ExtraFeeAirTemperatureRuleFromControllerIT {
     }
 
 
-    public void testGetExtraFeeAirTemperatureRuleById(Long id) {
+    public void testGetExtraFeeAirTemperatureRuleById(Long id) throws Exception {
         Double startRange = -25.0;
         Double endRange = -30.0;
         Double fee = 5.0;
 
         // Send a GET request to the needed endpoint
-        ResponseEntity<ExtraFeeAirTemperatureRule> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "/" + id,
-                HttpMethod.GET, new HttpEntity<>(null, headers), ExtraFeeAirTemperatureRule.class);
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(hostUrl + port + apiUrl + "/" + id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        // Assert that the API returns the created rule with a status of OK
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-
-        ExtraFeeAirTemperatureRule responseRule = response.getBody();
+        String content = mvcResult.getResponse().getContentAsString();
+        ExtraFeeAirTemperatureRule responseRule = new ObjectMapper()
+                .readValue(content, ExtraFeeAirTemperatureRule.class);
 
         assertNotNull(responseRule);
         assertNotNull(responseRule.getId());
@@ -147,36 +148,21 @@ public class ExtraFeeAirTemperatureRuleFromControllerIT {
         assertEquals(fee, responseRule.getFee());
     }
 
-    public void testPatchExtraFeeAirTemperatureRuleById(Long id) throws IOException {
+    public void testPatchExtraFeeAirTemperatureRuleById(Long id) throws Exception {
         Double startRange = -25.0;
         Double endRange = -30.0;
         Double fee = 10.0;
 
-        ObjectMapper objectMapper = JsonMapper.builder()
-                .addModule(new JavaTimeModule())
-                .build();
+        // Send a PATCH request to the needed endpoint
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.patch(
+                                hostUrl + port + apiUrl + "/" + id + "?fee=" + fee)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        OkHttpClient client = new OkHttpClient();
-
-        HttpUrl url = HttpUrl.parse(hostUrl + port + apiUrl + "/" + id);
-        assertNotNull(url);
-
-        HttpUrl.Builder urlBuilder = url.newBuilder();
-        urlBuilder.addQueryParameter("fee", String.valueOf(fee));
-        url = urlBuilder.build();
-
-        //noinspection deprecation
-        Request request = new Request.Builder()
-                .url(url)
-                .patch(RequestBody.create(null, new byte[0]))
-                .build();
-
-        Response response = client.newCall(request).execute();
-        assertEquals(response.code(), HttpStatus.OK.value());
-
-        ExtraFeeAirTemperatureRule ruleResponse =
-                objectMapper.readValue(Objects.requireNonNull(response.body()).bytes(),
-                        ExtraFeeAirTemperatureRule.class);
+        String content = mvcResult.getResponse().getContentAsString();
+        ExtraFeeAirTemperatureRule ruleResponse = new ObjectMapper()
+                .readValue(content, ExtraFeeAirTemperatureRule.class);
 
         assertNotNull(ruleResponse);
         assertNotNull(ruleResponse.getId());
@@ -190,16 +176,16 @@ public class ExtraFeeAirTemperatureRuleFromControllerIT {
         assertEquals(fee, ruleResponse.getFee());
     }
 
-    public void testDeleteExtraFeeAirTemperatureRuleById(Long id) {
-        // Send a GET request to the needed endpoint
-        ResponseEntity<String> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "/" + id,
-                HttpMethod.DELETE, new HttpEntity<>(null, headers), String.class);
+    public void testDeleteExtraFeeAirTemperatureRuleById(Long id) throws Exception {
+        // Send a DELETE request to the needed endpoint
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete(
+                                hostUrl + port + apiUrl + "/" + id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        // Assert that the API returns the created rule with a status of OK
-        String ruleResponse = response.getBody();
-        assertNotNull(ruleResponse);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        String content = mvcResult.getResponse().getContentAsString();
+        assertNotNull(content);
     }
 
 }

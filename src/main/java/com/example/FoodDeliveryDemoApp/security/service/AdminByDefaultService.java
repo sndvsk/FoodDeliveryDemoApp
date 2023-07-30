@@ -19,16 +19,13 @@ public class AdminByDefaultService {
     private final UserRepository userRepository;
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationService authenticationService;
 
     public AdminByDefaultService(UserRepository userRepository,
                                  AdminRepository adminRepository,
-                                 PasswordEncoder passwordEncoder,
-                                 AuthenticationService authenticationService) {
+                                 PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.adminRepository = adminRepository;
         this.passwordEncoder = passwordEncoder;
-        this.authenticationService = authenticationService;
     }
 
     @PostConstruct

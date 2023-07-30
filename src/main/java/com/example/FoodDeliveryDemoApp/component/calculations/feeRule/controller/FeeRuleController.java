@@ -10,11 +10,13 @@ import com.example.FoodDeliveryDemoApp.component.calculations.feeRule.service.ex
 import com.example.FoodDeliveryDemoApp.component.calculations.feeRule.service.regionalBaseFee.RegionalBaseFeeRuleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.xml.bind.JAXBException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +25,8 @@ import java.util.List;
 @CrossOrigin
 @RestController
 @RequestMapping("/api/v1/rules")
+@PreAuthorize("isAuthenticated()")
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Rules API", description = "Endpoint for managing delivery fee calculation business rules " +
         "(base and extra fees)")
 public class FeeRuleController {

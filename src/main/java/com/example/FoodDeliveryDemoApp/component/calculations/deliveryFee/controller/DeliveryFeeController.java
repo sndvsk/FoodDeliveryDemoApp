@@ -7,11 +7,13 @@ import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.domain.DeliveryFee;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
@@ -20,6 +22,8 @@ import java.util.List;
 @CrossOrigin
 @RestController
 @RequestMapping("/api/v1/delivery-fee")
+@PreAuthorize("isAuthenticated()")
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Delivery Fee API", description = "Endpoint for calculating delivery fee")
 public class DeliveryFeeController {
 
@@ -65,9 +69,9 @@ public class DeliveryFeeController {
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all delivery fee calculations")
-    public ResponseEntity<List<DeliveryFee>> getAllExistingDeliveryFees() throws CustomNotFoundException {
+    public ResponseEntity<List<DeliveryFeeDTO>> getAllExistingDeliveryFees() throws CustomNotFoundException {
 
-        List<DeliveryFee> responseDeliveryFee = deliveryFeeService.getAllDeliveryFees();
+        List<DeliveryFeeDTO> responseDeliveryFee = deliveryFeeService.getAllDeliveryFees();
 
         return new ResponseEntity<>(responseDeliveryFee, HttpStatus.OK);
     }
@@ -81,11 +85,11 @@ public class DeliveryFeeController {
      */
     @GetMapping(path="/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get a delivery fee calculation by id")
-    public ResponseEntity<DeliveryFee> getExistingDeliveryFeeById(
+    public ResponseEntity<DeliveryFeeDTO> getExistingDeliveryFeeById(
             @Parameter(name = "id", description = "Id of delivery fee calculation")
             @PathVariable(name = "id", value = "id") Long id) throws CustomNotFoundException {
 
-        DeliveryFee responseDeliveryFee = deliveryFeeService.getDeliveryFeeById(id);
+        DeliveryFeeDTO responseDeliveryFee = deliveryFeeService.getDeliveryFeeById(id);
 
         return new ResponseEntity<>(responseDeliveryFee, HttpStatus.OK);
     }

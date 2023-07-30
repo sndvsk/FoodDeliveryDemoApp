@@ -5,6 +5,7 @@ import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.dto.MenuDT
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.service.MenuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,6 +15,8 @@ import java.util.List;
 
 @CrossOrigin
 @RestController
+@PreAuthorize("isAuthenticated()")
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/v2/menus")
 public class MenuController {
 

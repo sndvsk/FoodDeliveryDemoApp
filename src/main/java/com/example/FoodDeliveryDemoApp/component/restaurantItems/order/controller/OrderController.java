@@ -3,6 +3,7 @@ package com.example.FoodDeliveryDemoApp.component.restaurantItems.order.controll
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto.OrderDTO;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.dto.OrderDTOResponse;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.order.service.OrderService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,8 @@ import java.util.List;
 
 @CrossOrigin
 @RestController
+@PreAuthorize("isAuthenticated()")
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/v2/orders")
 public class OrderController {
 

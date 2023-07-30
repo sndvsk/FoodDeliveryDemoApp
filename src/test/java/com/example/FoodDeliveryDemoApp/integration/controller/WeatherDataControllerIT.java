@@ -1,6 +1,9 @@
 package com.example.FoodDeliveryDemoApp.integration.controller;
 
+import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.dto.DeliveryFeeDTO;
+import com.example.FoodDeliveryDemoApp.component.calculations.feeRule.domain.extraFee.ExtraFeeAirTemperatureRule;
 import com.example.FoodDeliveryDemoApp.component.weatherItems.weatherData.domain.WeatherData;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -9,17 +12,23 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.IOException;
 //import java.time.Instant;
@@ -27,24 +36,30 @@ import java.io.IOException;
 //import java.time.ZoneId;
 //import java.time.ZoneOffset;
 //import java.time.temporal.ChronoUnit;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @BootstrapWith(SpringBootTestContextBootstrapper.class)
 @ExtendWith(SpringExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ActiveProfiles("test")
+@WithMockUser(username = "admin", roles = {"ADMIN"})
+@AutoConfigureMockMvc
 public class WeatherDataControllerIT {
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @LocalServerPort
     private int port;
@@ -54,20 +69,17 @@ public class WeatherDataControllerIT {
 
     private final String apiUrl = "/api/v1/weather";
 
-    final HttpHeaders headers = new HttpHeaders();
-
     @Test
     @Order(1)
-    public void testGetWeatherDataForAllSupportedCities() {
+    public void testGetWeatherDataForAllSupportedCities() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(
+                hostUrl + port + apiUrl + "/cities")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        HttpEntity<String> entity = new HttpEntity<>(null, headers);
-
-        ResponseEntity<List<WeatherData>> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "/cities",
-                HttpMethod.GET, entity, new ParameterizedTypeReference<>() {
-                }
-        );
-        List<WeatherData> weatherDataList = response.getBody();
+        String content = mvcResult.getResponse().getContentAsString();
+        List<WeatherData> weatherDataList = objectMapper.readValue(content, new TypeReference<>() {});
 
         // Assert that the API returns a non-empty list of weather observations
         assertNotNull(weatherDataList);
@@ -86,16 +98,17 @@ public class WeatherDataControllerIT {
 
     @Test
     @Order(2)
-    public void testGetWeatherDataForSelectedCities() {
+    public void testGetWeatherDataForSelectedCities() throws Exception {
         String cities = "tallinn,tartu,pärnu";
 
-        HttpEntity<String> entity = new HttpEntity<>(null, headers);
-        ResponseEntity<List<WeatherData>> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "/cities/" + cities,
-                HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
-        );
-        List<WeatherData> weatherDataList = response.getBody();
-        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(
+                hostUrl + port + apiUrl + "/cities/" + cities)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        List<WeatherData> weatherDataList = objectMapper.readValue(content, new TypeReference<>() {});
 
         assertNotNull(weatherDataList);
         assertEquals(3, weatherDataList.size());
@@ -123,14 +136,14 @@ public class WeatherDataControllerIT {
 
     @Test
     @Order(3)
-    public void testGetAllWeatherData() {
-        HttpEntity<String> entity = new HttpEntity<>(null, headers);
-        ResponseEntity<List<WeatherData>> response = restTemplate.exchange(
-                hostUrl + port + apiUrl,
-                HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
-        );
-        List<WeatherData> weatherDataList = response.getBody();
-        assertEquals(response.getStatusCode(), HttpStatus.OK);
+    public void testGetAllWeatherData() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(hostUrl + port + apiUrl)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        List<WeatherData> weatherDataList = objectMapper.readValue(content, new TypeReference<>() {});
 
         assertNotNull(weatherDataList);
         assertTrue(weatherDataList.size() > 0);
@@ -150,23 +163,24 @@ public class WeatherDataControllerIT {
     @Test
     //@BeforeTestMethod
     @Order(4)
-    public void testAddWeatherData() throws InterruptedException, IOException {
+    public void testAddWeatherData() throws Exception {
         String stationName = "tallinn";
         Long wmoCode = 26038L;
         Double airTemperature = 1.3;
         Double windSpeed = 25.0;
         String weatherPhenomenon = "Heavy rain";
 
-        HttpEntity<String> entity = new HttpEntity<>(null, headers);
-        ResponseEntity<WeatherData> response = restTemplate.exchange(
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
                 hostUrl+ port + apiUrl + "?" +
                         String.format("stationName=%s&wmoCode=%s&airTemperature=%s&windSpeed=%s&weatherPhenomenon=%s",
-                                stationName, wmoCode, airTemperature, windSpeed, weatherPhenomenon),
+                                stationName, wmoCode, airTemperature, windSpeed, weatherPhenomenon))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn();
 
-                HttpMethod.POST, entity, new ParameterizedTypeReference<>() {}
-        );
-        WeatherData weatherDataResponse = response.getBody();
-        assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+        String content = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        WeatherData weatherDataResponse = objectMapper.readValue(content, WeatherData.class);
+
         assertNotNull(weatherDataResponse);
 
         assertNotNull(weatherDataResponse.getId());
@@ -200,21 +214,20 @@ public class WeatherDataControllerIT {
         testDeleteWeatherDataById(weatherDataResponse.getId());
     }
 
-    public void testGetWeatherDataById(Long id) {
+    public void testGetWeatherDataById(Long id) throws Exception {
         String stationName = "tallinn";
         Long wmoCode = 26038L;
         Double airTemperature = 1.3;
         Double windSpeed = 25.0;
         String weatherPhenomenon = "Heavy rain";
 
-        HttpEntity<String> entity = new HttpEntity<>(null, headers);
-        ResponseEntity<WeatherData> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "/" + id,
-                HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
-        );
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(hostUrl + port + apiUrl + "/" + id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        WeatherData weatherDataResponse = response.getBody();
-        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        String content = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        WeatherData weatherDataResponse = objectMapper.readValue(content, WeatherData.class);
 
         assertNotNull(weatherDataResponse);
         assertNotNull(weatherDataResponse.getId());
@@ -233,40 +246,25 @@ public class WeatherDataControllerIT {
 
     }
 
-    // see https://github.com/spring-projects/spring-framework/issues/19618
-    public void testPatchWeatherDataById(Long id) throws IOException {
+    public void testPatchWeatherDataById(Long id) throws Exception {
         String stationName = "tallinn";
         Long wmoCode = 26038L;
         Double airTemperature = -20.5;
         Double windSpeed = 3.0;
         String weatherPhenomenon = "Thunder";
 
-        ObjectMapper objectMapper = JsonMapper.builder()
-                .addModule(new JavaTimeModule())
-                .build();
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.patch(
+                                hostUrl + port + apiUrl + "/" + id)
+                        .param("airTemperature", String.valueOf(airTemperature))
+                        .param("windSpeed", String.valueOf(windSpeed))
+                        .param("weatherPhenomenon", weatherPhenomenon)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        OkHttpClient client = new OkHttpClient();
-
-        HttpUrl url = HttpUrl.parse(hostUrl + port + apiUrl + "/" + id);
-        assertNotNull(url);
-
-        HttpUrl.Builder urlBuilder = url.newBuilder();
-        urlBuilder.addQueryParameter("airTemperature", String.valueOf(airTemperature));
-        urlBuilder.addQueryParameter("windSpeed", String.valueOf(windSpeed));
-        urlBuilder.addQueryParameter("weatherPhenomenon", weatherPhenomenon);
-        url = urlBuilder.build();
-
-        //noinspection deprecation
-        Request request = new Request.Builder()
-                .url(url)
-                .patch(RequestBody.create(null, new byte[0]))
-                .build();
-
-        Response response = client.newCall(request).execute();
-        assertEquals(response.code(), HttpStatus.OK.value());
-
-        WeatherData weatherDataResponse =
-                objectMapper.readValue(Objects.requireNonNull(response.body()).bytes(), WeatherData.class);
+        String content = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        WeatherData weatherDataResponse = objectMapper
+                .readValue(content, WeatherData.class);
 
         assertNotNull(weatherDataResponse);
         assertNotNull(weatherDataResponse.getId());
@@ -284,50 +282,47 @@ public class WeatherDataControllerIT {
         assertEquals(weatherDataResponse.getWeatherPhenomenon(), weatherPhenomenon);
     }
 
-    public void testDeleteWeatherDataById(Long id) {
+    public void testDeleteWeatherDataById(Long id) throws Exception {
         String expectedResponse = String.format("Weather data with id: ´%s´ was deleted", id);
 
-        HttpEntity<String> entity = new HttpEntity<>(null, headers);
-        ResponseEntity<String> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "/" + id,
-                HttpMethod.DELETE, entity, new ParameterizedTypeReference<>() {}
-        );
-        String weatherDataResponse = response.getBody();
-        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete(
+                                hostUrl + port + apiUrl + "/" + id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        assertNotNull(weatherDataResponse);
-        assertEquals(weatherDataResponse, expectedResponse);
+        String content = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        assertNotNull(content);
+
+        assertEquals(content, expectedResponse);
     }
 
     @Test
     @Order(5)
-    //@DependsOn("testAddWeatherData")
-    public void testGetWeatherDataByIdFail() {
+    public void testGetWeatherDataByIdFail() throws Exception {
         Long id = null;
 
-        HttpEntity<String> entity = new HttpEntity<>(null, headers);
-        ResponseEntity<WeatherData> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "/" + id,
-                HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
-        );
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(hostUrl + port + apiUrl + "/" + id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
 
-        WeatherData weatherDataResponse = response.getBody();
-        assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        String content = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        WeatherData weatherDataResponse = objectMapper.readValue(content, WeatherData.class);
         assertNotNull(weatherDataResponse);
     }
 
     @Test
-    public void testGetWeatherDataByIdFail2() {
-        Long id = Long.MAX_VALUE;
+    public void testGetWeatherDataByIdFail2() throws Exception {
+        long id = Long.MAX_VALUE;
 
-        HttpEntity<String> entity = new HttpEntity<>(null, headers);
-        ResponseEntity<WeatherData> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "/" + id,
-                HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
-        );
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(hostUrl + port + apiUrl + "/" + id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andReturn();
 
-        WeatherData weatherDataResponse = response.getBody();
-        assertEquals(response.getStatusCode(), HttpStatus.NOT_FOUND);
+        String content = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        WeatherData weatherDataResponse = objectMapper.readValue(content, WeatherData.class);
         assertNotNull(weatherDataResponse);
     }
 

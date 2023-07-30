@@ -4,6 +4,7 @@ import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.dto.ItemDT
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.service.ItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,6 +14,8 @@ import java.util.List;
 
 @CrossOrigin
 @RestController
+@PreAuthorize("isAuthenticated()")
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/v2/items")
 public class ItemController {
 

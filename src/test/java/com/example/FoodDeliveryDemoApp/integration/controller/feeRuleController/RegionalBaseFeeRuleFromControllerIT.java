@@ -1,6 +1,8 @@
 package com.example.FoodDeliveryDemoApp.integration.controller.feeRuleController;
 
 import com.example.FoodDeliveryDemoApp.component.calculations.feeRule.domain.RegionalBaseFeeRule;
+import com.example.FoodDeliveryDemoApp.component.calculations.feeRule.domain.extraFee.ExtraFeeAirTemperatureRule;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -9,6 +11,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -16,11 +19,15 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,6 +35,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @BootstrapWith(SpringBootTestContextBootstrapper.class)
 @ExtendWith(SpringExtension.class)
@@ -36,10 +44,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource(locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ActiveProfiles("test")
+@WithMockUser(username = "admin", roles = {"ADMIN"})
+@AutoConfigureMockMvc
 public class RegionalBaseFeeRuleFromControllerIT {
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private MockMvc mockMvc;
 
     @LocalServerPort
     private int port;
@@ -49,24 +59,16 @@ public class RegionalBaseFeeRuleFromControllerIT {
 
     private final String apiUrl = "/api/v1/rules/fee/base";
 
-    private final HttpHeaders headers = new HttpHeaders();
-
-    @BeforeEach
-    public void setUp() {
-        headers.setContentType(MediaType.APPLICATION_JSON);
-    }
-
     @Test
     @Order(1)
-    public void testGetAllRegionalBaseFeeRules() {
-        HttpEntity<String> entity = new HttpEntity<>(null, headers);
+    public void testGetAllRegionalBaseFeeRules() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(hostUrl + port + apiUrl)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        ResponseEntity<List<RegionalBaseFeeRule>> response = restTemplate.exchange(
-                hostUrl + port + apiUrl,
-                HttpMethod.GET, entity, new ParameterizedTypeReference<>() {}
-        );
-        List<RegionalBaseFeeRule> ruleList = response.getBody();
-        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        String content = mvcResult.getResponse().getContentAsString();
+        List<RegionalBaseFeeRule> ruleList = new ObjectMapper().readValue(content, new TypeReference<>() {});
 
         assertNotNull(ruleList);
         assertTrue(ruleList.size() > 0);
@@ -83,7 +85,7 @@ public class RegionalBaseFeeRuleFromControllerIT {
 
     @Test
     @Order(2)
-    public void testAddRegionalBaseFeeRule() throws InterruptedException, IOException {
+    public void testAddRegionalBaseFeeRule() throws Exception {
         // Create a new regional base fee rule
         String city = "tallinn";
         String vehicleType = "somestringthatisnotrealvehicletype";
@@ -91,16 +93,15 @@ public class RegionalBaseFeeRuleFromControllerIT {
         Double fee = 5.0;
 
         // Send a POST request to the needed endpoint
-        ResponseEntity<RegionalBaseFeeRule> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "?" +
-                        String.format("city=%s&vehicleType=%s&fee=%s", city, vehicleType, fee),
-                HttpMethod.POST, new HttpEntity<>(null, headers), RegionalBaseFeeRule.class
-        );
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(hostUrl + port + apiUrl + "?" +
+                                String.format("city=%s&vehicleType=%s&fee=%s", city, vehicleType, fee))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn();
 
-        // Assert that the API returns the created rule with a status of CREATED
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-
-        RegionalBaseFeeRule responseRule = response.getBody();
+        String content = mvcResult.getResponse().getContentAsString();
+        RegionalBaseFeeRule responseRule = new ObjectMapper()
+                .readValue(content,RegionalBaseFeeRule.class);
 
         assertNotNull(responseRule);
         assertNotNull(responseRule.getId());
@@ -123,21 +124,21 @@ public class RegionalBaseFeeRuleFromControllerIT {
     }
 
 
-    public void testGetRegionalBaseFeeRuleById(Long id) {
+    public void testGetRegionalBaseFeeRuleById(Long id) throws Exception {
         String city = "tallinn";
         String vehicleType = "somestringthatisnotrealvehicletype";
         Long wmoCode = 26038L;
         Double fee = 5.0;
 
         // Send a GET request to the needed endpoint
-        ResponseEntity<RegionalBaseFeeRule> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "/" + id,
-                HttpMethod.GET, new HttpEntity<>(null, headers), RegionalBaseFeeRule.class);
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(hostUrl + port + apiUrl + "/" + id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        // Assert that the API returns the created rule with a status of OK
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-
-        RegionalBaseFeeRule responseRule = response.getBody();
+        String content = mvcResult.getResponse().getContentAsString();
+        RegionalBaseFeeRule responseRule = new ObjectMapper()
+                .readValue(content, RegionalBaseFeeRule.class);
 
         assertNotNull(responseRule);
         assertNotNull(responseRule.getId());
@@ -153,36 +154,22 @@ public class RegionalBaseFeeRuleFromControllerIT {
         assertEquals(fee, responseRule.getFee());
     }
 
-    public void testPatchGetRegionalBaseFeeRuleById(Long id) throws IOException {
+    public void testPatchGetRegionalBaseFeeRuleById(Long id) throws Exception {
         String city = "tallinn";
         String vehicleType = "somestringthatisnotrealvehicletype";
         Long wmoCode = 26038L;
         Double fee = 4.0;
 
-        ObjectMapper objectMapper = JsonMapper.builder()
-                .addModule(new JavaTimeModule())
-                .build();
+        // Send a PATCH request to the needed endpoint
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.patch(
+                                hostUrl + port + apiUrl + "/" + id + "?fee=" + fee)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        OkHttpClient client = new OkHttpClient();
-
-        HttpUrl url = HttpUrl.parse(hostUrl + port + apiUrl + "/" + id);
-        assertNotNull(url);
-
-        HttpUrl.Builder urlBuilder = url.newBuilder();
-        urlBuilder.addQueryParameter("fee", String.valueOf(fee));
-        url = urlBuilder.build();
-
-        //noinspection deprecation
-        Request request = new Request.Builder()
-                .url(url)
-                .patch(RequestBody.create(null, new byte[0]))
-                .build();
-
-        Response response = client.newCall(request).execute();
-        assertEquals(response.code(), HttpStatus.OK.value());
-
-        RegionalBaseFeeRule ruleResponse =
-                objectMapper.readValue(Objects.requireNonNull(response.body()).bytes(), RegionalBaseFeeRule.class);
+        String content = mvcResult.getResponse().getContentAsString();
+        RegionalBaseFeeRule ruleResponse = new ObjectMapper()
+                .readValue(content, RegionalBaseFeeRule.class);
 
         assertNotNull(ruleResponse);
         assertNotNull(ruleResponse.getId());
@@ -198,16 +185,16 @@ public class RegionalBaseFeeRuleFromControllerIT {
         assertEquals(fee, ruleResponse.getFee());
     }
 
-    public void testDeleteRegionalBaseFeeRuleById(Long id) {
-        // Send a GET request to the needed endpoint
-        ResponseEntity<String> response = restTemplate.exchange(
-                hostUrl + port + apiUrl + "/" + id,
-                HttpMethod.DELETE, new HttpEntity<>(null, headers), String.class);
+    public void testDeleteRegionalBaseFeeRuleById(Long id) throws Exception {
+        // Send a DELETE request to the needed endpoint
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete(
+                                hostUrl + port + apiUrl + "/" + id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        // Assert that the API returns the created rule with a status of OK
-        String ruleResponse = response.getBody();
-        assertNotNull(ruleResponse);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        String content = mvcResult.getResponse().getContentAsString();
+        assertNotNull(content);
     }
 
 }
