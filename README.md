@@ -2,7 +2,7 @@
 
 ## About this project
 
-This project is a technical task. \
+This project is backend for a food delivery application. \
 The objective of the task is to develop a sub-functionality(API) of the food delivery application, which
 calculates the delivery fee for food couriers based on regional base fee, vehicle type, and weather
 conditions (extra fees).
@@ -74,8 +74,6 @@ Use code below, if project was updated!
    docker-compose up --build
    ```
 
-
-
 ## How to use
 
 Use [Swagger UI](http://localhost:8080/swagger-ui/index.html) to test the endpoints.
@@ -111,7 +109,6 @@ If you want to run the integration tests, refer to the instruction below.
     mvn clean install
     ```
     
-    
 - Unit tests 
   
   - Build the project using maven (unit tests run automatically)
@@ -128,34 +125,3 @@ If you want to run the integration tests, refer to the instruction below.
     ```sh
     mvn clean package -P no-unit-tests
     ```
-
-### Coverage
-
-1. All methods in controllers are covered by tests.
-![all test coverage](src/main/resources/misc/png/all_test_coverage.png)
-   
-
-2. Most of the service methods and lines are covered by tests.
-![service test coverage](src/main/resources/misc/png/service_test_coverage.png)
-   
-
-## Objectives
-
-1. Database for storing and manipulating data ✅
-2. Configurable scheduled task for importing weather data (CronJob) ✅
-3. Functionality to calculate delivery fee ✅
-4. REST interface, which enables to request of the delivery fee according to input parameters ✅
-   
-### Bonuses
-
-1. Bonus 1. CRUD REST interface for regional base fees and extra fees for weather conditions. ✅
-2. Bonus 2. Datetime in REST interface request. ✅
-
-### Additional
-
-There are some more additions in my solution that were not listed in the task.
-
-## TODOS
-
-1. _>90%_ test coverage in services.
-2. Make integration test environment better. (RepositoryInitializer, DatabaseCleanupTestExecutionListener, @DataJpaTest)

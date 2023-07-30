@@ -67,9 +67,9 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public List<OrderDTOResponse> getAllOrders() {
         List<Order> orders = orderRepository.findAll();
-        if (orders.isEmpty()) {
+/*        if (orders.isEmpty()) {
             throw new CustomNotFoundException("No orders in the database.");
-        }
+        }*/
         return OrderDTOMapper.toDtoResponseList(orders);
     }
 
