@@ -1,5 +1,4 @@
 -- restaurants.sql
-
 INSERT INTO restaurants(name, description, theme, phone, image, owner_id)
 VALUES ('Asian Delights', 'Specializes in various Asian dishes', 'ASIAN', '+123456789', null, 2),
        ('Mexican Fiesta', 'Authentic Mexican food', 'MEXICAN', '+234567891', null, 3),
@@ -8,7 +7,6 @@ VALUES ('Asian Delights', 'Specializes in various Asian dishes', 'ASIAN', '+1234
        ('American Diner', 'Classic American dishes', 'AMERICAN', '+567891234', null, 6);
 
 -- addresses.sql
-
 INSERT INTO addresses(street, city, county, country, house_number, zip_code, restaurant_id)
 VALUES
     ('Mere pst 5', 'Tallinn', 'Harju maakond', 'Estonia', '5', '10111', 1),
@@ -18,7 +16,6 @@ VALUES
     ('Narva mnt 7D', 'Tallinn', 'Harju maakond', 'Estonia', '7D', '10117', 5);
 
 -- menus.sql
-
 INSERT INTO menus(name, visibility, restaurant_id, owner_id)
 VALUES ('Asian Menu', true, 1, 2),
        ('Mexican Menu', true, 2, 3),
@@ -29,7 +26,6 @@ VALUES ('Asian Menu', true, 1, 2),
 -- items.sql
 
 -- Continue items.sql for Asian Menu. 20 items
-
 INSERT INTO items(name, description, price, image, ingredients, allergens, menu_id, restaurant_id, owner_id)
 VALUES
 ('Pad Thai', 'Pad Thai is a Thai noodle stir fry with a sweet-savoury-sour sauce scattered with crushed peanuts.', 9.99, null, 'rice noodles,peanut or vegetable oil,medium shrimp,eggs,palm sugar,Thai fish sauce,tamarind puree,fresh lime juice,cayenne pepper,shallot,garlic,scallions,bean sprouts,chopped peanuts', 'peanuts', 1, 1, 2),
@@ -54,7 +50,6 @@ VALUES
 ('Matcha Green Tea', 'Powdered green tea', 2.99, null, 'matcha powder,water,sugar,milk', 'milk', 1, 1, 2);
 
 -- Continue items.sql for Mexican Menu. 20 items
-
 INSERT INTO items(name, description, price, image, ingredients, allergens, menu_id, restaurant_id, owner_id)
 VALUES
 ('Tacos', 'Classic Mexican dish with various fillings', 7.99, null, 'tortillas,beef,onions,cilantro,avocado,lime', null, 2, 2, 3),
@@ -80,7 +75,6 @@ VALUES
 
 
 -- Continue items.sql for Italian Menu. 20 items
-
 INSERT INTO items(name, description, price, image, ingredients, allergens, menu_id, restaurant_id, owner_id)
 VALUES
 ('Margherita Pizza', 'Classic Italian pizza with tomatoes, mozzarella and basil', 9.99, null, 'pizza dough,tomatoes,mozzarella,basil,olive oil', 'milk,wheat', 3, 3, 4),
@@ -105,7 +99,6 @@ VALUES
 ('Negroni', 'Italian cocktail with gin, vermouth and Campari', 9.99, null, 'gin,red vermouth,Campari', null, 3, 3, 4);
 
 -- Continue items.sql for French Menu. 20 items
-
 INSERT INTO items(name, description, price, image, ingredients, allergens, menu_id, restaurant_id, owner_id)
 VALUES
 ('Croissant', 'Buttery, flaky pastry', 3.99, null, 'flour,butter,yeast,salt,sugar,milk', 'milk,wheat', 4, 4, 5),
@@ -130,7 +123,6 @@ VALUES
 ('Chateauneuf-du-Pape Wine', 'Red wine from the Rhône wine region', 10.99, null, 'grapes (Grenache, Syrah, Mourvèdre)', null, 4, 4, 5);
 
 -- Continue items.sql for American Menu. 20 items
-
 INSERT INTO items(name, description, price, image, ingredients, allergens, menu_id, restaurant_id, owner_id)
 VALUES
 ('Hamburger', 'Classic American beef burger', 9.99, null, 'beef patty,burger bun,lettuce,tomato,onion,pickles,cheddar cheese', 'milk,wheat', 5, 5, 6),
