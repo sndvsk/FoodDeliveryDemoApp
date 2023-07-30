@@ -4,7 +4,6 @@ package com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.servi
 import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.dto.DeliveryFeeDTO;
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
-import com.example.FoodDeliveryDemoApp.component.calculations.deliveryFee.domain.DeliveryFee;
 
 import java.time.OffsetDateTime;
 import java.util.List;
