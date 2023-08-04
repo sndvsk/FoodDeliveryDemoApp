@@ -12,7 +12,6 @@ import com.example.FoodDeliveryDemoApp.component.userItems.owner.repository.Owne
 import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
 import com.example.FoodDeliveryDemoApp.component.utils.OwnershipHelper;
-import com.example.FoodDeliveryDemoApp.exception.CustomAccessDeniedException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
