@@ -42,7 +42,13 @@ public class ItemDTO {
     @JsonProperty("menu_id")
     private Long menuId;
 
+    @JsonProperty("menu_name")
+    private String menuName;
+
     @JsonProperty("restaurant_id")
     private Long restaurantId;
+
+    @JsonProperty("restaurant_name")
+    private String restaurantName;
 
 }

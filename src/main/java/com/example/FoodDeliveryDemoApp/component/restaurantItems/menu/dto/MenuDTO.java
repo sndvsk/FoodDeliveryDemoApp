@@ -30,6 +30,9 @@ public class MenuDTO {
     @JsonProperty("restaurant_id")
     private Long restaurantId;
 
+    @JsonProperty("restaurant_name")
+    private String restaurantName;
+
     @JsonProperty("items")
     private List<ItemDTO> items;
 

@@ -8,9 +8,9 @@ services:
       context: ./
       dockerfile: Dockerfile
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_db:5432/fd_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://fddbtest.c9igchfuz29e.eu-north-1.rds.amazonaws.com:5432/fd_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=123
+      - SPRING_DATASOURCE_PASSWORD=qwe123qwe
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
     ports:
       - "8080:8080"
@@ -25,7 +25,7 @@ services:
     environment:
       - POSTGRES_DB=fd_db
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123
+      - POSTGRES_PASSWORD=qwe123qwe
     ports:
       - "5433:5432"
     volumes:
@@ -37,7 +37,7 @@ services:
     environment:
       - POSTGRES_DB=fd_db_test
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123
+      - POSTGRES_PASSWORD=qwe123qwe
     ports:
       - "5434:5432"
     volumes:

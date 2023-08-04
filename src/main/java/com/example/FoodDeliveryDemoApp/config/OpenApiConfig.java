@@ -33,7 +33,8 @@ import org.springframework.context.annotation.Configuration;
         servers = {
                 @Server(
                         description = "PROD ENV",
-                        url = "http://fd-app-test.eu-north-1.elasticbeanstalk.com" // to change
+                        //url = "http://fd-app-test.eu-north-1.elasticbeanstalk.com" // to change
+                        url = "http://fd-app.eu-north-1.elasticbeanstalk.com" // to change
                 ),
                 @Server(
                         description = "Local ENV",

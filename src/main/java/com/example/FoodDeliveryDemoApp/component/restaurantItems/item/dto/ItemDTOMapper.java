@@ -1,6 +1,8 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.item.dto;
 
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.item.domain.Item;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.domain.Menu;
+import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,11 +36,15 @@ public class ItemDTOMapper {
         }
 
         if (item.getMenu() != null) {
-            dto.setMenuId(item.getMenu().getId());
+            Menu menu = item.getMenu();
+            dto.setMenuId(menu.getId());
+            dto.setMenuName(menu.getName());
         }
 
         if (item.getRestaurant() != null) {
-            dto.setRestaurantId(item.getRestaurant().getId());
+            Restaurant rest = item.getRestaurant();
+            dto.setRestaurantId(rest.getId());
+            dto.setRestaurantName(rest.getName());
         }
         return dto;
     }
