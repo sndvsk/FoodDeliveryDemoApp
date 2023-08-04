@@ -1,9 +1,11 @@
 package com.example.FoodDeliveryDemoApp.component.calculations.googleMaps.service;
 
 import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTO;
-import com.example.FoodDeliveryDemoApp.component.calculations.googleMaps.dto.DirectionDTO;
+import com.example.FoodDeliveryDemoApp.component.calculations.googleMaps.dto.GoogleDirectionResponse;
 import com.example.FoodDeliveryDemoApp.exception.ExternalServiceException;
 import com.example.FoodDeliveryDemoApp.exception.UnauthorizedException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -40,7 +42,7 @@ public class ExternalDirectionsServiceImpl implements ExternalDirectionsService 
      * @throws RuntimeException if an unknown error occurs.
      */
     @Override
-    public DirectionDTO getDirections(List<AddressDTO> addressDTOS) {
+    public GoogleDirectionResponse getDirections(List<AddressDTO> addressDTOS) {
 
         AddressDTO originAddress = addressDTOS.get(0);
         AddressDTO destinationAddress = addressDTOS.get(1);
@@ -61,19 +63,20 @@ public class ExternalDirectionsServiceImpl implements ExternalDirectionsService 
 
 
         try {
-            return webClient.get()
+            String response =  webClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .scheme("https")
                             .host("maps.googleapis.com")
                             .path("/maps/api/directions/json")
                             .queryParam("origin", origin)
                             .queryParam("destination", destination)
-                            .queryParam("departure_time", Instant.now())
+                            .queryParam("departure_time", Instant.now().toEpochMilli())
                             .queryParam("key", googleDirectionsApiKey)
                             .build())
-                    .retrieve()
-                    .bodyToMono(DirectionDTO.class)
-                    .block();
+                    .retrieve().bodyToMono(String.class).block();
+
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(response, GoogleDirectionResponse.class);
 
         } catch (WebClientResponseException e) {
             if (e.getStatusCode().is4xxClientError()) {
@@ -85,6 +88,8 @@ public class ExternalDirectionsServiceImpl implements ExternalDirectionsService 
             } else {
                 throw new RuntimeException("Unknown error occurred");
             }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 

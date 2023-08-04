@@ -1,7 +1,7 @@
 package com.example.FoodDeliveryDemoApp.component.calculations.googleMaps.controller;
 
 import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTO;
-import com.example.FoodDeliveryDemoApp.component.calculations.googleMaps.dto.DirectionDTO;
+import com.example.FoodDeliveryDemoApp.component.calculations.googleMaps.dto.GoogleDirectionResponse;
 import com.example.FoodDeliveryDemoApp.component.calculations.googleMaps.service.ExternalDirectionsService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,9 +28,9 @@ public class ExternalDirectionsController {
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<DirectionDTO> getDirections(@RequestBody List<AddressDTO> addressDTOS) {
+    public ResponseEntity<GoogleDirectionResponse> getDirections(@RequestBody List<AddressDTO> addressDTOS) {
 
-        DirectionDTO directions = directionsService.getDirections(addressDTOS);
+        GoogleDirectionResponse directions = directionsService.getDirections(addressDTOS);
 
         return new ResponseEntity<>(directions, HttpStatus.OK);
     }
