@@ -32,7 +32,7 @@ public class OrderController {
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
-    @GetMapping(path = "/{id}")
+    @GetMapping(path = "/admin/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<OrderDTOResponse> getOrderById(
             @PathVariable Long id) {

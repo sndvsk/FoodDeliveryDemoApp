@@ -14,9 +14,9 @@ import org.springframework.context.annotation.Configuration;
 @OpenAPIDefinition(
         info = @Info(
                 contact = @Contact(
-                        name = "test",
-                        email = "test@gmail.com",
-                        url = "https://test.com"
+                        name = "Sander Veske",
+                        email = "sander.veske@gmail.com",
+                        url = "http://fd-app-test.s3-website.eu-north-1.amazonaws.com/"
                 ),
                 title="FoodDeliveryDemoApp API",
                 description = """
@@ -28,16 +28,16 @@ import org.springframework.context.annotation.Configuration;
                         name = "MIT",
                         url = "https://opensource.org/license/mit/"
                 ),
-                termsOfService = "Terms of service"
+                termsOfService = "http://fd-app-test.s3-website.eu-north-1.amazonaws.com/others/terms-of-service"
         ),
         servers = {
                 @Server(
-                        description = "Local ENV",
-                        url = "http://localhost:8080"
+                        description = "PROD ENV",
+                        url = "http://fd-app-test.eu-north-1.elasticbeanstalk.com" // to change
                 ),
                 @Server(
-                        description = "PROD ENV",
-                        url = "http://localhost:8080" // to change
+                        description = "Local ENV",
+                        url = "http://localhost:8080"
                 )
         }
 /*        ,

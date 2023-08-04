@@ -17,14 +17,12 @@ public interface RestaurantService {
 
     RestaurantDTO getRestaurant(Long restaurantId);
 
-    RestaurantDTO createRestaurant(Long ownerId, String name, String desc, RestaurantTheme theme, String phone,
-                                   String image, AddressDTO address);
+    RestaurantDTO createRestaurant(Long ownerId, RestaurantDTO restaurantDTO);
 
 /*    CompletableFuture<RestaurantDTO> createRestaurant(Long ownerId, String name, String desc, RestaurantTheme theme, String phone,
                                        String image, AddressDTO address);*/
 
-    RestaurantDTO updateRestaurant(Long restaurantId, Long ownerId, String name, String desc, RestaurantTheme theme,
-                                   String phone, String image, AddressDTO address);
+    RestaurantDTO updateRestaurant(Long restaurantId, Long ownerId, RestaurantDTO restaurantDTO);
 
     String deleteRestaurant(Long restaurantId, Long ownerId);
 }

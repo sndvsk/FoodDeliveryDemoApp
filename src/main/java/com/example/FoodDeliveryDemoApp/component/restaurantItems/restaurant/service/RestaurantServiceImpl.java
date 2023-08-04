@@ -13,6 +13,8 @@ import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTOMapper;
 import com.example.FoodDeliveryDemoApp.component.address.repository.AddressRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.repository.OwnerRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.service.OwnerService;
+import com.example.FoodDeliveryDemoApp.exception.CustomAccessDeniedException;
+import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,18 +109,37 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Transactional
-    public RestaurantDTO createRestaurant(Long ownerId, String name, String desc, RestaurantTheme theme,
-                                          String phone, String image, AddressDTO addressGiven) {
+    public RestaurantDTO createRestaurant(Long ownerId, RestaurantDTO restaurantDTO) {
+        // Validate the restaurantDTO
+        if (restaurantDTO.getName() == null || restaurantDTO.getName().trim().isEmpty()
+                || restaurantDTO.getDescription() == null || restaurantDTO.getDescription().trim().isEmpty()
+                || restaurantDTO.getTheme() == null
+                || restaurantDTO.getPhone() == null || restaurantDTO.getPhone().trim().isEmpty()
+                || restaurantDTO.getImage() == null || restaurantDTO.getImage().trim().isEmpty()
+                || restaurantDTO.getAddress() == null) {
+            throw new CustomBadRequestException("Incomplete restaurant data provided.");
+        }
+
         return ownerRepository.findOwnerByUserId(ownerId)
                 .map(owner -> {
-                    Restaurant restaurant = new Restaurant(name, desc, theme, phone, image, owner);
-                    Address address = AddressDTOMapper.toEntity(addressGiven, restaurant);
+                    if (!owner.isApproved())
+                        throw new CustomAccessDeniedException("You are not yet approved as an owner");
+
+                    Restaurant restaurant = new Restaurant(restaurantDTO.getName(),
+                            restaurantDTO.getDescription(),
+                            RestaurantTheme.valueOf(restaurantDTO.getTheme()),
+                            restaurantDTO.getPhone(),
+                            restaurantDTO.getImage(),
+                            owner);
+
+                    Address address = AddressDTOMapper.toEntity(restaurantDTO.getAddress(), restaurant);
                     restaurant.setAddress(address);
                     Restaurant created = restaurantRepository.save(restaurant);
                     return RestaurantDTOMapper.toDto(created);
                 })
                 .orElseThrow(() -> new CustomNotFoundException("Owner not found with id " + ownerId));
     }
+
 
 /*    public CompletableFuture<RestaurantDTO> createRestaurant(Long ownerId, String name, String desc, RestaurantTheme theme,
                                                              String phone, String image, AddressDTO addressGiven) {
@@ -136,17 +157,20 @@ public class RestaurantServiceImpl implements RestaurantService {
 
 
     @Transactional
-    public RestaurantDTO updateRestaurant(Long restaurantId, Long ownerId, String name, String desc,
-                                          RestaurantTheme theme, String phone, String image, AddressDTO addressDTO) {
+    public RestaurantDTO updateRestaurant(Long restaurantId, Long ownerId, RestaurantDTO restaurantDTO) {
         return restaurantRepository.findById(restaurantId).map(restaurant -> {
 
             OwnershipHelper.validateOwner(ownerId, restaurant.getOwner().getId());
 
-            Optional.ofNullable(name).ifPresent(restaurant::setName);
-            Optional.ofNullable(desc).ifPresent(restaurant::setDescription);
-            Optional.ofNullable(theme).ifPresent(restaurant::setTheme);
-            Optional.ofNullable(phone).ifPresent(restaurant::setPhone);
-            Optional.ofNullable(image).ifPresent(restaurant::setImage);
+            Optional.ofNullable(restaurantDTO.getName()).ifPresent(restaurant::setName);
+            Optional.ofNullable(restaurantDTO.getDescription()).ifPresent(restaurant::setDescription);
+            Optional.ofNullable(restaurantDTO.getTheme())
+                    .map(RestaurantTheme::valueOf)
+                    .ifPresent(restaurant::setTheme);
+            Optional.ofNullable(restaurantDTO.getPhone()).ifPresent(restaurant::setPhone);
+            Optional.ofNullable(restaurantDTO.getPhone()).ifPresent(restaurant::setImage);
+
+            AddressDTO addressDTO = restaurantDTO.getAddress();
 
             if (addressDTO != null) {
                 Address newAddress = AddressDTOMapper.toEntity(addressDTO, restaurant);

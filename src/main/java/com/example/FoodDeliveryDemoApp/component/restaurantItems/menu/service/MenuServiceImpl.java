@@ -12,6 +12,7 @@ import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.doma
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.repository.RestaurantRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.domain.Owner;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.repository.OwnerRepository;
+import com.example.FoodDeliveryDemoApp.exception.CustomAccessDeniedException;
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.stereotype.Component;
@@ -82,6 +83,10 @@ public class MenuServiceImpl implements MenuService {
     public MenuDTO addMenu(Long ownerId, String menuName) {
         Owner owner = ownerRepository.findById(ownerId)
                 .orElseThrow(() -> new CustomNotFoundException("Owner not found with id " + ownerId));
+
+        if (!owner.isApproved())
+            throw new CustomAccessDeniedException("You are not yet approved as an owner");
+
         Menu menu = new Menu();
         menu.setName(menuName);
         menu.setVisibility(false);

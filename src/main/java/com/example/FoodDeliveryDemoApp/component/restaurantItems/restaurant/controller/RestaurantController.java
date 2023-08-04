@@ -54,15 +54,7 @@ public class RestaurantController {
     public ResponseEntity<RestaurantDTO> createRestaurant(
             @PathVariable Long ownerId,
             @RequestBody RestaurantDTO restaurantDto) {
-        RestaurantDTO restaurant = restaurantService.createRestaurant(
-                ownerId,
-                restaurantDto.getName(),
-                restaurantDto.getDescription(),
-                RestaurantTheme.valueOf(restaurantDto.getTheme()),
-                restaurantDto.getPhone(),
-                restaurantDto.getImage(),
-                restaurantDto.getAddress()
-        );
+        RestaurantDTO restaurant = restaurantService.createRestaurant(ownerId, restaurantDto);
         return new ResponseEntity<>(restaurant, HttpStatus.CREATED);
     }
 
@@ -75,13 +67,7 @@ public class RestaurantController {
         RestaurantDTO restaurant = restaurantService.updateRestaurant(
                 restaurantId,
                 ownerId,
-                restaurantDto.getName(),
-                restaurantDto.getDescription(),
-                RestaurantTheme.valueOf(restaurantDto.getTheme()),
-                restaurantDto.getPhone(),
-                restaurantDto.getImage(),
-                restaurantDto.getAddress()
-        );
+                restaurantDto);
         return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 

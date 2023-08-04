@@ -12,7 +12,8 @@ public enum RestaurantTheme {
     MEDITERRANEAN,
     VEGAN,
     SEAFOOD,
-    BBQ;
+    BBQ,
+    OTHER;
 
     public static RestaurantTheme fromString(String themeStr) {
         for (RestaurantTheme theme : RestaurantTheme.values()) {

@@ -11,6 +11,7 @@ import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.domain.Men
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.menu.repository.MenuRepository;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.repository.RestaurantRepository;
+import com.example.FoodDeliveryDemoApp.exception.CustomAccessDeniedException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,6 +82,9 @@ public class ItemServiceImpl implements ItemService {
                            String itemIngredients, String itemAllergens) {
         Owner owner = ownerRepository.findById(ownerId)
                 .orElseThrow(() -> new CustomNotFoundException("No owner with id: " + ownerId));
+
+        if (!owner.isApproved())
+            throw new CustomAccessDeniedException("You are not yet approved as an owner");
 
         Item item = new Item(itemName, itemDesc, itemPrice, itemImage, itemIngredients, itemAllergens, owner);
         itemRepository.save(item);

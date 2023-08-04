@@ -17,6 +17,7 @@ import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.repo
 import com.example.FoodDeliveryDemoApp.component.userItems.customer.domain.Customer;
 import com.example.FoodDeliveryDemoApp.component.userItems.customer.repository.CustomerRepository;
 import com.example.FoodDeliveryDemoApp.exception.CustomAccessDeniedException;
+import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import com.example.FoodDeliveryDemoApp.security.jwt.JwtService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -132,6 +133,10 @@ public class OrderServiceImpl implements OrderService {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomNotFoundException("Customer not found with id " + customerId));
 
+        if (customer.getAddress() == null) {
+            throw new CustomBadRequestException("Address is missing. Please add address in 'Profile Settings'.");
+        }
+
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));
 
@@ -160,8 +165,7 @@ public class OrderServiceImpl implements OrderService {
         ObjectMapper mapper = new ObjectMapper();
         TypeReference<HashMap<Long,Integer>> typeRef = new TypeReference<>() {};
         try {
-            Map<Long, Integer> itemsMap = mapper.readValue(items, typeRef);
-            return itemsMap;
+            return mapper.readValue(items, typeRef);
         } catch (Exception e) {
             throw new RuntimeException("Invalid items input format", e);
         }
