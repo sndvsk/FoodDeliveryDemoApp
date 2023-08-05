@@ -23,7 +23,7 @@ public class Token {
     @SequenceGenerator(name = "tokens_id_seq", sequenceName = "tokens_id_seq", allocationSize = 1)
     public Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, length = 1000)
     public String token;
 
     @Builder.Default

@@ -1,7 +1,6 @@
 package com.example.FoodDeliveryDemoApp.component.calculations.googleMaps.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

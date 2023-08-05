@@ -112,7 +112,7 @@ public class AuthenticationService {
         }
     }
 
-    private User createUser(RegisterRequest request) {
+    private void validateUser(RegisterRequest request) {
         Optional<? extends User> existingUserByEmail = findByEmail(request.getEmail());
         Optional<? extends User> existingUserByUsername = findByUsername(request.getUsername());
 
@@ -129,12 +129,18 @@ public class AuthenticationService {
                 if (!userHasAdminRole()) {
                     throw new CustomAccessDeniedException("Regular users cannot create admins");
                 }
-                return buildUser(request);
             }
             case OWNER, CUSTOMER -> {
-                return buildUser(request);
+                // No specific checks for these roles
             }
             default -> throw new CustomBadRequestException("Invalid role: " + request.getRole());
+        }
+
+        if (request.getFirstname().length() < 1 || request.getLastname().length() < 3 ||
+                request.getUsername().length() < 3 || request.getPassword().length() < 3 ||
+                !request.getEmail().matches("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$") ||
+                !request.getTelephone().matches("^\\+?[1-9]\\d{1,15}$")) {
+            throw new CustomBadRequestException("Invalid input data");
         }
     }
 
@@ -144,7 +150,8 @@ public class AuthenticationService {
                 .anyMatch(authority -> authority.getAuthority().equals(Role.ADMIN.name()));
     }
 
-    private User buildUser(RegisterRequest request) {
+    private User createUser(RegisterRequest request) {
+        validateUser(request);
         return User.builder()
                 .username(request.getUsername())
                 .firstname(request.getFirstname())
