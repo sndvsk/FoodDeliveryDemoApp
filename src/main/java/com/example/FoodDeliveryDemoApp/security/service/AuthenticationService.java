@@ -54,6 +54,10 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
+    private final static String namePattern = "^[\\p{L} ']+$"; // This regex matches any Unicode letter and spaces
+    private final static String emailPattern  = "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$";
+    private final static String telephonePattern = "^\\+?[1-9]\\d{1,15}$";
+
     public AuthenticationService(AdminRepository adminRepository,
                                  OwnerRepository ownerRepository,
                                  CustomerRepository customerRepository,
@@ -136,11 +140,22 @@ public class AuthenticationService {
             default -> throw new CustomBadRequestException("Invalid role: " + request.getRole());
         }
 
-        if (request.getFirstname().length() < 1 || request.getLastname().length() < 3 ||
-                request.getUsername().length() < 3 || request.getPassword().length() < 3 ||
-                !request.getEmail().matches("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$") ||
-                !request.getTelephone().matches("^\\+?[1-9]\\d{1,15}$")) {
-            throw new CustomBadRequestException("Invalid input data");
+        String firstName = request.getFirstname();
+        String lastName = request.getLastname();
+        String username = request.getUsername();
+        String password = request.getPassword();
+        String email = request.getEmail();
+        String telephone = request.getTelephone();
+
+        if (
+            !firstName.matches(namePattern) || firstName.length() < 3 ||
+            !lastName.matches(namePattern) || lastName.length() < 3 ||
+            username.length() < 3 ||
+            password.length() < 3 ||
+            !email.matches(emailPattern) ||
+            !telephone.matches(telephonePattern)
+        ) {
+            throw new CustomBadRequestException("Invalid register input data");
         }
     }
 
