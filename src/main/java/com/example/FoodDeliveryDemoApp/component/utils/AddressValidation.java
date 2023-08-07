@@ -10,7 +10,7 @@ public class AddressValidation {
     private final static String unicodeLettersAndSpacesPattern = "^[\\p{L} ']+$";
     private final static String unicodeLettersDigitsSpacesPattern = "^[\\p{L}\\p{N} ]*$";
     private final static String unicodeLettersDigitsPattern = "^[\\p{L}\\p{N}]*$";
-    private final static String houseNumberPattern = "^\\d+[-\\s/]*\\d*$";
+    private final static String houseNumberPattern = "^\\d+[-\\s/]*\\d*[A-Za-z]?$";
     private final static String zipCodePattern = "^\\d{5,15}$";
 
     public static void validateCreateAddress(AddressDTO request) {
@@ -31,8 +31,10 @@ public class AddressValidation {
                         unicodeLettersDigitsSpacesPattern, 3, 255));
         validateOptional(updatedAddress.getHouseNumber(), name ->
                 validatePattern(name, "house_number", houseNumberPattern, 1, 255));
-        validateOptional(updatedAddress.getAptNumber(), name ->
-                validatePattern(name, "apt_number", unicodeLettersDigitsPattern, 1, 255));
+        if (updatedAddress.getAptNumber() != null && !updatedAddress.getAptNumber().isEmpty()) {
+            validatePattern(updatedAddress.getAptNumber(),
+                    "apt_number", unicodeLettersDigitsPattern, 1, 255);
+        }
     }
 
     private static void validateAddressFields(AddressDTO request) {

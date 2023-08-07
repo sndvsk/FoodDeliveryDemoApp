@@ -99,12 +99,15 @@ public class MenuServiceImpl implements MenuService {
     public ItemDTO addItemToMenu(Long itemId, Long menuId, Long restaurantId, Long ownerId) {
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new CustomNotFoundException("Menu not found with id " + menuId));
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new CustomNotFoundException("Restaurant not found with id " + restaurantId));
 
         OwnershipHelper.validateOwner(ownerId, menu.getOwner().getId());
         OwnershipHelper.validateRestaurant(restaurantId, menu.getRestaurant().getId());
 
         return itemRepository.findById(itemId).map(item -> {
             item.setMenu(menu);
+            item.setRestaurant(restaurant);
             itemRepository.save(item);
             return ItemDTOMapper.toDto(item);
         }).orElseThrow(() -> new CustomNotFoundException("Item not found with id " + itemId));

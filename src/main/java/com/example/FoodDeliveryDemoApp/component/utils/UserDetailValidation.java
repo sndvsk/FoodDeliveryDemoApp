@@ -34,7 +34,10 @@ public class UserDetailValidation {
         validateOptional(updatedUser.getLastname(), name -> validateName(name, "lastname"));
         validateOptional(updatedUser.getUsername(), name -> validateStringSize(name, "username"));
         validateOptional(updatedUser.getEmail(), UserDetailValidation::validateEmail);
-        validateOptional(updatedUser.getPassword(), password -> validateStringSize(password, "password"));
+        String pw = updatedUser.getPassword();
+        if (pw != null && !pw.isEmpty()) {
+            validateStringSize(pw, "password");
+        }
         validateOptional(updatedUser.getTelephone(), UserDetailValidation::validateTelephone);
     }
 

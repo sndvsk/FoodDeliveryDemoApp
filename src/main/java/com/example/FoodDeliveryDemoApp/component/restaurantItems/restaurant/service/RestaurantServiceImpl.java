@@ -108,14 +108,14 @@ public class RestaurantServiceImpl implements RestaurantService {
         String desc = restaurantDTO.getDescription();
         String theme = restaurantDTO.getTheme();
         String phone = restaurantDTO.getPhone();
-        String image = restaurantDTO.getImage();
+        String image = "none"; // restaurantDTO.getImage();
         AddressDTO address_ = restaurantDTO.getAddress();
         // Validate the restaurantDTO
         if (name == null || name.trim().isEmpty()
                 || desc == null || desc.trim().isEmpty()
                 || theme == null
                 || phone == null || phone.trim().isEmpty()
-                || image == null || image.trim().isEmpty()
+                //|| image == null || image.trim().isEmpty()
                 || address_ == null) {
             throw new CustomBadRequestException("Incomplete restaurant data provided.");
         }
@@ -127,14 +127,12 @@ public class RestaurantServiceImpl implements RestaurantService {
                     if (!owner.isApproved())
                         throw new CustomAccessDeniedException("You are not yet approved as an owner");
 
-                    Restaurant restaurant = new Restaurant(restaurantDTO.getName(),
-                            restaurantDTO.getDescription(),
-                            RestaurantTheme.valueOf(restaurantDTO.getTheme()),
-                            restaurantDTO.getPhone(),
-                            restaurantDTO.getImage(),
-                            owner);
+                    Restaurant restaurant = new Restaurant(
+                            name, desc,
+                            RestaurantTheme.valueOf(theme),
+                            phone, image, owner);
 
-                    Address address = AddressDTOMapper.toEntity(restaurantDTO.getAddress(), restaurant);
+                    Address address = AddressDTOMapper.toEntity(address_, restaurant);
                     restaurant.setAddress(address);
                     Restaurant created = restaurantRepository.save(restaurant);
                     return RestaurantDTOMapper.toDto(created);
@@ -173,7 +171,8 @@ public class RestaurantServiceImpl implements RestaurantService {
                     .map(RestaurantTheme::valueOf)
                     .ifPresent(restaurant::setTheme);
             Optional.ofNullable(restaurantDTO.getPhone()).ifPresent(restaurant::setPhone);
-            Optional.ofNullable(restaurantDTO.getPhone()).ifPresent(restaurant::setImage);
+            //Optional.ofNullable(restaurantDTO.getPhone()).ifPresent(restaurant::setImage);
+            restaurant.setImage("none");
 
 
             Address newAddress = AddressDTOMapper.toEntity(addressDTO, restaurant);

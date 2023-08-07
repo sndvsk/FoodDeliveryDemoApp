@@ -53,6 +53,7 @@ public class UserServiceImpl implements UserService {
             }
             existingUser.setUsername(newUsername);
         });
+        Optional.ofNullable(updatedUser.getTelephone()).ifPresent(existingUser::setTelephone);
         Optional.ofNullable(updatedUser.getPassword()).ifPresent(
                 password -> existingUser.setPassword(passwordEncoder.encode(password)));
         existingUser.setUpdatedAt(Instant.now());
