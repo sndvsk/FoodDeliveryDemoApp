@@ -105,6 +105,7 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new CustomNotFoundException("No item with id: " + itemId));
 
         item.setMenu(menu);
+        item.setRestaurant(menu.getRestaurant());
         itemRepository.save(item);
         return ItemDTOMapper.toDto(item);
     }
