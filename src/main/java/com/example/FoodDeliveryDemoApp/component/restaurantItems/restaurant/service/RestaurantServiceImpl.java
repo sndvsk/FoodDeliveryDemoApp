@@ -1,6 +1,7 @@
 package com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.service;
 
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.domain.Owner;
+import com.example.FoodDeliveryDemoApp.component.utils.AddressValidation;
 import com.example.FoodDeliveryDemoApp.component.utils.OwnershipHelper;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.Restaurant;
 import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.domain.RestaurantTheme;
@@ -10,9 +11,7 @@ import com.example.FoodDeliveryDemoApp.component.restaurantItems.restaurant.repo
 import com.example.FoodDeliveryDemoApp.component.address.domain.Address;
 import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTO;
 import com.example.FoodDeliveryDemoApp.component.address.dto.AddressDTOMapper;
-import com.example.FoodDeliveryDemoApp.component.address.repository.AddressRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.repository.OwnerRepository;
-import com.example.FoodDeliveryDemoApp.component.userItems.owner.service.OwnerService;
 import com.example.FoodDeliveryDemoApp.exception.CustomAccessDeniedException;
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
@@ -35,22 +34,16 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final OwnerService ownerService;
     private final RestaurantRepository restaurantRepository;
     private final OwnerRepository ownerRepository;
-    private final AddressRepository addressRepository;
 
     private final Executor threadPoolTaskExecutor;
 
-    public RestaurantServiceImpl(OwnerService ownerService,
-                                 RestaurantRepository restaurantRepository,
+    public RestaurantServiceImpl(RestaurantRepository restaurantRepository,
                                  OwnerRepository ownerRepository,
-                                 AddressRepository addressRepository,
                                  @Qualifier("threadPoolTaskExecutor")Executor threadPoolTaskExecutor) {
-        this.ownerService = ownerService;
         this.restaurantRepository = restaurantRepository;
         this.ownerRepository = ownerRepository;
-        this.addressRepository = addressRepository;
         this.threadPoolTaskExecutor = threadPoolTaskExecutor;
     }
 
@@ -110,15 +103,24 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Transactional
     public RestaurantDTO createRestaurant(Long ownerId, RestaurantDTO restaurantDTO) {
+
+        String name = restaurantDTO.getName();
+        String desc = restaurantDTO.getDescription();
+        String theme = restaurantDTO.getTheme();
+        String phone = restaurantDTO.getPhone();
+        String image = restaurantDTO.getImage();
+        AddressDTO address_ = restaurantDTO.getAddress();
         // Validate the restaurantDTO
-        if (restaurantDTO.getName() == null || restaurantDTO.getName().trim().isEmpty()
-                || restaurantDTO.getDescription() == null || restaurantDTO.getDescription().trim().isEmpty()
-                || restaurantDTO.getTheme() == null
-                || restaurantDTO.getPhone() == null || restaurantDTO.getPhone().trim().isEmpty()
-                || restaurantDTO.getImage() == null || restaurantDTO.getImage().trim().isEmpty()
-                || restaurantDTO.getAddress() == null) {
+        if (name == null || name.trim().isEmpty()
+                || desc == null || desc.trim().isEmpty()
+                || theme == null
+                || phone == null || phone.trim().isEmpty()
+                || image == null || image.trim().isEmpty()
+                || address_ == null) {
             throw new CustomBadRequestException("Incomplete restaurant data provided.");
         }
+
+        AddressValidation.validateCreateAddress(address_);
 
         return ownerRepository.findOwnerByUserId(ownerId)
                 .map(owner -> {
@@ -158,6 +160,9 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Transactional
     public RestaurantDTO updateRestaurant(Long restaurantId, Long ownerId, RestaurantDTO restaurantDTO) {
+        AddressDTO addressDTO = restaurantDTO.getAddress();
+        AddressValidation.validateUpdateAddress(addressDTO);
+
         return restaurantRepository.findById(restaurantId).map(restaurant -> {
 
             OwnershipHelper.validateOwner(ownerId, restaurant.getOwner().getId());
@@ -170,13 +175,10 @@ public class RestaurantServiceImpl implements RestaurantService {
             Optional.ofNullable(restaurantDTO.getPhone()).ifPresent(restaurant::setPhone);
             Optional.ofNullable(restaurantDTO.getPhone()).ifPresent(restaurant::setImage);
 
-            AddressDTO addressDTO = restaurantDTO.getAddress();
 
-            if (addressDTO != null) {
-                Address newAddress = AddressDTOMapper.toEntity(addressDTO, restaurant);
-                if(!restaurant.getAddress().isAddressEqual(newAddress)){
-                    restaurant.getAddress().update(newAddress); // You would need to implement this update method in Address
-                }
+            Address newAddress = AddressDTOMapper.toEntity(addressDTO, restaurant);
+            if(!restaurant.getAddress().isAddressEqual(newAddress)){
+                restaurant.getAddress().update(newAddress);
             }
 
             Restaurant updatedRestaurant = restaurantRepository.save(restaurant);

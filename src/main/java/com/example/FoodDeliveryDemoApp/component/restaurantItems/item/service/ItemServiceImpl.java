@@ -173,6 +173,7 @@ public class ItemServiceImpl implements ItemService {
                     OwnershipHelper.validateOwner(ownerId, item.getOwner().getId());
                     OwnershipHelper.validateRestaurant(restaurantId, item.getRestaurant().getId());
                     item.setRestaurant(null);
+                    item.setMenu(null);
                     itemRepository.save(item);
                     return ItemDTOMapper.toDto(item);
                 }).orElseThrow(() -> new CustomNotFoundException("Item not found with id " + itemId));

@@ -1,5 +1,7 @@
 package com.example.FoodDeliveryDemoApp.component.userItems.user.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +13,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AuthenticationRequest {
 
+    @NotBlank
+    @Size(min = 3, max = 255)
     private String username;
-    String password;
+
+    @NotBlank
+    @Size(min = 3, max = 255)
+    private String password;
 
 }

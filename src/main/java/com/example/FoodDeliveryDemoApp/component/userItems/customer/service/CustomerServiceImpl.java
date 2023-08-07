@@ -8,6 +8,7 @@ import com.example.FoodDeliveryDemoApp.component.address.repository.AddressRepos
 import com.example.FoodDeliveryDemoApp.component.userItems.customer.repository.CustomerRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
+import com.example.FoodDeliveryDemoApp.component.utils.AddressValidation;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +44,8 @@ public class CustomerServiceImpl implements CustomerService {
         User user = getUserById(userId);
         Customer customer = getCustomerById(user.getId());
 
+        AddressValidation.validateCreateAddress(addressDto);
+
         Address newAddress = buildAddress(addressDto);
         newAddress.setCustomer(customer);
         customer.setAddress(newAddress);
@@ -59,6 +62,8 @@ public class CustomerServiceImpl implements CustomerService {
         User user = getUserById(userId);
         Customer customer = getCustomerById(user.getId());
         Address currentAddress = customer.getAddress();
+
+        AddressValidation.validateUpdateAddress(addressDto);
 
         // Copy new values from DTO to address
         Address updatedAddress = buildAddress(addressDto);

@@ -100,6 +100,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
+/*    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseBody
+    public ResponseEntity<RestError> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        List<String> exList =  ex.getBindingResult()
+                .getAllErrors().stream()
+                .map(ObjectError::getDefaultMessage)
+                .toList();
+
+        RestError error = new RestError(HttpStatus.BAD_REQUEST.value(), exList.toString());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }*/
+
     // fixme
     // ex.message() is only for testing purposes
     @ExceptionHandler(Exception.class)

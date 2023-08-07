@@ -9,6 +9,7 @@ import com.example.FoodDeliveryDemoApp.component.userItems.owner.domain.Owner;
 import com.example.FoodDeliveryDemoApp.component.userItems.owner.repository.OwnerRepository;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
+import com.example.FoodDeliveryDemoApp.component.utils.UserDetailValidation;
 import com.example.FoodDeliveryDemoApp.exception.CustomAccessDeniedException;
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
@@ -53,10 +54,6 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-
-    private final static String namePattern = "^[\\p{L} ']+$"; // This regex matches any Unicode letter and spaces
-    private final static String emailPattern  = "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$";
-    private final static String telephonePattern = "^\\+?[1-9]\\d{1,15}$";
 
     public AuthenticationService(AdminRepository adminRepository,
                                  OwnerRepository ownerRepository,
@@ -140,23 +137,7 @@ public class AuthenticationService {
             default -> throw new CustomBadRequestException("Invalid role: " + request.getRole());
         }
 
-        String firstName = request.getFirstname();
-        String lastName = request.getLastname();
-        String username = request.getUsername();
-        String password = request.getPassword();
-        String email = request.getEmail();
-        String telephone = request.getTelephone();
-
-        if (
-            !firstName.matches(namePattern) || firstName.length() < 3 ||
-            !lastName.matches(namePattern) || lastName.length() < 3 ||
-            username.length() < 3 ||
-            password.length() < 3 ||
-            !email.matches(emailPattern) ||
-            !telephone.matches(telephonePattern)
-        ) {
-            throw new CustomBadRequestException("Invalid register input data");
-        }
+        UserDetailValidation.validateRegisterUser(request);
     }
 
     private boolean userHasAdminRole() {
@@ -211,6 +192,8 @@ public class AuthenticationService {
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         Authentication authentication;
+
+        UserDetailValidation.validateLogin(request);
         try {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(

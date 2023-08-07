@@ -5,6 +5,7 @@ import com.example.FoodDeliveryDemoApp.component.userItems.user.dto.UserDTOMappe
 import com.example.FoodDeliveryDemoApp.component.userItems.user.domain.User;
 import com.example.FoodDeliveryDemoApp.component.userItems.user.repository.UserRepository;
 import com.example.FoodDeliveryDemoApp.component.address.repository.AddressRepository;
+import com.example.FoodDeliveryDemoApp.component.utils.UserDetailValidation;
 import com.example.FoodDeliveryDemoApp.exception.CustomBadRequestException;
 import com.example.FoodDeliveryDemoApp.exception.CustomNotFoundException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,6 +32,9 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public UserDTO updateUserInformation(String username, UserDTO updatedUser) {
+
+        UserDetailValidation.validateUpdateUser(updatedUser);
+
         User existingUser = getUserByUsername(username);
         String existingEmail = existingUser.getEmail();
         String existingUsername = existingUser.getUsername();
